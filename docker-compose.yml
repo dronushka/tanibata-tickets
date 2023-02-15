@@ -46,10 +46,10 @@ services:
       - file_storage:/tmp/file_storage
 
     environment:
-      - MYSQL_ROOT_PASSWORD=${kQHS-g4Y?b@(B,4g}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       #      - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_USER=tt
-      - MYSQL_PASSWORD=${25(AKM'AyZLbfK;5}
+      - MYSQL_PASSWORD=${MYSQL_TT_PASSWORD}
       - MYSQL_DATABASE=tt
     networks:
       - tt_net
