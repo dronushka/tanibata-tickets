@@ -13,6 +13,8 @@ import {
     Burger,
     useMantineTheme,
 } from '@mantine/core'
+import Logo from '@/components/Logo'
+import Navigation from '@/components/Navingation'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const theme = useMantineTheme()
@@ -28,7 +30,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             asideOffsetBreakpoint="sm"
             navbar={
                 <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
-                    <Text>Application navbar</Text>
+                    <Navigation />
                 </Navbar>
             }
             // aside={
@@ -56,7 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             />
                         </MediaQuery>
 
-                        <Text>Application header</Text>
+                        <Logo />
                     </div>
                 </Header>
             }

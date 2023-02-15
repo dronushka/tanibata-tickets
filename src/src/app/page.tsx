@@ -1,4 +1,4 @@
-'use client'
+
 import { Test } from '@/app/test-component'
 import { AppShell, Header, Navbar } from '@mantine/core'
 
