@@ -12,11 +12,25 @@ export default function LoginForm() {
 
     const emailValidator = z.string().email()
 
-    const sendEmail = () => {
+    const sendEmail = async () => {
         const validated = emailValidator.safeParse(email)
         if (validated.success) {
             //send api request here
-            setEmailIsSet(true)
+            const res = await fetch("/api/sendPassword", {
+                method: "POST",
+                headers: new Headers({'content-type': 'application/json'}),
+                credentials: 'include',
+                body: JSON.stringify({ email })
+            })
+            if (res.ok) {
+                setEmailIsSet(true)
+            } else {
+                const response = await res.json()
+                if (response?.error === "user_not_found")
+                    setEmailError("Указанная почта не найдена в системе")
+                else
+                    setEmailError("Что-то пошло не так, попробуйте позже")
+            }
         } else {
             setEmailError("Неправильный формат e-mail")
         }
@@ -37,7 +51,7 @@ export default function LoginForm() {
                             withAsterisk
                             error={emailError}
                             onChange={(e) => {
-                                setEmailError(false)
+                                setEmailError("")
                                 setEmail(e.target.value)
                             }}
                         />
