@@ -1,7 +1,7 @@
 
 import { Test } from '@/app/test-component'
 import { AppShell, Header, Navbar } from '@mantine/core'
-import { prisma } from 'prisma/db'
+import { prisma } from "@/db"
 
 export default async function Page() {
 
