@@ -1,6 +1,11 @@
-'use client'
-import { Text } from "@mantine/core"
+import { getServerSession } from "next-auth/next"
+import { redirect } from "next/navigation"
+import OrdersForm from "./client/orders-form"
 
-export default function OrdersPage () {
-    return <Text>Заказы</Text>
+export default async function OrdersPage () {
+    const session = await getServerSession()
+    if (!session)
+        redirect('/login')
+    if (session)
+        return <OrdersForm />
 }
