@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma, createPassword } from "@/db"
 import { z, ZodError } from 'zod'
-import { User } from '@prisma/client'
+import { sendPassword } from '@/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method != "POST")
@@ -24,9 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         
         const password = await createPassword(user, req.body.email)
-        //send password via smtp here
-        res.status(200).json({password})
-        // res.status(200).end()
+       
+        const info = await sendPassword(validatedEmail, password)
+        // console.log(info)
+        // res.status(200).json({password})
+        res.status(200).end()
 
         // res.status(422).json({
         //     error: "email can not be validated",
