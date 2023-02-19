@@ -1,14 +1,18 @@
 "use client"
-
-import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
+import { useSession, signIn, signOut } from "next-auth/react"
 import { useState } from "react"
 import { z } from "zod"
+import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
+import { useRouter } from "next/navigation"
 
-export default function LoginForm() {
+export default function LoginForm({callbackUrl}: {callbackUrl: string | undefined} ) {
     const [ email, setEmail ] = useState<string>("")
     const [ emailError, setEmailError ] = useState<string>("")
-    const [ password, setPassword ] = useState<string>("")
     const [ emailIsSent, setEmailIsSet ] = useState<boolean>(false)
+    
+    const [ password, setPassword ] = useState<string>("")
+    const [ passwordError, setPasswordError ] = useState<string>("")
+    
     const [ loading, setLoading ] = useState<boolean>(false)
 
     const [ aquiredPassword, setAquiredPassword ] = useState<string>("")
@@ -45,6 +49,35 @@ export default function LoginForm() {
         }
     }
 
+    const router = useRouter()
+
+    const passwordValidator = z.string()
+
+    async function login() {
+        setLoading(true)
+        try {
+            const res = await signIn("credentials", {
+                redirect: false,
+                email,
+                password
+            })
+            console.log('res', res)
+                
+            if (res?.ok) {
+                console.log("logged in")
+                
+                router.replace(callbackUrl ?? '/orders')
+            }
+            else
+                setPasswordError("Ошибка аутентификации. Проверьте email или пароль.")
+
+        } catch (e) {
+            console.error(e)
+            setPasswordError("Что-то пошло не так")
+        }
+        setLoading(false)
+    }
+
     return (
         <Flex sx={{
             width: "100%",
@@ -66,6 +99,7 @@ export default function LoginForm() {
                             rightSection={loading && <Loader size="xs" />}
                         />
                         <Button
+                            loading={loading}
                             onClick={sendEmail}
                         >
                             Отправить одноразовый пароль
@@ -73,18 +107,33 @@ export default function LoginForm() {
                     </Stack>
                 )}
                 {emailIsSent && (
-                    <Stack sx={{ width: 400, height: 115 }}>
+                    <Stack sx={{ width: 400}}>
                         {aquiredPassword && <Text>{aquiredPassword}</Text>}
                         <TextInput 
                             type="password"
                             label="Одноразовый пароль"
                             withAsterisk
+                            error={passwordError}
                             onChange={(e) => setPassword(e.target.value)}
+                            rightSection={loading && <Loader size="xs" />}
                         />
                         <Button
-                            onClick={sendEmail}
+                            loading={loading}
+                            onClick={login}
                         >
-                            Отправить одноразовый пароль
+                            Войти
+                        </Button>
+                        <Button
+                            variant="subtle"
+                            onClick={() => {
+                                setEmailIsSet(false)
+                                setEmail("")
+                                setEmailError("")
+                                setPassword("")
+                                setPasswordError("")
+                            }}
+                        >
+                            Отправить пароль на другой e-mail
                         </Button>
                     </Stack>
                 )}
