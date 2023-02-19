@@ -15,6 +15,7 @@ import {
 } from '@mantine/core'
 import Logo from '@/components/Logo'
 import Navigation from '@/components/Navingation'
+import User from '@/components/User'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const theme = useMantineTheme()
@@ -30,8 +31,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             asideOffsetBreakpoint="sm"
             navbar={
                 <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
-                    <Navigation />
-                </Navbar>
+                    <Navbar.Section grow mt="md">
+                        <Navigation />
+                    </Navbar.Section>
+                    <Navbar.Section>
+                        <User />
+                    </Navbar.Section>
+                </ Navbar>
             }
             // aside={
             //     <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
@@ -63,7 +69,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </Header>
             }
         >
-            {children}
+                { children }
         </AppShell>
     )
 }
