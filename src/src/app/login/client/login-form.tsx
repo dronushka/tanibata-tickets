@@ -15,7 +15,7 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
     
     const [ loading, setLoading ] = useState<boolean>(false)
 
-    const [ aquiredPassword, setAquiredPassword ] = useState<string>("")
+    // const [ aquiredPassword, setAquiredPassword ] = useState<string>("")
     
     const emailValidator = z.string().email()
 
@@ -28,14 +28,14 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
             const res = await fetch("/api/sendPassword", {
                 method: "POST",
                 headers: new Headers({'content-type': 'application/json'}),
-                credentials: 'include',
+                // credentials: 'include',
                 body: JSON.stringify({ email })
             })
 
             setLoading(false)
 
             if (res.ok) {
-                setAquiredPassword((await res.json()).password)
+                // setAquiredPassword((await res.json()).password)
                 setEmailIsSet(true)
             } else {
                 const response = await res.json()
@@ -96,6 +96,7 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                                 setEmailError("")
                                 setEmail(e.target.value)
                             }}
+                            disabled={loading}
                             rightSection={loading && <Loader size="xs" />}
                         />
                         <Button
@@ -108,7 +109,7 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                 )}
                 {emailIsSent && (
                     <Stack sx={{ width: 400}}>
-                        {aquiredPassword && <Text>{aquiredPassword}</Text>}
+                        {/* {aquiredPassword && <Text>{aquiredPassword}</Text>} */}
                         <TextInput 
                             type="password"
                             label="Одноразовый пароль"
@@ -116,6 +117,7 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                             error={passwordError}
                             onChange={(e) => setPassword(e.target.value)}
                             rightSection={loading && <Loader size="xs" />}
+                            disabled={loading}
                         />
                         <Button
                             loading={loading}
