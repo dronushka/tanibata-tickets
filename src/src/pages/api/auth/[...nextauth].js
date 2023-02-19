@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 
 export const authOptions = {
     session: {
-        jwt: true,
+        strategy: "jwt",
     },
     providers: [
         CredentialsProvider({
@@ -38,11 +38,12 @@ export const authOptions = {
                     return null
 
                 if (bcrypt.compareSync(credentials.password, password.hash)) {
-                    const user = prisma.user.findFirst({
+                    const user = await prisma.user.findFirst({
                         where: {
                             email: credentials.email
                         }
                     })
+                    
                     return { 
                         id: user.id,
                         email: user.email
@@ -54,6 +55,17 @@ export const authOptions = {
     ],
     pages: {
         signIn: "/login"
+    },
+    callbacks: {
+        jwt: async ({ token, user }) => {
+            // console.log(p)
+            user && (token.user = user)
+            return token
+        },
+        session: async ({ session, token }) => {
+            session.user = token.user
+            return session
+        }
     }
 }
 

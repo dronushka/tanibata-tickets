@@ -2,6 +2,7 @@
 
 import { CacheProvider } from '@emotion/react'
 import { useEmotionCache, MantineProvider } from '@mantine/core'
+import { SessionProvider } from 'next-auth/react'
 import { useServerInsertedHTML } from 'next/navigation'
 
 export default function RootStyleRegistry({ children }: { children: React.ReactNode }) {
@@ -18,10 +19,12 @@ export default function RootStyleRegistry({ children }: { children: React.ReactN
   ))
 
   return (
-    <CacheProvider value={cache}>
-      <MantineProvider withGlobalStyles withNormalizeCSS>
-        {children}
-      </MantineProvider>
-    </CacheProvider>
+    <SessionProvider>
+      <CacheProvider value={cache}>
+        <MantineProvider withGlobalStyles withNormalizeCSS>
+          {children}
+        </MantineProvider>
+      </CacheProvider>
+    </SessionProvider>
   )
 }
