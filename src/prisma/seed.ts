@@ -19,6 +19,24 @@ const createSquareVenueRows = (rowsCount: number, colsCount: number) => {
   return rows
 }
 
+const createVenueByRows = ( _rows: Array<{price: number, ticketCount: number}> ) => {
+  const rows: any = { create: [] }
+
+  for (let i = 0; i <= _rows.length - 1; i++) {
+    const tickets: any = { create: [] }
+    for (let j = 1; j <= _rows[i].ticketCount; j++) {
+      tickets.create.push({ number: String(j)})
+    }
+    rows.create.push({
+      number: i + 1,
+      tickets: tickets
+    })
+  }
+
+  console.log(rows)
+  return rows
+}
+
 async function main() {
   await prisma.role.createMany({ data: [ { name: "customer" }, { name: "admin" } ] })
 
@@ -56,10 +74,37 @@ async function main() {
       }
     })
 
+  const rows = [
+    { price: 1, ticketCount: 21},
+    { price: 1, ticketCount: 22},
+    { price: 1, ticketCount: 23},
+    { price: 1, ticketCount: 25},
+    { price: 1, ticketCount: 26},
+    { price: 1, ticketCount: 27},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+    { price: 1, ticketCount: 28},
+  ]
   await prisma.venue.create({
     data: {
       name: "ОДНТ",
-      rows: createSquareVenueRows(10, 10)
+      rows: createVenueByRows(rows)
     }
   })
 }
