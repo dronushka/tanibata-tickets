@@ -11,28 +11,60 @@ datasource db {
 }
 
 model Role {
-  id    Int @id @default(autoincrement())
-  name  String
-  user  User[]
+  id   Int    @id @default(autoincrement())
+  name String
+  user User[]
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
   name      String
   nickname  String
   age       Int
   phone     String?
   social    String?
   passwords Password[]
-  role      Role @relation(fields: [roleId], references: [id])
+  role      Role       @relation(fields: [roleId], references: [id])
   roleId    Int
+  Order     Order[]
 }
 
 model Password {
-  id   Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id])
-  userId Int
-  hash String @unique
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  hash       String   @unique
   created_at DateTime @default(now())
+}
+
+model Ticket {
+  id      Int    @id @default(autoincrement())
+  number  String
+  row     Row    @relation(fields: [rowId], references: [id])
+  order   Order? @relation(fields: [orderId], references: [id])
+  orderId Int?
+  rowId   Int
+}
+
+model Row {
+  id      Int      @id @default(autoincrement())
+  number  Int
+  venue   Venue    @relation(fields: [venueId], references: [id])
+  venueId Int
+  tickets Ticket[]
+}
+
+model Venue {
+  id   Int    @id @default(autoincrement())
+  name String
+  rows Row[]
+}
+
+model Order {
+  id      Int      @id @default(autoincrement())
+  tickets Ticket[]
+  price   Float
+  user    User     @relation(fields: [userId], references: [id])
+  userId  Int
 }
