@@ -33,7 +33,7 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
     // if (!venue)
     //     return <></>
 
-    console.log(order)
+    // console.log(order)
     
     return (
         <>
@@ -50,7 +50,7 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
                                     <MemoizedTicketButton
                                         key={ticket.id}
                                         sx={getTicketSx(i, j)}
-                                        selected={!!order?.tickets[ticket.id]}
+                                        selected={!!order?.tickets.has(ticket.id)}
                                         ticket={ticket}
                                         setOrder={setOrder}
                                     />

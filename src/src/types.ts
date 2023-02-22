@@ -10,7 +10,10 @@ export type ClientRow = Row & { tickets: ClientTicket[]}
 //     tickets: ClientTicket[]
 // } | null
 
-export type ClientOrder = {
-    tickets: { [id: number]: ClientTicket }
-} | null
+// export type ClientOrder = {
+//     tickets: { [id: number]: ClientTicket }
+// } | null
 
+export type ClientOrder = {
+    tickets: Map<number,ClientTicket>
+} | null

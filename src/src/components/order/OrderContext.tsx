@@ -4,13 +4,13 @@ import { createContext, Dispatch, ReactNode, SetStateAction, useState } from "re
 
 export const OrderContext = createContext<{ order: ClientOrder, setOrder?: Dispatch<SetStateAction<ClientOrder>> }>({
     order: {
-        tickets: []
+        tickets: new Map()
     }
 })
 
 export const OrderContextProvider = ({children}: {children: ReactNode}) => {
     const [order, setOrder] = useState<ClientOrder>({
-        tickets: []
+        tickets: new Map()
     })
     
     return <OrderContext.Provider value={{order, setOrder}} >{children}</OrderContext.Provider>
