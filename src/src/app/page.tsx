@@ -2,7 +2,7 @@
 import { Test } from '@/app/test-component'
 import { AppShell, Header, Navbar } from '@mantine/core'
 import { prisma } from "@/db"
-import MakeOrder from './client/make-order'
+import MakeOrder from '../components/order/make-order'
 
 export default async function Page() {
   const venue = await prisma.venue.findFirst({
@@ -18,7 +18,7 @@ export default async function Page() {
     }
   })
 
-  console.log(venue)
+  // console.log(venue)
 
   return <MakeOrder venue={venue} />
 }
