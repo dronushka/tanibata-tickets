@@ -13,9 +13,12 @@ export default function TicketButton(
     // console.log('rerender ', rowNumber, ' - ', ticketNumber)
 
     const onTicketClick = () => {
-        setOrder(prev => {
-            console.log(prev)
-            return {...prev, tickets: [...prev.tickets, ticket]}
+        setOrder((prev: { tickets: ClientTicket[] }) => {
+            if (prev.tickets[ticket.id]) {
+                const { [ticket.id]: remove, ...newTickets } = prev.tickets
+                return { ...prev, tickets: newTickets}
+            } else 
+                return {...prev, tickets: {...prev.tickets, [ticket.id]: ticket}}
         })
     }
     return (
@@ -32,10 +35,10 @@ export default function TicketButton(
                 </Button>
             </Popover.Target>
             <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
-                <Stack>
-                    <Text size="sm">Ряд: {ticket.rowNumber}</Text>
-                    <Text size="sm">Место: {ticket.number}</Text>
-                    <Text size="sm">{selected}</Text>
+                <Stack spacing="xs">
+                    <Text size="xs">Ряд: {ticket.rowNumber}</Text>
+                    <Text size="xs">Место: {ticket.number}</Text>
+                    <Text size="xs">Цена: {ticket.priceRange.price}</Text>
                 </Stack>
             </Popover.Dropdown>
         </Popover>

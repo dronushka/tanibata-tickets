@@ -12,7 +12,11 @@ export default async function Page() {
     include: {
       rows: {
         include: {
-          tickets: true
+          tickets: {
+            include: {
+              priceRange: true
+            }
+          }
         }
       }
     }

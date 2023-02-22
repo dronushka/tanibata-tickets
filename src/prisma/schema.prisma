@@ -39,12 +39,15 @@ model Password {
 }
 
 model Ticket {
-  id      Int    @id @default(autoincrement())
-  number  String
-  row     Row    @relation(fields: [rowId], references: [id])
-  order   Order? @relation(fields: [orderId], references: [id])
-  orderId Int?
-  rowId   Int
+  id           Int        @id @default(autoincrement())
+  number       String
+  reserved     Boolean    @default(false)
+  priceRange   PriceRange @relation(fields: [priceRangeId], references: [id])
+  priceRangeId Int
+  row          Row        @relation(fields: [rowId], references: [id])
+  order        Order?     @relation(fields: [orderId], references: [id])
+  orderId      Int?
+  rowId        Int
 }
 
 model Row {
@@ -59,6 +62,13 @@ model Venue {
   id   Int    @id @default(autoincrement())
   name String
   rows Row[]
+}
+
+model PriceRange {
+  id     Int      @id @default(autoincrement())
+  name   String
+  price  Float    @default(0)
+  Ticket Ticket[]
 }
 
 model Order {

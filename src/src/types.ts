@@ -1,17 +1,16 @@
-import { Row, Ticket } from "@prisma/client"
-
-// export type ClientTicket = {
-//     rowNumber: number,
-//     ticketId: number
-// }
-
-export type ClientOrder = {
-    tickets: ClientTicket[]
-} | null
+import { PriceRange, Row, Ticket } from "@prisma/client"
 
 export type ClientTicket = Ticket & { 
-    selected: boolean,
-    rowNumber: string
+    rowNumber: string,
+    priceRange: PriceRange
 }
 
 export type ClientRow = Row & { tickets: ClientTicket[]}
+// export type ClientOrder = {
+//     tickets: ClientTicket[]
+// } | null
+
+export type ClientOrder = {
+    tickets: { [id: number]: ClientTicket }
+} | null
+

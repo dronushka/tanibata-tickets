@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PriceRange, PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -8,7 +8,7 @@ const createSquareVenueRows = (rowsCount: number, colsCount: number) => {
   for (let i = 1; i <= rowsCount; i++) {
     const tickets: any = { create: [] }
     for (let j = 1; j <= colsCount; j++) {
-      tickets.create.push({ number: String(j)})
+      tickets.create.push({ number: String(j) })
     }
     rows.create.push({
       number: i,
@@ -19,13 +19,20 @@ const createSquareVenueRows = (rowsCount: number, colsCount: number) => {
   return rows
 }
 
-const createVenueByRows = ( _rows: Array<{price: number, ticketCount: number}> ) => {
+const createVenueByRows = (_rows: { priceRange: PriceRange, ticketCount: number }[]) => {
   const rows: any = { create: [] }
 
   for (let i = 0; i <= _rows.length - 1; i++) {
     const tickets: any = { create: [] }
     for (let j = 1; j <= _rows[i].ticketCount; j++) {
-      tickets.create.push({ number: String(j)})
+      tickets.create.push({
+        number: String(j),
+        priceRange: {
+          connect: {
+            id: _rows[i].priceRange.id
+          }
+        }
+      })
     }
     rows.create.push({
       number: i + 1,
@@ -33,12 +40,14 @@ const createVenueByRows = ( _rows: Array<{price: number, ticketCount: number}> )
     })
   }
 
-  console.log(rows)
+  // console.log(rows)
   return rows
 }
 
 async function main() {
-  await prisma.role.createMany({ data: [ { name: "customer" }, { name: "admin" } ] })
+  console.log("Creating users and roles")
+
+  await prisma.role.createMany({ data: [{ name: "customer" }, { name: "admin" }] })
 
   const adminRole = await prisma.role.findFirst({ where: { name: "admin" } })
 
@@ -74,33 +83,60 @@ async function main() {
       }
     })
 
+  console.log("Creating price ranges")
+
+  await prisma.priceRange.createMany({
+    data: [
+      {
+        name: "Зона 1",
+        price: 1000,
+      },
+      {
+        name: "Зона 2",
+        price: 2000
+      },
+      {
+        name: "Зона 3",
+        price: 3000
+      }
+    ]
+  })
+
+  const priceRanges = await prisma.priceRange.findMany()
+  // console.log(priceRanges)
+  console.log("Creating venue and tickets")
+
   const rows = [
-    { price: 1, ticketCount: 21},
-    { price: 1, ticketCount: 22},
-    { price: 1, ticketCount: 23},
-    { price: 1, ticketCount: 25},
-    { price: 1, ticketCount: 26},
-    { price: 1, ticketCount: 27},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
-    { price: 1, ticketCount: 28},
+    { priceRange: priceRanges[2], ticketCount: 21 },
+    { priceRange: priceRanges[2], ticketCount: 22 },
+    { priceRange: priceRanges[2], ticketCount: 23 },
+    { priceRange: priceRanges[2], ticketCount: 25 },
+    { priceRange: priceRanges[2], ticketCount: 26 },
+    { priceRange: priceRanges[2], ticketCount: 27 },
+    { priceRange: priceRanges[2], ticketCount: 28 },
+    { priceRange: priceRanges[2], ticketCount: 28 },
+    { priceRange: priceRanges[2], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[1], ticketCount: 28 },
+    { priceRange: priceRanges[0], ticketCount: 28 },
+    { priceRange: priceRanges[0], ticketCount: 28 },
+    { priceRange: priceRanges[0], ticketCount: 28 },
   ]
+
+  // const rows = [
+  //   { priceRange: priceRanges[0], ticketCount: 2 }
+  // ]
   await prisma.venue.create({
     data: {
       name: "ОДНТ",

@@ -1,13 +1,13 @@
 "use client"
 
 import { ClientOrder } from "@/types"
-import { Row, Ticket, Venue } from "@prisma/client"
+import { PriceRange, Row, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useState } from "react"
 import { json } from "stream/consumers"
 import Hall from "../hall"
 import { OrderContext, OrderContextProvider } from "./OrderContext"
 
-export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { tickets: Ticket[] })[] } | null }) {
+export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange})[] })[] } | null }) {
 
     const clientRows = venue?.rows.map(
             row => (
@@ -17,7 +17,6 @@ export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { t
                         ticket => (
                             {
                                 ...ticket,
-                                selected: false,
                                 rowNumber: String(row.number)
                             }
                         )
@@ -27,7 +26,8 @@ export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { t
         )
     
 
-
+    console.log(clientRows)
+    
     return (
         <OrderContextProvider>
             {/* <pre>{JSON.stringify(order, null, 2)}</pre> */}

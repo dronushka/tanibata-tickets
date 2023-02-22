@@ -1,20 +1,15 @@
 'use client'
 
-import { ClientRow, ClientTicket } from "@/types"
+import { ClientRow } from "@/types"
 import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
-import { Row, Ticket, Venue } from "@prisma/client"
-import { memo, useCallback, useContext } from "react"
+import { memo, useContext } from "react"
 import { OrderContext } from "./order/OrderContext"
 import TicketButton from "./order/ticket-button"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
-    // debugger
-    // console.log('oldProps', oldPros)
-    // console.log('newProps', newProps)
     return oldPros.selected === newProps.selected
 })
 
-// export default function Hall({ venue }: { venue?: Venue & { rows: (Row & { tickets: SelectableTicket[] })[] } }) {
 export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
     const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexWrap: "nowrap", justifyContent: "center" }
@@ -32,39 +27,14 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
 
     const { order, setOrder } = useContext(OrderContext)
 
-    // const onTicketClick = useCallback((ticket: ClientTicket) => {
-    //     if (!order || !setOrder) return
-    //     console.log('ticketClick', order, ticket)
-    //     setOrder({
-    //         ...order,
-    //         tickets: [
-    //             ...order.tickets,
-    //             ticket
-    //         ]
-    //     })
-    // }, [order])
-
-    
-    // const onTicketClick = (ticket: ClientTicket) => {
-    //     if (!order || !setOrder) return
-    //     console.log('ticketClick', order, ticket)
-
-        
-    //     setOrder({
-    //         ...order,
-    //         tickets: [
-    //             ...order.tickets,
-    //             ticket
-    //         ]
-    //     })
-    // }
-
     const dimension = 26
 
     // console.log(venue)
     // if (!venue)
     //     return <></>
 
+    console.log(order)
+    
     return (
         <>
             <Stack spacing={2}>
@@ -80,13 +50,9 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
                                     <MemoizedTicketButton
                                         key={ticket.id}
                                         sx={getTicketSx(i, j)}
-                                        // rowNumber={String(ticket.rowNumber)}
-                                        // ticketNumber={ticket.number}
-                                        selected={!!order?.tickets.find(orderTicket => orderTicket.id === ticket.id)}
-                                        // row={row}
+                                        selected={!!order?.tickets[ticket.id]}
                                         ticket={ticket}
                                         setOrder={setOrder}
-                                        // onClick={() => onTicketClick(ticket)}
                                     />
                                 ))
                             }
