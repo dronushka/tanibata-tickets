@@ -6,8 +6,8 @@ import { useDisclosure } from "@mantine/hooks"
 import { MouseEventHandler } from "react"
 
 export default function TicketButton(
-    { ticket, selected = false, setOrder, sx, onClick }: 
-    { ticket: ClientTicket, setOrder: any, selected: boolean, sx: Sx, onClick?: MouseEventHandler<HTMLButtonElement> | undefined}
+    { ticket, selected = false, setOrder, sx }: 
+    { ticket: ClientTicket, setOrder: any, selected: boolean, sx: Sx }
 ) {
     const [opened, { close, open }] = useDisclosure(false)
     // console.log('rerender ', rowNumber, ' - ', ticketNumber)
