@@ -18,8 +18,8 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
         return defaultSx
     }
 
-    const getTicketSx = (rowIndex: Number, ticketIndex: Number) => (theme: MantineTheme) => {
-        const defaultSx: Sx = {height: dimension, width: dimension, backgroundColor: theme.colors.green[6]}
+    const getTicketSx = (rowIndex: Number, ticketIndex: Number) => {
+        const defaultSx: Sx = {height: dimension, width: dimension}
         if (rowIndex > 9 && (ticketIndex == 6 || ticketIndex == 20))
             return {...defaultSx, marginRight: dimension}
         return defaultSx
@@ -27,7 +27,7 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
 
     const { order, setOrder } = useContext(OrderContext)
 
-    const dimension = 26
+    const dimension = 20
 
     // console.log(venue)
     // if (!venue)
