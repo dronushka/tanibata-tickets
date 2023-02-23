@@ -2435,6 +2435,11 @@ react-dom@18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
 
+react-hook-mask@^1.1.11:
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/react-hook-mask/-/react-hook-mask-1.1.11.tgz#48d08be3c8e9e72b3d54f3ef7785b7f1ec39e560"
+  integrity sha512-GBCOUh57Q1K08Xl3CkjCsvIQU+PNisZc+jq5QtdFqQ/p2/HcqmO8x5Jw3ODnC5AcGexwx3rWzslSmAKqHjapGA==
+
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"

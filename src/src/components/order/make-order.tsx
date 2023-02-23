@@ -7,6 +7,7 @@ import { createContext, Dispatch, SetStateAction, useState } from "react"
 import { json } from "stream/consumers"
 import Hall from "../hall"
 import { OrderContext, OrderContextProvider } from "./OrderContext"
+import PaymentForm from "./payment-form"
 import Stage from "./stage"
 import Summary from "./summary"
 
@@ -28,13 +29,9 @@ export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { t
         )
     )
 
-    const [ showPaymentForm, setShowPaymentForm ] = useState<boolean>(false)
-    
-    const toPaymentForm = () => {
+    const [showPaymentForm, setShowPaymentForm] = useState<boolean>(true)
 
-    }
-
-    console.log(clientRows)
+    console.log(showPaymentForm)
 
     return (
         <>
@@ -43,15 +40,24 @@ export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { t
                     flexDirection: "row"
                 }}>
                     <Box>
-                        <Stage />
-                        {/* <pre>{JSON.stringify(order, null, 2)}</pre> */}
-                        <Hall rows={clientRows} />
+                        {!showPaymentForm && (
+                            <>
+                                <Stage />
+                                {/* <pre>{JSON.stringify(order, null, 2)}</pre> */}
+                                <Hall rows={clientRows} />
+                            </>
+                        )}
+                        {showPaymentForm && (
+                            <PaymentForm />
+                        )}
                     </Box>
+
+
                     <Flex sx={{
                         alignItems: "center",
                         padding: 20
                     }}>
-                        <Summary onPaymentClick={toPaymentForm}/>
+                        <Summary onPaymentClick={() => setShowPaymentForm(true)} />
                     </Flex>
                 </Flex>
             </OrderContextProvider>
