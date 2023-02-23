@@ -5,6 +5,7 @@ import { Box, Button, FileButton, Group, Input, Paper, Text, TextInput } from "@
 import { IconArrowLeft, IconUpload } from "@tabler/icons-react"
 import PhoneInput from "./phone-input"
 import { useState } from "react"
+import MaskInput from "../mask-input"
 
 // type PaymentFormData = {
 //     name: string,
@@ -12,25 +13,38 @@ import { useState } from "react"
 // }
 const formValidator = z.object({
     name: z.string().min(1, "Введите имя"),
-    phone: z.string().min(10, "Введите телефон").max(10)
+    phone: z.string().min(10, "Введите телефон").max(10),
+    email: z.string().email("Введите корректный e-mail"),
+    age: z.string().regex(/^\d+$/, "Введите возраст"),
+    nickname: z.string(),
+    social: z.string(),
+    // cheque: z.file()
 })
 
 type PaymentFormData = z.infer<typeof formValidator>
 
 type PaymentFormErrors = {
     name?: string[],
-    phone?: string[]
+    phone?: string[],
+    email?: string[]
+    age?: string[],
+    nickname?: string[],
+    social?: string[]
 } | null
 
 export default function PaymentForm() {
 
 
-    const [ paymentFormData, setPaymentFormData ] = useState<PaymentFormData>({
+    const [paymentFormData, setPaymentFormData] = useState<PaymentFormData>({
         name: "",
-        phone: ""
+        phone: "",
+        email: "",
+        age: "",
+        nickname: "",
+        social: ""
     })
 
-    const [ paymentFormErrors, setPaymentFormErrors ] = useState<PaymentFormErrors>(null)
+    const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
 
     const setFile = () => {
 
@@ -39,17 +53,13 @@ export default function PaymentForm() {
     const sendPaymentOrder = () => {
         const validated = formValidator.safeParse(paymentFormData)
 
-        // console.log(validated)
-
-        if (!validated.success) {
+        if (!validated.success)
             setPaymentFormErrors(validated.error.flatten().fieldErrors)
-            
-        } else {
 
-        }
+
 
     }
-    console.log(paymentFormErrors)
+    // console.log(paymentFormErrors)
     return (
         <Paper shadow="sm" radius="md" p="md">
             <Button leftIcon={<IconArrowLeft />} variant="subtle">Вернуться к выбору билетов</Button>
@@ -69,7 +79,7 @@ export default function PaymentForm() {
                 withAsterisk
                 value={paymentFormData.name}
                 onChange={e => {
-                    setPaymentFormData(prev => ({ ...prev, name: e.target.value}))
+                    setPaymentFormData(prev => ({ ...prev, name: e.target.value }))
                     setPaymentFormErrors(prev => {
                         if (prev?.name) {
                             const { name, ...rest } = prev
@@ -80,12 +90,13 @@ export default function PaymentForm() {
                 }}
                 error={paymentFormErrors?.name?.join(', ')}
             />
-            <PhoneInput 
+            <MaskInput
                 label="Телефон"
                 withAsterisk
+                mask="+7 (999) 999-99-99"
                 value={paymentFormData.phone}
-                setValue={value => {
-                    setPaymentFormData(prev => ({ ...prev, phone: value}))
+                onChange={value => {
+                    setPaymentFormData(prev => ({ ...prev, phone: value }))
                     setPaymentFormErrors(prev => {
                         if (prev?.phone) {
                             const { phone, ...rest } = prev
@@ -96,20 +107,47 @@ export default function PaymentForm() {
                 }}
                 error={paymentFormErrors?.phone?.join(', ')}
             />
-
             <TextInput
                 label="E-mail"
                 withAsterisk
+                value={paymentFormData.phone}
+                onChange={e => {
+                    setPaymentFormData(prev => ({ ...prev, email: e.target.value }))
+                    setPaymentFormErrors(prev => {
+                        if (prev?.email) {
+                            const { email, ...rest } = prev
+                            return rest
+                        }
+                        return prev
+                    })
+                }}
+                error={paymentFormErrors?.email?.join(', ')}
             />
             <TextInput
                 label="Возраст"
                 withAsterisk
+                value={paymentFormData.age}
+                onChange={e => {
+                    setPaymentFormData(prev => ({ ...prev, age: e.target.value.replace(/\D/, '') }))
+                    setPaymentFormErrors(prev => {
+                        if (prev?.age) {
+                            const { age, ...rest } = prev
+                            return rest
+                        }
+                        return prev
+                    })
+                }}
+                error={paymentFormErrors?.age?.join(', ')}
             />
             <TextInput
                 label="Никнейм"
+                value={paymentFormData.nickname}
+                onChange={(e) => setPaymentFormData(prev => ({ ...prev, nickname: e.target.value }))}
             />
             <TextInput
                 label="Адрес страницы VK (если есть, для оперативной связи)"
+                value={paymentFormData.social}
+                onChange={(e) => setPaymentFormData(prev => ({ ...prev, social: e.target.value }))}
             />
             <Button onClick={sendPaymentOrder}>Отправить</Button>
             <Box>
