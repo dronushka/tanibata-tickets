@@ -1,16 +1,16 @@
 'use client'
 
-import { ClientRow } from "@/types"
+import { TicketRow } from "@/types"
 import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { memo, useContext } from "react"
-import { OrderContext } from "./order/OrderContext"
-import TicketButton from "./order/ticket-button"
+import { OrderContext } from "./OrderContext"
+import TicketButton from "./ticket-button"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected
 })
 
-export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
+export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
     const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexWrap: "nowrap", justifyContent: "center" }
         if (rowIndex === 9)
@@ -50,7 +50,7 @@ export default function Hall({ rows = []}: { rows?: ClientRow[] }) {
                                     <MemoizedTicketButton
                                         key={ticket.id}
                                         sx={getTicketSx(i, j)}
-                                        selected={!!order?.tickets.has(ticket.id)}
+                                        selected={!!order?.tickets?.has(ticket.id)}
                                         ticket={ticket}
                                         setOrder={setOrder}
                                     />

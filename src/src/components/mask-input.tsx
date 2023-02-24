@@ -8,7 +8,7 @@ export default function MaskInput (
 ) {
     const id = useId()
     const maskGenerator = createDefaultMaskGenerator(mask)
-
+    // console.log('phone error', error)
     return (
         <Input.Wrapper id={id} label={label} withAsterisk={withAsterisk} error={error}>
             <Input
