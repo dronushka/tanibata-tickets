@@ -27,18 +27,11 @@ export const paymentDataSchema = z.object({
 })
 
 export type PaymentDataSchema = z.infer<typeof paymentDataSchema>
-// export type PaymentData = {
-//     name: string,
-//     phone: string,
-//     email: string,
-//     age: number,
-//     cheque: File,
-//     nickname?: string,
-//     social?: string
-// }
+
 export type PaymentData = Omit<PaymentDataSchema, 'cheque'> & {cheque: File | null}
 
 export type ClientOrder = {
+    isReady: boolean,
     paymentData: PaymentData,
     tickets: Map<number,ClientTicket>
 }

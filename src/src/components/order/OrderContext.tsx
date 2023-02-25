@@ -7,19 +7,22 @@ export const OrderContext = createContext<{ order?: ClientOrder, setOrder?: Disp
     setOrder: undefined
 })
 
+export const initialOrder: ClientOrder = {
+    isReady: false,
+    paymentData: {
+        name: "",
+        phone: "",
+        email: "",
+        age: "",
+        nickname: "",
+        social: "",
+        cheque: null
+    },
+    tickets: new Map()
+}
+
 export const OrderContextProvider = ({children}: {children: ReactNode}) => {
-    const [order, setOrder] = useState<ClientOrder>({
-        paymentData: {
-            name: "",
-            phone: "",
-            email: "",
-            age: "",
-            nickname: "",
-            social: "",
-            cheque: null
-        },
-        tickets: new Map()
-    })
+    const [order, setOrder] = useState<ClientOrder>({...initialOrder})
     
     return <OrderContext.Provider value={{order, setOrder}} >{children}</OrderContext.Provider>
 }

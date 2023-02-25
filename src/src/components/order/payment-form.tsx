@@ -2,10 +2,10 @@
 
 import { Box, Button, Container, FileButton, Flex, Group, Input, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconArrowLeft, IconUpload } from "@tabler/icons-react"
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import MaskInput from "../mask-input"
 import { useSession } from "next-auth/react"
-import { OrderContext } from "./OrderContext"
+import { initialOrder, OrderContext } from "./OrderContext"
 import { PaymentData, paymentDataSchema } from "@/types"
 
 type PaymentFormErrors = {
@@ -19,22 +19,26 @@ type PaymentFormErrors = {
 } | null
 
 export default function PaymentForm() {
+    const { order, setOrder } = useContext(OrderContext)
 
-    const { data: session, status } = useSession()
+    const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
 
-    const [paymentData, setPaymentData] = useState<Omit<PaymentData, 'cheque'> & {cheque: File | null}>({
-        name: "",
-        phone: "",
-        email: "",
-        age: "",
-        nickname: "",
-        social: "",
-        cheque: null
-    })
+    useEffect(() => {
+        if (order)
+            setPaymentData(order.paymentData)
+    }, [order])
 
     const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
     
-    const { setOrder } = useContext(OrderContext)
+    const setField = (field: keyof PaymentData, value: string | File | null) => {
+        setPaymentData(prev => ({ ...prev, [field]: value }))
+        setPaymentFormErrors(prev => {
+            if (prev)
+                delete prev[field]
+            return prev
+        })
+    }
+
 
     const sendPaymentOrder = () => {
         const validated = paymentDataSchema.safeParse(paymentData)
@@ -45,16 +49,7 @@ export default function PaymentForm() {
             return
         }
 
-        setOrder && setOrder(prev => ({...prev, paymentData: validated.data}))
-    }
-
-    const setField = (field: keyof PaymentData, value: string | File | null) => {
-        setPaymentData(prev => ({ ...prev, [field]: value }))
-        setPaymentFormErrors(prev => {
-            if (prev)
-                delete prev[field]
-            return prev
-        })
+        setOrder && setOrder(prev => ({...prev, paymentData: validated.data, isReady: true}))
     }
 
     return (
