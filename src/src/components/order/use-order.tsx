@@ -55,15 +55,21 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
                     console.log('sending password to ', order?.paymentData.email )
                     sendPasswordEmail(order?.paymentData.email)
                     setStage("authenticate")
-                }
-                else
+                } else {
+                    // debugger
                     setStage("send")
+                    console.log('sending order')
+                    setStage("complete")
+                }
             break
             case "authenticate":
                 setStage("send")
+                console.log('sending order')
+                setStage("complete")
             break
             case "send":
                 setStage("complete")
+                setOrder({...initialOrder})
             break
         }
     }

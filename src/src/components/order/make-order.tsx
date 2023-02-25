@@ -1,9 +1,10 @@
 "use client"
 
-import { Box, Flex } from "@mantine/core"
+import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, ThemeIcon } from "@mantine/core"
 import { PriceRange, Row, Ticket, Venue } from "@prisma/client"
+import { IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
-import { useContext, useEffect, useState } from "react"
+import Link from "next/link"
 import LoginForm from "../login-form"
 import Hall from "./hall"
 import PaymentForm from "./payment-form"
@@ -30,24 +31,14 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
 
 
     const { data: session, status } = useSession()
-    // const { order, setOrder } = useContext(OrderContext)
-    const { order, nextStage, prevStage } = useOrder()
-    // const { next: nextStage, prev: prevStage } = useOrderRoutine()
 
-    // const [ showPaymentForm, setShowPaymentForm ] = useState<boolean>(true)
-    // const [ orderComplete, setOrderComplete ] = useState<boolean>(false)
+    const { order, nextStage, prevStage } = useOrder()
 
     const sendOrder = async () => {
         //send Order here
         // setOrder && setOrder({...initialOrder})
         // setOrderComplete(true)
     }
-
-    // useEffect(() => {
-    //     if (order?.isReady && status === 'authenticated') {
-    //         sendOrder()
-    //     }
-    // }, [order, status])
 
     console.log('order', order)
 
@@ -80,14 +71,40 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
                     </Flex>
                 )}
                 {order.stage === "authenticate" && (
-                    <LoginForm 
-                        clientEmail={order.paymentData.email} 
+                    <LoginForm
+                        clientEmail={order.paymentData.email}
                         callback={nextStage}
                         rollback={prevStage}
                     />
                 )}
-                {order.stage === "send" && <p>Creating order ...</p>}
-                {order.stage === "complete" && <p>Order complete</p>}
+                {(order.stage === "send" || order.stage === "complete") && (
+                    <Flex sx={{
+                        width: "100%",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}>
+                        <Paper shadow="xs" p="md">
+                            <Stack sx={{ minWidth: 250, maxWidth: 400, alignItems: "center" }}>
+                                {order.stage === "send" && <>
+                                    <Loader size="lg" />
+                                    <Text>Заказ создается</Text>
+                                </>}
+                                {order.stage === "complete" && <>
+                                    <ThemeIcon variant="outline" color="green" size="xl" sx={{border: 0}}>
+                                        <IconCheck size="xl"/>
+                                    </ThemeIcon>
+                                    <Text>Заказ успешно создан!</Text>
+                                    <Link href="/orders" passHref legacyBehavior>
+                                        <Button variant="subtle">
+                                            Посмотреть мои заказы
+                                        </Button>
+                                    </Link>
+                                </>}
+                            </Stack>
+                        </Paper>
+                    </Flex>
+                )}
             </>
         )
 
