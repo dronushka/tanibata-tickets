@@ -30,7 +30,10 @@ export type PaymentDataSchema = z.infer<typeof paymentDataSchema>
 
 export type PaymentData = Omit<PaymentDataSchema, 'cheque'> & {cheque: File | null}
 
+export type OrderStage = "tickets" | "form" | "authenticate" | "send" | "complete"
+
 export type ClientOrder = {
+    stage: OrderStage,
     isReady: boolean,
     paymentData: PaymentData,
     tickets: Map<number,ClientTicket>

@@ -6,10 +6,10 @@ import { useSession } from "next-auth/react"
 import { useContext, useEffect, useState } from "react"
 import LoginForm from "../login-form"
 import Hall from "./hall"
-import { OrderContext, OrderContextProvider } from "./OrderContext"
 import PaymentForm from "./payment-form"
 import Stage from "./stage"
 import Summary from "./summary"
+import { OrderProvider, useOrder } from "./use-order"
 
 function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }) {
     const clientRows = venue?.rows.map(
@@ -28,39 +28,45 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
         )
     )
 
+
     const { data: session, status } = useSession()
-    const { order, setOrder } = useContext(OrderContext)
+    // const { order, setOrder } = useContext(OrderContext)
+    const { order, nextStage, prevStage } = useOrder()
+    // const { next: nextStage, prev: prevStage } = useOrderRoutine()
 
-    const [ showPaymentForm, setShowPaymentForm ] = useState<boolean>(true)
-    const [ orderComplete, setOrderComplete ] = useState<boolean>(false)
+    // const [ showPaymentForm, setShowPaymentForm ] = useState<boolean>(true)
+    // const [ orderComplete, setOrderComplete ] = useState<boolean>(false)
 
-    useEffect(() => {
-        if (order?.isReady && status === 'authenticated') {
-            //sendOrder
-            setOrderComplete(true)
-        }
-    }, [order, status])
+    const sendOrder = async () => {
+        //send Order here
+        // setOrder && setOrder({...initialOrder})
+        // setOrderComplete(true)
+    }
+
+    // useEffect(() => {
+    //     if (order?.isReady && status === 'authenticated') {
+    //         sendOrder()
+    //     }
+    // }, [order, status])
 
     console.log('order', order)
-    console.log('showPaymentForm', showPaymentForm)
-    console.log('orderComplete', orderComplete)
 
-    if (order && !orderComplete)
+    if (order)
         return (
             <>
-                {!order?.isReady && (
+                {(order.stage === "tickets" || order.stage === "form") && (
                     <Flex sx={{
                         flexDirection: "row"
                     }}>
                         <Box>
-                            {!showPaymentForm && (
+                            {order.stage === "tickets" && (
                                 <>
                                     <Stage />
                                     {/* <pre>{JSON.stringify(order, null, 2)}</pre> */}
                                     <Hall rows={clientRows} />
                                 </>
                             )}
-                            {showPaymentForm && (
+                            {order.stage === "form" && (
                                 <PaymentForm />
                             )}
                         </Box>
@@ -69,20 +75,21 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
                             alignItems: "center",
                             padding: 20
                         }}>
-                            <Summary onPaymentClick={() => setShowPaymentForm(true)} />
+                            <Summary />
                         </Flex>
                     </Flex>
                 )}
-                {order && order.isReady && status === 'unauthenticated' && (
+                {order.stage === "authenticate" && (
                     <LoginForm 
                         clientEmail={order.paymentData.email} 
-                        callback={() => { setOrder && setOrder(prev => ({ ...prev, isReady: false})) }}
+                        callback={nextStage}
+                        rollback={prevStage}
                     />
                 )}
+                {order.stage === "send" && <p>Creating order ...</p>}
+                {order.stage === "complete" && <p>Order complete</p>}
             </>
         )
-    else if (order && orderComplete)
-        return <p>Order complete</p>
 
     return <p>loading ...</p>
 
@@ -90,8 +97,8 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
 
 export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }) {
     return (
-        <OrderContextProvider>
+        <OrderProvider>
             <Scaffolding venue={venue} />
-        </OrderContextProvider>
+        </OrderProvider>
     )
 }

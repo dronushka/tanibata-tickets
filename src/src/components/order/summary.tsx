@@ -2,12 +2,12 @@
 
 import { ClientTicket } from "@/types"
 import { Button, Divider, Group, Paper, Stack, Text } from "@mantine/core"
-import { useContext } from "react"
-import { OrderContext } from "./OrderContext"
+// import { useContext } from "react"
+// import { OrderContext } from "./OrderContext"
+import { useOrder } from "./use-order"
 
-export default function Summary({ onPaymentClick }: {onPaymentClick: () => void}) {
-    const { order } = useContext(OrderContext)
-
+export default function Summary() {
+    const { order, nextStage } = useOrder()
     return (
         <Paper shadow="sm" radius="md" p="md">
             <Stack>
@@ -23,12 +23,12 @@ export default function Summary({ onPaymentClick }: {onPaymentClick: () => void}
                     <Text size="sm" fw={700}>Итого:</Text>
                     <Text size="sm" fw={700}>{order && [...order.tickets.values()].reduce((sum: number, ticket: ClientTicket) => sum + ticket.priceRange.price, 0)} руб.</Text>
                 </Group>
-                <Button 
+                {order?.stage === "tickets" && <Button 
                     disabled={!order?.tickets.size}
-                    onClick={onPaymentClick}
+                    onClick={() => nextStage(order)}
                 >
                     Перейти к оплате
-                </Button>
+                </Button>}
             </Stack>
         </Paper>
     )

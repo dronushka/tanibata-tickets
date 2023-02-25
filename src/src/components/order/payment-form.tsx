@@ -1,12 +1,11 @@
 "use client"
 
-import { Box, Button, Container, FileButton, Flex, Group, Input, Paper, Stack, Text, TextInput } from "@mantine/core"
+import { Box, Button, FileButton, Flex, Group, Input, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconArrowLeft, IconUpload } from "@tabler/icons-react"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import MaskInput from "../mask-input"
-import { useSession } from "next-auth/react"
-import { initialOrder, OrderContext } from "./OrderContext"
 import { PaymentData, paymentDataSchema } from "@/types"
+import { initialOrder, useOrder } from "./use-order"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -19,7 +18,7 @@ type PaymentFormErrors = {
 } | null
 
 export default function PaymentForm() {
-    const { order, setOrder } = useContext(OrderContext)
+    const { order, nextStage, prevStage } = useOrder()
 
     const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
 
@@ -39,7 +38,6 @@ export default function PaymentForm() {
         })
     }
 
-
     const sendPaymentOrder = () => {
         const validated = paymentDataSchema.safeParse(paymentData)
         console.log(validated)
@@ -49,13 +47,20 @@ export default function PaymentForm() {
             return
         }
 
-        setOrder && setOrder(prev => ({...prev, paymentData: validated.data, isReady: true}))
+        if (order) 
+            nextStage({...order, paymentData: validated.data})
     }
 
     return (
         <Paper shadow="sm" radius="md" p="md">
             <Stack>
-                <Button leftIcon={<IconArrowLeft />} variant="subtle">Вернуться к выбору билетов</Button>
+                <Button 
+                    leftIcon={<IconArrowLeft />} 
+                    variant="subtle"
+                    onClick={prevStage}
+                >
+                        Вернуться к выбору билетов
+                </Button>
                 <Box>
                     <Text>
                         Вы открыли форму для покупки билетов на «Алоха! Косплей-фест», который пройдёт 3 сентября 2022 года на Стерео пляже

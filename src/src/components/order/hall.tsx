@@ -2,9 +2,9 @@
 
 import { TicketRow } from "@/types"
 import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
-import { memo, useContext } from "react"
-import { OrderContext } from "./OrderContext"
+import { memo } from "react"
 import TicketButton from "./ticket-button"
+import { useOrder } from "./use-order"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected
@@ -25,7 +25,7 @@ export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
         return defaultSx
     }
 
-    const { order, setOrder } = useContext(OrderContext)
+    const { order, setOrder } = useOrder()
 
     const dimension = 20
 
