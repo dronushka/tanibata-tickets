@@ -125,6 +125,7 @@ export default function PaymentForm() {
                         <Text color="gray" size="sm">Файв формате: jpeg, png, pd</Text>
                     </Box>
                     <Box>
+                        {paymentData.cheque && <Text>{paymentData.cheque.name}</Text>}
                         <FileButton
                             onChange={value => setField("cheque", value)}
                             accept="image/png,image/jpeg"
