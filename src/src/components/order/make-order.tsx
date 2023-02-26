@@ -10,7 +10,7 @@ import Hall from "./hall"
 import PaymentForm from "./payment-form"
 import Stage from "./stage"
 import Summary from "./summary"
-import { OrderProvider, useOrder } from "./use-order"
+import { initialOrder, OrderProvider, useOrder } from "./use-order"
 
 function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }) {
     const clientRows = venue?.rows.map(
@@ -40,9 +40,11 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
         // setOrderComplete(true)
     }
 
-    console.log('order', order)
+    // console.log('order', order)
+    // console.log(session?.user)
+    // console.log(session?.user ? session.user : initialOrder.paymentData)
 
-    if (order)
+    if (status !== "loading" && order)
         return (
             <>
                 {(order.stage === "tickets" || order.stage === "form") && (
@@ -108,7 +110,7 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
             </>
         )
 
-    return <p>loading ...</p>
+    return <Loader size="xl"/>
 
 }
 

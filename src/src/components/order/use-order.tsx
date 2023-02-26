@@ -1,7 +1,7 @@
-import { ClientOrder, OrderStage } from "@/types"
+import { createOrder, sendPasswordEmail } from "@/lib/api-calls"
+import { ClientOrder, OrderStage } from "@/types/types"
 import { useSession } from "next-auth/react"
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react"
-import { sendPasswordEmail } from "../login-form"
+import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react"
 
 export const initialOrder: ClientOrder = {
     stage: "tickets",
@@ -37,8 +37,17 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         setOrder(prev => ({ ...prev, stage: value}))
     }
 
-    const { status } = useSession()
+    const { data: session, status } = useSession()
 
+    useEffect(() => {
+        if (session)
+            setOrder(prev => ({
+                ...prev,
+                paymentData: {...session.user, cheque: null}
+            }))
+    }, 
+    [session])
+    
     const nextStage = (newOrder?: ClientOrder) => {
         if (!order)
             return
@@ -52,19 +61,21 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
             break
             case "form":
                 if (status !== "authenticated") {
-                    console.log('sending password to ', order?.paymentData.email )
-                    sendPasswordEmail(order?.paymentData.email)
+                    console.log('sending password to ', newOrder?.paymentData.email )
+                    sendPasswordEmail(newOrder?.paymentData.email)
                     setStage("authenticate")
                 } else {
                     // debugger
                     setStage("send")
                     console.log('sending order')
+                    newOrder && createOrder(newOrder)
                     setStage("complete")
                 }
             break
             case "authenticate":
                 setStage("send")
                 console.log('sending order')
+                createOrder(order)
                 setStage("complete")
             break
             case "send":

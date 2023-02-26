@@ -1,6 +1,6 @@
 'use client'
 
-import { TicketRow } from "@/types"
+import { TicketRow } from "@/types/types"
 import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { memo } from "react"
 import TicketButton from "./ticket-button"

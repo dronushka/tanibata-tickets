@@ -10,6 +10,6 @@ export default async function LoginPage ({ searchParams }: { searchParams?: { [k
     if (session)
         redirect("/orders")
     return <LoginForm 
-        callbackUrl={searchParams?.callbackUrl}
+        callback={()=>{}}
     />
 }

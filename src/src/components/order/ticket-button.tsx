@@ -1,6 +1,6 @@
 'use client'
 
-import { ClientTicket } from "@/types"
+import { ClientTicket } from "@/types/types"
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { MouseEventHandler } from "react"

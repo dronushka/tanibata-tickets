@@ -4,8 +4,9 @@ import { Box, Button, FileButton, Flex, Group, Input, Paper, Stack, Text, TextIn
 import { IconArrowLeft, IconUpload } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 import MaskInput from "../mask-input"
-import { PaymentData, paymentDataSchema } from "@/types"
+import { PaymentData, paymentDataSchema } from "@/types/types"
 import { initialOrder, useOrder } from "./use-order"
+import { User } from "@prisma/client"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -121,8 +122,8 @@ export default function PaymentForm() {
                 </Box>
                 <Group>
                     <Box sx={{ flexGrow: 1 }}>
-                        <Text color="gray" size="sm">Файлы размером не более 25 Мб,</Text>
-                        <Text color="gray" size="sm">Файв формате: jpeg, png, pd</Text>
+                        <Text color="gray" size="sm">Файл размером не более 2 Мб,</Text>
+                        <Text color="gray" size="sm">Файл формате: jpeg, png, pd</Text>
                     </Box>
                     <Box>
                         {paymentData.cheque && <Text>{paymentData.cheque.name}</Text>}

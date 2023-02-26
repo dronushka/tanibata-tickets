@@ -1,48 +1,9 @@
 "use client"
 
-import { useSession, signIn, signOut } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { z } from "zod"
-import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
-
-export const sendPasswordEmail = async (email: string) => {
-    const emailValidator = z.string().email()
-    const validated = emailValidator.safeParse(email)
-    if (!validated.success)
-        return {
-            success: false,
-            error: "Неправильный формат e-mail"
-        }
-    else {
-
-        // setLoading(true)
-
-        const res = await fetch("/api/sendPassword", {
-            method: "POST",
-            headers: new Headers({ 'content-type': 'application/json' }),
-            // credentials: 'include',
-            body: JSON.stringify({ email })
-        })
-
-        // setLoading(false)
-
-        if (res.ok) {
-            return ({success: true})
-        } else {
-            const response = await res.json()
-            if (response?.error === "user_not_found")
-                return {
-                    success: false,
-                    error: "Указанная почта не найдена в системе"
-                }
-            else
-                return {
-                    success: false,
-                    error: "Что-то пошло не так, попробуйте позже"
-                }
-        }
-    } 
-}
+import {  Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
+import { sendPasswordEmail } from "@/lib/api-calls"
 
 export default function LoginForm(
     { clientEmail, callback, rollback }: 

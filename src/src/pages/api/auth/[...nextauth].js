@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
+import { User } from '@prisma/client'
 
 export const authOptions = {
     session: {
@@ -23,7 +24,7 @@ export const authOptions = {
                 const password = await prisma.password.findFirst({
                     where: {
                         user: {
-                            email: credentials.email
+                            email: credentials?.email
                         }
                     },
                     orderBy: {
@@ -32,22 +33,29 @@ export const authOptions = {
                     take: 1
                 })
 
-                console.log(password)
+                // console.log(password)
 
                 if (!password)
                     return null
 
-                if (bcrypt.compareSync(credentials.password, password.hash)) {
+                if (credentials && bcrypt.compareSync(credentials.password, password.hash)) {
                     const user = await prisma.user.findFirst({
                         where: {
                             email: credentials.email
                         }
                     })
                     
-                    return { 
-                        id: user.id,
-                        email: user.email
-                    }
+                    if (user)
+                        return { 
+                            id: String(user.id),
+                            email: user.email,
+                            name: user.name,
+                            nickname: user.nickname !== null ? user.nickname : "" ,
+                            age: String(user.age),
+                            phone: user.phone !== null ? user.phone : "" , 
+                            social: user.social !== null ? user.phone : ""
+                        }
+                    return null
                 }
                 return null
             }
