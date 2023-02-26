@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).end()
 
     const session = await getServerSession(req, res, authOptions)
-    console.log('session', session)
+    // console.log('session', session)
     if (!session)
         res.status(401).end()
 
@@ -49,9 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 })
             })
 
-        console.log('createOrder', paymentData, tickets, cheque)
+        // console.log('createOrder', paymentData, tickets, cheque)
 
-        //Check tickets
         const dbTickets = await prisma.ticket.findMany({
             where: {
                 id: { in: tickets.map(ticket => ticket.id) }
@@ -85,13 +84,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 social: paymentData.social,
             }
         })
-
-        // tickets     Ticket[]
-        // paymentData Json
-        // price       Float
-        // user        User     @relation(fields: [userId], references: [id])
-        // userId      Int
-        // const price = tickets.reduce((price, ticket)=>( price + ticket.priceRange.price), 0)
 
         await prisma.order.create({
             data: {

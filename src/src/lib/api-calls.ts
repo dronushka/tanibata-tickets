@@ -54,6 +54,9 @@ export const createOrder = async (order: ClientOrder) => {
     if (res.ok) {
         return ({success: true})
     } else {
-    
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
     }
 }

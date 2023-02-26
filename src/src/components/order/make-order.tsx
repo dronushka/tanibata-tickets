@@ -2,12 +2,13 @@
 
 import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, ThemeIcon } from "@mantine/core"
 import { PriceRange, Row, Ticket, User, Venue } from "@prisma/client"
-import { IconCheck } from "@tabler/icons-react"
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import FullPageMessage from "../full-page-message"
 import LoginForm from "../login-form"
 import Hall from "./hall"
+import OrderError from "./order-error"
 import PaymentForm from "./payment-form"
 import Stage from "./stage"
 import Summary from "./summary"
@@ -36,8 +37,9 @@ function Scaffolding(
 
     const { status } = useSession()
 
-    const { order, nextStage, prevStage } = useOrder()
+    const { order, nextStage, prevStage, setOrder } = useOrder()
 
+    console.log(order?.error)
     if (status !== "loading" && order)
         return (
             <>
@@ -72,7 +74,7 @@ function Scaffolding(
                         rollback={prevStage}
                     />
                 )}
-                {(order.stage === "send" || order.stage === "complete") && (
+                {(order.stage === "send" || order.stage === "complete" || order.stage === "error") && (
                     <FullPageMessage>
                         <Stack sx={{ minWidth: 250, maxWidth: 400, alignItems: "center" }}>
                             {order.stage === "send" && <>
@@ -81,7 +83,7 @@ function Scaffolding(
                             </>}
                             {order.stage === "complete" && <>
                                 <ThemeIcon variant="outline" color="green" size="xl" sx={{ border: 0 }}>
-                                    <IconCheck size="xl" />
+                                    <IconCheck size={40} />
                                 </ThemeIcon>
                                 <Text>Заказ успешно создан!</Text>
                                 <Link href="/orders" passHref legacyBehavior>
@@ -89,6 +91,25 @@ function Scaffolding(
                                         Посмотреть мои заказы
                                     </Button>
                                 </Link>
+                            </>}
+                            {order.stage === "error" && <>
+                                <ThemeIcon variant="outline" color="red" size="xl" sx={{ border: 0 }}>
+                                    <IconAlertTriangle size={40} />
+                                </ThemeIcon>
+                                <Text>Ошибка создания заказа!</Text>
+                                <OrderError text={order.error} />
+                                <Button 
+                                    variant="subtle"
+                                    onClick={() => setOrder && setOrder(prev => ({
+                                            ...prev,
+                                            stage: "tickets",
+                                            tickets: new Map
+                                        }))
+                                    }
+                                >
+                                    Начать заново
+                                </Button>
+                                
                             </>}
                         </Stack>
                     </FullPageMessage>

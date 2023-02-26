@@ -5,7 +5,7 @@ import { Context, createContext, Dispatch, ReactNode, SetStateAction, useContext
 
 export const initialOrder: ClientOrder = {
     stage: "tickets",
-    isReady: false,
+    error: undefined,
     paymentData: {
         name: "",
         phone: "",
@@ -43,8 +43,8 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     const [ defaultPaymentData, setDefaultPaymentData ] = useState<PaymentData>(initPaymentData)
     const [ order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
 
-    const setStage = (value: OrderStage) => {
-        setOrder(prev => ({ ...prev, stage: value }))
+    const setStage = (value: OrderStage, error?: string) => {
+        setOrder(prev => ({ ...prev, stage: value, error }))
     }
 
     const { data: session, status } = useSession()
@@ -58,7 +58,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     // }, 
     // [session])
 
-    const nextStage = (newOrder?: ClientOrder) => {
+    const nextStage = async (newOrder?: ClientOrder) => {
         if (!order)
             return
 
@@ -78,15 +78,25 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
                     // debugger
                     setStage("send")
                     console.log('sending order')
-                    newOrder && createOrder(newOrder)
-                    setStage("complete")
+                    if (newOrder) {
+                        const result = await createOrder(newOrder)
+                        if (result.success)
+                            setStage("complete")
+                        else
+                            setStage("error", result.error)
+                    }
                 }
                 break
             case "authenticate":
                 setStage("send")
                 console.log('sending order')
-                createOrder(order)
-                setStage("complete")
+                if (newOrder) {
+                    const result = await createOrder(newOrder)
+                    if (result.success)
+                        setStage("complete")
+                    else
+                        setStage("error", result.error)
+                }
                 break
             case "send":
                 setStage("complete")
