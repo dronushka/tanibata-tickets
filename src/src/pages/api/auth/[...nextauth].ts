@@ -1,10 +1,10 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions, SessionUser } from 'next-auth'
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
 import { User } from '@prisma/client'
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
@@ -45,9 +45,9 @@ export const authOptions = {
                         }
                     })
                     
-                    // if (user)
+                    if (user)
                         return { 
-                            id: user.id,
+                            id: String(user.id),
                             email: user.email,
                             // name: user.name,
                             // nickname: user.nickname !== null ? user.nickname : "" ,
@@ -71,7 +71,7 @@ export const authOptions = {
             return token
         },
         session: async ({ session, token }) => {
-            session.user = token.user
+            session.user = token.user as SessionUser
             return session
         }
     }
