@@ -72,9 +72,10 @@ model PriceRange {
 }
 
 model Order {
-  id      Int      @id @default(autoincrement())
-  tickets Ticket[]
-  price   Float
-  user    User     @relation(fields: [userId], references: [id])
-  userId  Int
+  id          Int      @id @default(autoincrement())
+  tickets     Ticket[]
+  paymentData Json
+  price       Float
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
 }
