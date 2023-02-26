@@ -19,14 +19,18 @@ type PaymentFormErrors = {
 } | null
 
 export default function PaymentForm() {
-    const { order, nextStage, prevStage } = useOrder()
+    const { defaultPaymentData, order, nextStage, prevStage } = useOrder()
 
     const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
 
     useEffect(() => {
-        if (order)
-            setPaymentData(order.paymentData)
-    }, [order])
+        defaultPaymentData && setPaymentData(defaultPaymentData)
+    }, [defaultPaymentData])
+
+    // useEffect(() => {
+    //     if (order)
+    //         setPaymentData(order.paymentData)
+    // }, [order])
 
     const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
     

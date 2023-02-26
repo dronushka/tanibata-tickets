@@ -45,17 +45,17 @@ export const authOptions = {
                         }
                     })
                     
-                    if (user)
+                    // if (user)
                         return { 
-                            id: String(user.id),
+                            id: user.id,
                             email: user.email,
-                            name: user.name,
-                            nickname: user.nickname !== null ? user.nickname : "" ,
-                            age: String(user.age),
-                            phone: user.phone !== null ? user.phone : "" , 
-                            social: user.social !== null ? user.phone : ""
+                            // name: user.name,
+                            // nickname: user.nickname !== null ? user.nickname : "" ,
+                            // age: String(user.age),
+                            // phone: user.phone !== null ? user.phone : "" , 
+                            // social: user.social !== null ? user.phone : ""
                         }
-                    return null
+                    // return null
                 }
                 return null
             }

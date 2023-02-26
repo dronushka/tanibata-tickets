@@ -10,17 +10,12 @@ export const sendPasswordEmail = async (email?: string) => {
             error: "Неправильный формат e-mail"
         }
     else {
-
-        // setLoading(true)
-
         const res = await fetch("/api/sendPassword", {
             method: "POST",
             headers: new Headers({ 'content-type': 'application/json' }),
             // credentials: 'include',
             body: JSON.stringify({ email })
         })
-
-        // setLoading(false)
 
         if (res.ok) {
             return ({success: true})
@@ -41,26 +36,20 @@ export const sendPasswordEmail = async (email?: string) => {
 }
 
 export const createOrder = async (order: ClientOrder) => {
-    // const formData = Object.entries(order).reduce((fd, [ k, v ]) => (fd.append(k, v), fd), new FormData);
     console.log('sending', order)
     const { cheque, ...paymentData } = order.paymentData
     
     const formData = new FormData
     formData.append('paymentInfo', JSON.stringify(paymentData))
     cheque && formData.append('cheque', cheque)
-    // formData.append('tickets', JSON.stringify([...order.tickets.values]))
     formData.append('tickets', JSON.stringify(
         [...order.tickets].map(([key, value]) => ({ ...value }))
     ))
 
     const res = await fetch("/api/createOrder", {
         method: "POST",
-        // headers: new Headers({ 'content-type': 'application/json' }),
-        // credentials: 'include',
         body: formData
     })
-
-    // setLoading(false)
 
     if (res.ok) {
         return ({success: true})

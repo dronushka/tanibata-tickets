@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, ThemeIcon } from "@mantine/core"
-import { PriceRange, Row, Ticket, Venue } from "@prisma/client"
+import { PriceRange, Row, Ticket, User, Venue } from "@prisma/client"
 import { IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
@@ -13,7 +13,10 @@ import Stage from "./stage"
 import Summary from "./summary"
 import { OrderProvider, useOrder } from "./use-order"
 
-function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }) {
+function Scaffolding(
+    { user, venue }: 
+    { user?: User | null, venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }
+) {
     const clientRows = venue?.rows.map(
         row => (
             {
@@ -100,9 +103,20 @@ function Scaffolding({ venue }: { venue: Venue & { rows: (Row & { tickets: (Tick
     )
 }
 
-export default function MakeOrder({ venue }: { venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }) {
+export default function MakeOrder(
+    { user, venue }:
+    { user?: User, venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }
+) {   
     return (
-        <OrderProvider>
+        <OrderProvider initPaymentData={{
+            name: user?.name ?? "",
+            email: user?.email ?? "",
+            age: user?.age ? String(user.age) : "",
+            phone: user?.phone ?? "",
+            nickname: user?.nickname ?? "",
+            social: user?.social ?? "",
+            cheque: null
+        }}>
             <Scaffolding venue={venue} />
         </OrderProvider>
     )
