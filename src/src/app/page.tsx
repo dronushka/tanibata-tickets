@@ -24,7 +24,8 @@ export default async function Page() {
                 include: {
                     tickets: {
                         include: {
-                            priceRange: true
+                            priceRange: true,
+                            order: true
                         }
                     }
                 }

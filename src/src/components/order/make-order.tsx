@@ -26,6 +26,7 @@ function Scaffolding(
                     ticket => (
                         {
                             ...ticket,
+                            reserved: !!ticket.orderId,
                             rowNumber: String(row.number)
                         }
                     )
@@ -34,7 +35,7 @@ function Scaffolding(
         )
     )
 
-
+    
     const { status } = useSession()
 
     const { order, nextStage, prevStage, setOrder } = useOrder()
@@ -99,13 +100,15 @@ function Scaffolding(
                                 <Text>Ошибка создания заказа!</Text>
                                 <OrderError text={order.error} />
                                 <Button 
+                                    component="a"
+                                    href="/"
                                     variant="subtle"
-                                    onClick={() => setOrder && setOrder(prev => ({
-                                            ...prev,
-                                            stage: "tickets",
-                                            tickets: new Map
-                                        }))
-                                    }
+                                    // onClick={() => setOrder && setOrder(prev => ({
+                                    //         ...prev,
+                                    //         stage: "tickets",
+                                    //         tickets: new Map
+                                    //     }))
+                                    // }
                                 >
                                     Начать заново
                                 </Button>

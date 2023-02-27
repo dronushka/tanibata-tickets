@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await prisma.user.update({
             where: {
-                id: session?.user.id
+                email: session?.user.email
             },
             data: {
                 name: paymentData.name,
@@ -91,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 price,
                 user: {
                     connect: {
-                        id: session?.user.id
+                        email: session?.user.email
                     }
                 },
                 tickets: {
