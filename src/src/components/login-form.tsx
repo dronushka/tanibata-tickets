@@ -78,6 +78,7 @@ export default function LoginForm(
                     <Stack sx={{ width: 400 }}>
                         <TextInput
                             label="E-mail"
+                            name="email"
                             withAsterisk
                             error={emailError}
                             onChange={(e) => {

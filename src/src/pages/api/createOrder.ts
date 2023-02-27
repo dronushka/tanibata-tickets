@@ -47,7 +47,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         cheque: files.cheque as File
                     })
                 })
-            })
+            }
+        )
 
         // console.log('createOrder', paymentData, tickets, cheque)
 
@@ -64,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let price = 0
         for (let ticket of dbTickets) {
             if (ticket.order) {
-                res.status(422).json({ error: "some_tickets_are_bought" }) 
+                res.status(422).json({ error: "some_tickets_are_bought" })
                 return
             }
             else {
