@@ -1,4 +1,4 @@
-import { PriceRange, Row, Ticket } from "@prisma/client"
+import { PriceRange, Row, Ticket, Venue } from "@prisma/client"
 import { z } from "zod"
 
 export type ClientTicket = Ticket & { 
@@ -7,6 +7,8 @@ export type ClientTicket = Ticket & {
 }
 
 export type TicketRow = Row & { tickets: ClientTicket[]}
+
+export type ClientVenue = Venue & { rows: TicketRow[] } | null
 
 export const paymentDataSchema = z.object({
     name: z.string().min(1, "Введите имя"),

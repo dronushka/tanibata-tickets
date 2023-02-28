@@ -3,8 +3,8 @@
 import { TicketRow } from "@/types/types"
 import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { memo } from "react"
-import TicketButton from "./ticket-button"
-import { useOrder } from "./use-order"
+import TicketButton from "../ticket-button"
+import { useOrder } from "../use-order"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected
@@ -25,7 +25,7 @@ export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
         return defaultSx
     }
 
-    const { order, setOrder } = useOrder()
+    const { order, setOrder, nextStage } = useOrder()
 
     const dimension = 20
 

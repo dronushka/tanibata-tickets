@@ -4,7 +4,7 @@ import { ClientTicket } from "@/types/types"
 import { Button, Divider, Group, Paper, Stack, Text } from "@mantine/core"
 // import { useContext } from "react"
 // import { OrderContext } from "./OrderContext"
-import { useOrder } from "./use-order"
+import { useOrder } from "../use-order"
 
 export default function Summary() {
     const { order, nextStage } = useOrder()

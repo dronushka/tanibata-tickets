@@ -1,6 +1,6 @@
 "use client"
 
-import { OrderStage } from "@/types/types"
+import { ClientVenue, OrderStage } from "@/types/types"
 import { Box, Button, Center, Container, Flex, Loader, Paper, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { PriceRange, Row, Ticket, User, Venue } from "@prisma/client"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
@@ -8,34 +8,17 @@ import { useSession } from "next-auth/react"
 import Link from "next/link"
 import FullPageMessage from "../full-page-message"
 import LoginForm from "../login-form"
-import Hall from "./hall"
+import Hall from "./tickets-picker/hall"
 import OrderError from "./order-error"
 import OrderForm from "./order-form"
 import PaymentForm from "./payment-form"
-import Stage from "./stage"
-import Summary from "./summary"
+import Stage from "./tickets-picker/stage"
+import Summary from "./tickets-picker/summary"
 import { OrderProvider, useOrder } from "./use-order"
+import TicketsPicker from "./tickets-picker/tickets-picker"
 
-function Scaffolding(
-    { user, venue }:
-        { user?: User | null, venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }
-) {
-    const clientRows = venue?.rows.map(
-        row => (
-            {
-                ...row,
-                tickets: row.tickets.map(
-                    ticket => (
-                        {
-                            ...ticket,
-                            reserved: !!ticket.orderId,
-                            rowNumber: String(row.number)
-                        }
-                    )
-                )
-            }
-        )
-    )
+function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
+
 
 
     const { status } = useSession()
@@ -47,7 +30,7 @@ function Scaffolding(
         return stages.findIndex(s => s === step)
     }
 
-    console.log({ user })
+    // console.log({ user })
     console.log({ order })
 
     if (!order || status === "loading")
@@ -83,30 +66,7 @@ function Scaffolding(
             <Container sx={{ flexGrow: 1 }}>
                 {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {order.stage === "form" && <OrderForm />}
-                {order.stage === "tickets" && (
-                    <>
-                        <Flex sx={{
-                            flexDirection: "row"
-                        }}>
-                            <Box>
-                                {order.stage === "tickets" && (
-                                    <>
-                                        <Stage />
-                                        <Hall rows={clientRows} />
-                                    </>
-                                )}
-                            </Box>
-
-                            <Flex sx={{
-                                alignItems: "center",
-                                padding: 20
-                            }}>
-                                <Summary />
-                            </Flex>
-                        </Flex>
-                        <Button variant="default" onClick={prevStage}>Назад</Button>
-                    </>
-                )}
+                {order.stage === "tickets" && <TicketsPicker venue={venue} />}
 
                 {order.stage === "payment" && <PaymentForm />}
                 
@@ -162,10 +122,7 @@ function Scaffolding(
     // )
 }
 
-export default function MakeOrder(
-    { user, venue }:
-        { user?: User, venue: Venue & { rows: (Row & { tickets: (Ticket & { priceRange: PriceRange })[] })[] } | null }
-) {
+export default function MakeOrder({ user, venue }: { user?: User, venue: ClientVenue }) {
     return (
         <OrderProvider initPaymentData={{
             name: user?.name ?? "",
