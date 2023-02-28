@@ -50,6 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         )
 
+        if  (!tickets || !tickets.length)
+            throw "no tickets specified"
         // console.log('createOrder', paymentData, tickets, cheque)
 
         const dbTickets = await prisma.ticket.findMany({

@@ -44,7 +44,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
 
     const setStage = (value: OrderStage, error?: string) => {
-        console.log({error})
+        console.log({ error })
         setOrder(prev => ({ ...prev, stage: value, error }))
     }
 
@@ -84,13 +84,15 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
                 setStage("tickets")
                 break
             case "tickets":
-                setStage("makeReservation")
-                const result = await createOrder(order)
-                if (result.success)
-                    setStage("payment")
-                else 
-                    setStage("error", result.error)
-                break
+                if (newOrder) {
+                    setStage("makeReservation")
+                    const result = await createOrder(newOrder)
+                    if (result.success)
+                        setStage("payment")
+                    else
+                        setStage("error", result.error)
+                    break
+                }
             case "payment":
                 setStage("complete")
                 break

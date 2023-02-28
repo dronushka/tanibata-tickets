@@ -24,11 +24,11 @@ export default function Summary() {
                 <Divider/>
                 <Group sx={{justifyContent: "space-between"}}>
                     <Text size="sm" fw={700}>Итого:</Text>
-                    <Text size="sm" fw={700}>{order && [...order.tickets.values()].reduce((sum: number, ticket: ClientTicket) => sum + ticket.priceRange.price, 0)} руб.</Text>
+                    <Text size="sm" fw={700}>{[...selectedTickets.values()].reduce((sum: number, ticket: ClientTicket) => sum + ticket.priceRange.price, 0)} руб.</Text>
                 </Group>
                 <Button 
                     disabled={!selectedTickets.size}
-                    onClick={() => nextStage({...order, stage: order?.stage, tickets: selectedTickets})}
+                    onClick={() => order && nextStage({...order, tickets: selectedTickets})}
                 >
                     Перейти к оплате
                 </Button>
