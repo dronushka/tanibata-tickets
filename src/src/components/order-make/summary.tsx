@@ -25,7 +25,7 @@ export default function Summary() {
                 </Group>
                 {order?.stage === "tickets" && <Button 
                     disabled={!order?.tickets.size}
-                    onClick={() => nextStage(order)}
+                    onClick={() => nextStage()}
                 >
                     Перейти к оплате
                 </Button>}

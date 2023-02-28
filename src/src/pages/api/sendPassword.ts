@@ -34,13 +34,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return
         }
         
-        const password = await createPassword(user, req.body.email)
+        const password = await createPassword(user)
        
         if (!password) {
             res.status(422).json({error: "cannot_create_password"})
             return
         }
-        
+
         await sendPassword(validatedEmail, password)
 
         res.status(200).end()

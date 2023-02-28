@@ -7,13 +7,6 @@ export type ClientTicket = Ticket & {
 }
 
 export type TicketRow = Row & { tickets: ClientTicket[]}
-// export type ClientOrder = {
-//     tickets: ClientTicket[]
-// } | null
-
-// export type ClientOrder = {
-//     tickets: { [id: number]: ClientTicket }
-// } | null
 
 export const paymentDataSchema = z.object({
     name: z.string().min(1, "Введите имя"),
@@ -21,20 +14,17 @@ export const paymentDataSchema = z.object({
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),
-    social: z.string().optional(),
-    // cheque: z.instanceof(File, "Приложите файл")
-    cheque: z.custom<File>(val => val instanceof File, "Приложите файл")
+    social: z.string().optional()
 })
 
-export type PaymentDataSchema = z.infer<typeof paymentDataSchema>
+export type PaymentData = z.infer<typeof paymentDataSchema>
 
-export type PaymentData = Omit<PaymentDataSchema, 'cheque'> & {cheque: File | null}
-
-export type OrderStage = "tickets" | "form" | "authenticate" | "send" | "complete" | "error"
+export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
 
 export type ClientOrder = {
     stage: OrderStage,
     error?: string,
     paymentData: PaymentData,
-    tickets: Map<number,ClientTicket>
+    tickets: Map<number,ClientTicket>,
+    cheque?: File
 }

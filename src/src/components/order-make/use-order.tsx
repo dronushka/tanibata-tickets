@@ -1,10 +1,10 @@
-import { createOrder, sendPasswordEmail } from "@/lib/api-calls"
+import { createOrder, getUser, sendPasswordEmail } from "@/lib/api-calls"
 import { ClientOrder, OrderStage, PaymentData } from "@/types/types"
 import { useSession } from "next-auth/react"
 import { Context, createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react"
 
 export const initialOrder: ClientOrder = {
-    stage: "tickets",
+    stage: "authenticate",
     error: undefined,
     paymentData: {
         name: "",
@@ -13,9 +13,9 @@ export const initialOrder: ClientOrder = {
         age: "",
         nickname: "",
         social: "",
-        cheque: null
     },
-    tickets: new Map()
+    tickets: new Map(),
+    cheque: undefined
 }
 
 export type OrderContext = {
@@ -33,32 +33,33 @@ export const OrderContext = createContext<OrderContext>({
     nextStage: (order?: ClientOrder) => { },
     prevStage: () => { }
 })
-    // OrderProvider = 
+// OrderProvider = 
 
 
 // let OrderContext: Context<OrderContext>
 // let OrderProvider: ReactNode
 
 export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: PaymentData, children: ReactNode }) => {
-    const [ defaultPaymentData, setDefaultPaymentData ] = useState<PaymentData>(initPaymentData)
-    const [ order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
+    // const [defaultPaymentData, setDefaultPaymentData] = useState<PaymentData>(initPaymentData)
+    const [order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
 
     const setStage = (value: OrderStage, error?: string) => {
+        console.log({error})
         setOrder(prev => ({ ...prev, stage: value, error }))
     }
 
     const { data: session, status } = useSession()
 
-    // useEffect(() => {
-    //     if (session)
-    //         setOrder(prev => ({
-    //             ...prev,
-    //             paymentData: {...session.user, cheque: null}
-    //         }))
-    // }, 
-    // [session])
+    useEffect(() => {
+        if (status === "unauthenticated") setStage("authenticate")
+
+        if (session)
+            if (order.stage === "authenticate") setStage("form")
+    },
+        [session, status])
 
     const nextStage = async (newOrder?: ClientOrder) => {
+        console.log(order.stage)
         if (!order)
             return
 
@@ -66,41 +67,32 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
             setOrder(newOrder)
 
         switch (order.stage) {
-            case "tickets":
-                setStage("form")
+            case "authenticate":
+                const { data: user } = await getUser()
+                setOrder(prev => ({
+                    ...prev,
+                    paymentData: {
+                        name: user.name ?? "",
+                        email: user.email,
+                        phone: user.phone ?? "",
+                        age: String(user.age) ?? "",
+                        social: user.social ?? ""
+                    }
+                }))
                 break
             case "form":
-                if (status !== "authenticated") {
-                    console.log('sending password to ', newOrder?.paymentData.email)
-                    sendPasswordEmail(newOrder?.paymentData.email)
-                    setStage("authenticate")
-                } else {
-                    // debugger
-                    setStage("send")
-                    console.log('sending order')
-                    if (newOrder) {
-                        const result = await createOrder(newOrder)
-                        if (result.success)
-                            setStage("complete")
-                        else
-                            setStage("error", result.error)
-                    }
-                }
+                setStage("tickets")
                 break
-            case "authenticate":
-                setStage("send")
-                console.log('sending order')
-                if (newOrder) {
-                    const result = await createOrder(newOrder)
-                    if (result.success)
-                        setStage("complete")
-                    else
-                        setStage("error", result.error)
-                }
+            case "tickets":
+                setStage("makeReservation")
+                const result = await createOrder(order)
+                if (result.success)
+                    setStage("payment")
+                else 
+                    setStage("error", result.error)
                 break
-            case "send":
+            case "payment":
                 setStage("complete")
-                setOrder({ ...initialOrder })
                 break
         }
     }
@@ -110,16 +102,13 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
             return
 
         switch (order.stage) {
-            case "authenticate":
+            case "tickets":
                 setStage("form")
-                break
-            case "form":
-                setStage("tickets")
                 break
         }
     }
 
-    return <OrderContext.Provider value={{ defaultPaymentData, order, setOrder, nextStage, prevStage }} >
+    return <OrderContext.Provider value={{ order, setOrder, nextStage, prevStage }} >
         {children}
     </OrderContext.Provider>
 }
