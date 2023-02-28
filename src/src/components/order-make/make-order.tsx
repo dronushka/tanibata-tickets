@@ -132,20 +132,19 @@ function Scaffolding(
                                 <ThemeIcon variant="outline" color="red" size="xl" sx={{ border: 0 }}>
                                     <IconAlertTriangle size={40} />
                                 </ThemeIcon>
-                                <Text>Ошибка создания заказа!</Text>
+                                <Text>Не удалось забронировать билеты!</Text>
                                 <OrderError text={order.error} />
                                 <Button
-                                    component="a"
-                                    href="/"
                                     variant="subtle"
-                                // onClick={() => setOrder && setOrder(prev => ({
-                                //         ...prev,
-                                //         stage: "tickets",
-                                //         tickets: new Map
-                                //     }))
-                                // }
+                                    onClick={() => setOrder && setOrder(prev => ({
+                                            ...prev,
+                                            stage: "tickets",
+                                            tickets: new Map,
+                                            error: undefined
+                                        }))
+                                    }
                                 >
-                                    Начать заново
+                                    Попробовать еще раз
                                 </Button>
 
                             </>}

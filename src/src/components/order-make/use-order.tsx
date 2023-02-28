@@ -44,6 +44,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
 
     const setStage = (value: OrderStage, error?: string) => {
+        console.log({error})
         setOrder(prev => ({ ...prev, stage: value, error }))
     }
 
@@ -87,7 +88,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
                 const result = await createOrder(order)
                 if (result.success)
                     setStage("payment")
-                else
+                else 
                     setStage("error", result.error)
                 break
             case "payment":
