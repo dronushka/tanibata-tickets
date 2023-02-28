@@ -4,7 +4,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/db"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method != "GET")
+    if (req.method !== "GET")
         res.status(405).end()
 
     const session = await getServerSession(req, res, authOptions)

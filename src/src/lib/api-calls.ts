@@ -18,6 +18,23 @@ export const getUser = async () => {
     }
 }
 
+export const getReservedTickets = async () => {
+    const res = await fetch("/api/getReservedTickets", {
+        method: "GET",
+        headers: new Headers({ 'content-type': 'application/json' })
+    })
+
+    if (res.ok) {
+        return ({ success: true, data: (await res.json()).tickets })
+    } else {
+        // const response = await res.json()
+        return {
+            success: false,
+            error: "Что-то пошло не так, попробуйте позже"
+        }
+    }
+}
+
 export const sendPasswordEmail = async (email?: string) => {
     const emailValidator = z.string().email()
     const validated = emailValidator.safeParse(email)

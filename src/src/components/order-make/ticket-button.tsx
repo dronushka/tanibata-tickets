@@ -1,29 +1,36 @@
-'use client'
-
 import { ClientTicket } from "@/types/types"
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { MouseEventHandler } from "react"
+import { Ticket } from "@prisma/client"
+import { Dispatch, SetStateAction } from "react"
 
 export default function TicketButton(
-    { ticket, selected = false, setOrder, sx }:
-        { ticket: ClientTicket, setOrder: any, selected: boolean, sx: Sx }
+    {
+        ticket,
+        selected = false,
+        reserved = false,
+        setSelectedTickets,
+        sx
+    }:
+        {
+            ticket: ClientTicket,
+            setSelectedTickets: Dispatch<SetStateAction<Map<number, ClientTicket>>>,
+            selected: boolean,
+            reserved?: boolean,
+            sx: Sx
+        }
 ) {
     const [opened, { close, open }] = useDisclosure(false)
-    // console.log('rerender ', rowNumber, ' - ', ticketNumber)
 
     const onTicketClick = () => {
-        setOrder((prev: { tickets: Map<number, ClientTicket> }) => {
-            if (prev.tickets.has(ticket.id)) {
-                // const { [ticket.id]: remove, ...newTickets } = prev.tickets
-                // return { ...prev, tickets: newTickets }
-                const newTickets = new Map(prev.tickets)
+        setSelectedTickets(prev => {
+            if (prev.has(ticket.id)) {
+                const newTickets = new Map(prev)
                 newTickets.delete(ticket.id)
-                return { ...prev, tickets: newTickets }
+                return newTickets
             } else {
-                return { ...prev, tickets: new Map(prev.tickets).set(ticket.id, ticket)}
+                return new Map(prev).set(ticket.id, ticket)
             }
-                // return { ...prev, tickets: { ...prev.tickets, [ticket.id]: ticket } }
         })
     }
 
@@ -38,15 +45,11 @@ export default function TicketButton(
     else if (ticket.priceRange.id === 3)
         colorCode = "pink"
 
-    // console.log(sx, {
-    //     ...sx,
-    //     backgroundColor: colorCode
-    // })
     return (
         <Popover width={100} position="bottom" withArrow shadow="md" opened={opened}>
             <Popover.Target>
                 <Button
-                    disabled={ticket.reserved}
+                    disabled={reserved || ticket.reserved}
                     compact
                     sx={{
                         ...sx,

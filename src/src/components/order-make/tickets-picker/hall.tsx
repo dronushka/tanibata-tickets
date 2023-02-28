@@ -1,13 +1,16 @@
 'use client'
 
+import { getReservedTickets } from "@/lib/api-calls"
 import { TicketRow } from "@/types/types"
-import { Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
-import { memo } from "react"
+import { Group, Loader, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
+import { Ticket } from "@prisma/client"
+import { memo, useContext, useEffect, useState } from "react"
 import TicketButton from "../ticket-button"
 import { useOrder } from "../use-order"
+import { TicketContext } from "./tickets-picker"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
-    return oldPros.selected === newProps.selected
+    return oldPros.selected === newProps.selected && oldPros.reserved === newProps.reserved
 })
 
 export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
@@ -25,18 +28,39 @@ export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
         return defaultSx
     }
 
-    const { order, setOrder, nextStage } = useOrder()
+    const [ reservedTickets, setReservedTickets ] = useState<Ticket[]>([])
+
+    const [ loadingTickets, setLoadingTickets ] = useState<boolean>(true)
+
+    const { setOrder } = useOrder() //TODO move out order context from here
+
+    useEffect(() => {
+        const fetchReservedTickets = async () => {
+            const res = await getReservedTickets()
+            if (res.success)
+                setReservedTickets(res.data)
+            else
+                setOrder && setOrder(prev => ({
+                    ...prev,
+                    stage: "error",
+                    error: res.error,
+                    tickets: new Map
+                }))
+            setLoadingTickets(false)
+        }
+
+        if (loadingTickets)
+            fetchReservedTickets()
+    }, [ loadingTickets ])
+    
+
+    const { selectedTickets, setSelectedTickets } = useContext(TicketContext)
 
     const dimension = 20
 
-    // console.log(venue)
-    // if (!venue)
-    //     return <></>
-
-    // console.log(order)
-    
     return (
-        <>
+        <div style={{ position: 'relative' }}>
+            <LoadingOverlay visible={loadingTickets} overlayBlur={2} />
             <Stack spacing={2}>
                 {
                     rows && rows.map((row, i) => (
@@ -50,9 +74,10 @@ export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
                                     <MemoizedTicketButton
                                         key={ticket.id}
                                         sx={getTicketSx(i, j)}
-                                        selected={!!order?.tickets?.has(ticket.id)}
+                                        selected={!!selectedTickets.has(ticket.id)}
+                                        reserved={!!reservedTickets.find(rt => rt.id === ticket.id)}
                                         ticket={ticket}
-                                        setOrder={setOrder}
+                                        setSelectedTickets={setSelectedTickets}
                                     />
                                 ))
                             }
@@ -60,6 +85,6 @@ export default function Hall({ rows = []}: { rows?: TicketRow[] }) {
                     ))
                 }
             </Stack>
-        </>
+        </div>
     )
 }
