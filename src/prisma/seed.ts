@@ -1,4 +1,5 @@
 import { PriceRange, PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -61,6 +62,11 @@ async function main() {
         role: {
           connect: {
             id: adminRole.id
+          }
+        },
+        passwords: {
+          create: {
+            hash: bcrypt.hashSync(process.env.DEFAULT_ADMIN_PASSWORD ?? "secret", 10)
           }
         }
       }
