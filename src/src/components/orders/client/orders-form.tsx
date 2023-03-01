@@ -37,6 +37,7 @@ export default function OrdersForm(
         console.log(strDate)
         return new Date(strDate).toLocaleString('ru-RU')
     }
+    
     useEffect(() => {
         setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt)})))
         setShowDates(true)

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Order, PriceRange, Row, Ticket } from "@prisma/client"
+import { useEffect, useState } from "react"
+import { File, Order, PriceRange, Row, Ticket } from "@prisma/client"
 import { ActionIcon, Button, Group, List, Pagination, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch } from "@tabler/icons-react"
 import OrderStatusText from "../orders/client/order-status-text"
@@ -13,6 +13,7 @@ import OrdersStatusFilter from "./orders-status-filter"
 type DashboardOrder = Omit<Order, "createdAt"> & {
     createdAt: string,
     paymentData: PaymentData,
+    cheque: File | null,
     tickets: (Ticket & {
         row: Row,
         priceRange: PriceRange
@@ -20,9 +21,9 @@ type DashboardOrder = Omit<Order, "createdAt"> & {
 }
 
 export default function DashboardOrders(
-    { orders, pagination, filter }:
+    { initOrders, pagination, filter, category }:
         {
-            orders?: DashboardOrder[],
+            initOrders: DashboardOrder[],
             pagination: {
                 page: number,
                 pageCount: number
@@ -31,13 +32,25 @@ export default function DashboardOrders(
             category: string
         }
 ) {
-    // const [ page, setPage ] = useState<number>(Number(searchParams?.page))
-    console.log(orders)
+    const [orders, setOrders] = useState(initOrders)
+
+    const [showDates, setShowDates] = useState(false)
+
+    const getLocalDate = (strDate: string) => {
+        console.log(strDate)
+        return new Date(strDate).toLocaleString('ru-RU')
+    }
+    
+    useEffect(() => {
+        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt)})))
+        setShowDates(true)
+    }, [initOrders])
 
     const router = useRouter()
 
-    const [searchFilter, setSearchFilter] = useState(filter)
-    
+    const [ searchFilter, setSearchFilter ] = useState(filter)
+    const [ filterCategory, setFilterCategory ] = useState(category)
+
     return (
         <Stack>
             <Paper p="sm" shadow="xs">
@@ -52,12 +65,18 @@ export default function DashboardOrders(
                         <Button
                             // sx={{ flexBasis: 100 }}
                             leftIcon={<IconSearch />}
-                            onClick={() => router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : ""))}
+                            onClick={() => router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
                         >
                             Найти
                         </Button>
                     </Group>
-                    <OrdersStatusFilter />
+                    <OrdersStatusFilter
+                        value={filterCategory}
+                        onChange={(value) => {
+                            setFilterCategory(value)
+                            router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + "&category=" + value)
+                        }}
+                    />
                 </Stack>
             </Paper>
             <Stack sx={{ maxWidth: 500 }}>
@@ -69,7 +88,8 @@ export default function DashboardOrders(
                                     <Text>ID: {order.id}</Text>
                                     <Text>{order.tickets.reduce((sum, t) => sum += t.priceRange.price, 0).toFixed(2)} р.</Text>
                                     {/* <Text>Статус: </Text> */}
-                                    <OrderStatusText status={order.status as OrderStatus} />
+                                    {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
+                                    {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
                                 </Group>
                             </Group>
 
@@ -100,7 +120,7 @@ export default function DashboardOrders(
                 page={pagination.page}
                 total={pagination.pageCount}
                 withEdges
-                onChange={(page) => router.push("/dashboard/orders?page=" + page + (searchFilter ? `&filter=${searchFilter}` : ""))}
+                onChange={(page) => router.push("/dashboard/orders?page=" + page + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
             />
         </Stack>
     )

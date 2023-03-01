@@ -29,24 +29,48 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     if (resFilter.success)
         filter = resFilter.data
 
+    let category = "all"
+    const categoryValidator = z.enum(["unpaid", "pending", "returnRequested", "returned", "complete"])
+    const resCategory = categoryValidator.safeParse(searchParams?.category)
+
+    if (resCategory.success)
+        category = resCategory.data
+
+    let categoryFilter = {}
+    if (category === "unpaid")
+        categoryFilter = {
+            cheque: null
+        }
+    else if (category !== "all")
+        categoryFilter = {
+            status: category
+        }
+
     const orders = await prisma.order.findMany({
         where: {
-            OR: [
+            AND: [
+                { ...categoryFilter },
                 {
-                    paymentData: {
-                        path: "$.name",
-                        string_contains: filter
-                    }
-                },
-                {
-                    paymentData: {
-                        path: "$.email",
-                        string_contains: filter
-                    }
+                    OR: [
+                        {
+                            paymentData: {
+                                path: "$.name",
+                                string_contains: filter
+                            }
+                        },
+                        {
+                            paymentData: {
+                                path: "$.email",
+                                string_contains: filter
+                            }
+                        }
+                    ]
                 }
             ]
+
         },
         include: {
+            cheque: true,
             tickets: {
                 include: {
                     row: true,
@@ -80,7 +104,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
 
     // console.log({pageNumber, orders})
     return <DashboardOrders
-        orders={
+        initOrders={
             orders.map(
                 order => ({
                     ...order,
@@ -93,6 +117,6 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             pageCount: Math.floor(orderCount / perPage)
         }}
         filter={filter}
-        category=""
+        category={category}
     />
 }

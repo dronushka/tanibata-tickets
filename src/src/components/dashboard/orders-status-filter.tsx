@@ -2,7 +2,7 @@
 
 import { Button, Group, Radio, Text } from "@mantine/core"
 
-export default function OrdersStatusFilter() {
+export default function OrdersStatusFilter({ value, onChange } : { value: string, onChange: (value: string) => void}) { //TODO use type for order status
     // return (
     //     // "pending" | "complete" | "returnRequested" | "returned"
     //     <Group>
@@ -17,6 +17,8 @@ export default function OrdersStatusFilter() {
     return (
         <Radio.Group
             name="orderStatus"
+            value={value}
+            onChange={onChange}
             // label="Select your favorite framework/library"
         >
             <Radio value="all" label={<Text>Все</Text>} />
