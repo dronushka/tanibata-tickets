@@ -1,7 +1,9 @@
 "use client"
 
 import { Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
+import { signIn } from "next-auth/react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function DashboardLoginForm () {
     const [loading, setLoading] = useState<boolean>(false)
@@ -12,10 +14,33 @@ export default function DashboardLoginForm () {
     const [password, setPassword] = useState<string>("")
     const [passwordError, setPasswordError] = useState<string>("")
 
-    const login = async () => {
+    const router = useRouter()
 
+    const login = async () => {
+        setLoading(true)
+        try {
+            const res = await signIn("credentials", {
+                redirect: false,
+                email,
+                password
+            })
+            console.log('res', res)
+
+            if (res?.ok) {
+                console.log("logged in as ", email)
+                router.push("/dashboard")
+                // router.replace(callbackUrl ?? '/orders')
+            }
+            else
+                setPasswordError("Ошибка аутентификации. Проверьте email или пароль.")
+
+        } catch (e) {
+            console.error(e)
+            setPasswordError("Что-то пошло не так")
+        }
+        setLoading(false)
     }
-    
+
     return (
         <Flex sx={{
             width: "100%",
