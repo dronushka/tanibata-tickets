@@ -48,12 +48,17 @@ export const authOptions: NextAuthOptions = {
                         }
                     })
                     
-                    if (user)
+                    if (user) {
+                        if (user.role.name === "customer")
+                            prisma.password.deleteMany({
+                                where: { userId: user.id }
+                            })
                         return { 
                             id: user.id,
                             email: user.email,
                             role: user.role.name
                         }
+                    }
                 }
                 return null
             }
