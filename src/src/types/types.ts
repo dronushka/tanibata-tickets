@@ -24,9 +24,12 @@ export type PaymentData = z.infer<typeof paymentDataSchema>
 export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
 
 export type ClientOrder = {
+    orderId?: number,
     stage: OrderStage,
     error?: string,
     paymentData: PaymentData,
     tickets: Map<number,ClientTicket>,
     cheque?: File
 }
+
+export type OrderStatus = "pending" | "complete" | "returnRequested" | "returned"

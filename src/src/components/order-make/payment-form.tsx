@@ -6,28 +6,31 @@ import { useOrder } from "./use-order"
 
 export default function PaymentForm() {
     const { order, setOrder, nextStage } = useOrder()
+
+    const [ cheque, setCheque ] = useState<File | undefined>(order?.cheque)
+
     const [chequeError, setChequeError] = useState<string>("")
 
     const chequeValidator = z.custom<File>(val => val instanceof File, "Приложите файл")
 
-    const setCheque = (value: File) => {
+    const changeCheque = (value: File) => {
         const res = chequeValidator.safeParse(value)
 
         if (res.success) {
             setChequeError("")
-            setOrder && setOrder(prev => ({ ...prev, cheque: value }))
+            setCheque(value)
         }
-        // else
-        //     setChequeError(res.error)
+        else
+            setChequeError(res.error.toString())
     }
 
     const send = () => {
-        const res = chequeValidator.safeParse(order?.cheque)
+        // const res = chequeValidator.safeParse(order?.cheque)
         // console.log('send', !order?.cheque, !res.success)
-        if (!order?.cheque || !res.success)
-            setChequeError("Приложите файл")
-        else
-            nextStage()
+        // if (!order?.cheque || !res.success)
+        //     setChequeError("Приложите файл")
+        // else
+        order && nextStage({ ...order, cheque })
     }
 
     if (!order)
@@ -67,14 +70,14 @@ export default function PaymentForm() {
                 /> */}
                 <Group>
                     <Box>
-                        {order.cheque && <Text>{order.cheque.name}</Text>}
+                        {cheque && <Text>{cheque.name}</Text>}
                         <Text color="gray" size="sm">Файл размером не более 2 Мб,</Text>
-                        <Text color="gray" size="sm">Файл формате: jpeg, png</Text>
+                        <Text color="gray" size="sm">Файл формате: jpeg, png, pdf</Text>
                     </Box>
                     <Box>
                         <FileButton
-                            onChange={setCheque}
-                            accept="image/png,image/jpeg"
+                            onChange={changeCheque}
+                            accept="image/png,image/jpeg,application/pdf"
                         >
                             {(props) => (
                                 <Button

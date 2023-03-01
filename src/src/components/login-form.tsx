@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react"
 import { useEffect, useState } from "react"
 import {  Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
 import { sendPasswordEmail } from "@/lib/api-calls"
+import { useRouter } from "next/navigation"
 
 export default function LoginForm(
     { clientEmail, callback, rollback }: 
@@ -54,6 +55,7 @@ export default function LoginForm(
             if (res?.ok) {
                 console.log("logged in as ", email)
                 callback && callback()
+                !callback && router.push("/orders")
                 // router.replace(callbackUrl ?? '/orders')
             }
             else
@@ -65,6 +67,8 @@ export default function LoginForm(
         }
         setLoading(false)
     }
+
+    const router = useRouter()
 
     return (
         <Flex sx={{

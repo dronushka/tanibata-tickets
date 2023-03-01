@@ -1,4 +1,4 @@
-import { createOrder, getUser, sendPasswordEmail } from "@/lib/api-calls"
+import { createOrder, getUser, sendPasswordEmail, uploadCheque } from "@/lib/api-calls"
 import { ClientOrder, OrderStage, PaymentData } from "@/types/types"
 import { useSession } from "next-auth/react"
 import { Context, createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react"
@@ -87,13 +87,16 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
                 if (newOrder) {
                     setStage("makeReservation")
                     const result = await createOrder(newOrder)
-                    if (result.success)
+                    if (result.success) {
+                        setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
                         setStage("payment")
+                    }
                     else
                         setStage("error", result.error)
                     break
                 }
             case "payment":
+                newOrder?.orderId && newOrder?.cheque && await uploadCheque(newOrder.orderId, newOrder.cheque)
                 setStage("complete")
                 break
         }

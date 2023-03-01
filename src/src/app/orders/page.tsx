@@ -1,11 +1,31 @@
+import { prisma } from "@/db"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import OrdersForm from "../../components/orders/client/orders-form"
 
-export default async function OrdersPage () {
-    const session = await getServerSession()
+export default async function OrdersPage() {
+    const session = await getServerSession(authOptions)
     if (!session)
         redirect('/login')
-    if (session)
-        return <OrdersForm />
+
+    // console.log(session)
+
+    const orders = await prisma.order.findMany({
+        where: {
+            userId: session.user.id
+        },
+        include: {
+            cheque: true,
+            tickets: {
+                include: {
+                    priceRange: true,
+                    row: true
+                }
+            }
+        }
+    })
+
+    // console.log(orders)
+    return <OrdersForm initOrders={orders.map(order => ({...order, cheque: !!order.cheque, createdAt: order.createdAt.toString()}))}/>
 }

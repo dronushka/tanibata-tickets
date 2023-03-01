@@ -9,7 +9,5 @@ export default async function LoginPage ({ searchParams }: { searchParams?: { [k
     // const router = useRouter()
     if (session)
         redirect("/orders")
-    return <LoginForm 
-        callback={()=>{}}
-    />
+    return <LoginForm />
 }

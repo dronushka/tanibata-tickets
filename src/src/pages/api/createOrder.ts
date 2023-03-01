@@ -88,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        await prisma.order.create({
+        const order = await prisma.order.create({
             data: {
                 paymentData,
                 price,
@@ -102,11 +102,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
         })
+        
+        res.status(200).json({ orderId: order.id})
 
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ error: e?.message })
     }
 
-    res.status(200).end()
 }

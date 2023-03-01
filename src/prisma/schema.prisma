@@ -24,6 +24,7 @@ model User {
   age       Int?
   phone     String?
   social    String?
+  createdAt DateTime   @default(now())
   passwords Password[]
   role      Role       @relation(fields: [roleId], references: [id])
   roleId    Int
@@ -73,9 +74,19 @@ model PriceRange {
 
 model Order {
   id          Int      @id @default(autoincrement())
-  tickets     Ticket[]
   paymentData Json
   price       Float
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  cheque      File?    @relation(fields: [fileId], references: [id])
+  tickets     Ticket[]
   user        User     @relation(fields: [userId], references: [id])
   userId      Int
+  fileId      Int?
+}
+
+model File {
+  id    Int     @id @default(autoincrement())
+  path  String
+  Order Order[]
 }

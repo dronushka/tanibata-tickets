@@ -85,6 +85,38 @@ export const createOrder = async (order: ClientOrder) => {
     })
 
     if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
+    }
+}
+
+export const getOrder = async (orderId: number) => {
+    const res = await fetch("/api/getOrder?orderId=" + orderId)
+    if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
+    }
+}
+
+export const uploadCheque = async (orderId: number, cheque: File) => {
+    const formData = new FormData
+    formData.append("orderId", String(orderId))
+    formData.append("cheque", cheque)
+
+    const res = await fetch("/api/uploadCheque", {
+        method: "POST",
+        body: formData
+    })
+
+    if (res.ok) {
         return ({ success: true })
     } else {
         return ({
