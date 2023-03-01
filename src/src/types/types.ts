@@ -1,4 +1,4 @@
-import { PriceRange, Row, Ticket, Venue } from "@prisma/client"
+import { Order, PriceRange, Row, Ticket, Venue } from "@prisma/client"
 import { z } from "zod"
 
 export type ClientTicket = Ticket & { 
@@ -33,3 +33,12 @@ export type ClientOrder = {
 }
 
 export type OrderStatus = "pending" | "complete" | "returnRequested" | "returned"
+
+export type DashboardOrder = Omit<Order, "createdAt"> & {
+    createdAt: string,
+    paymentData: PaymentData,
+    tickets: (Ticket & {
+        row: Row,
+        priceRange: PriceRange
+    })[]
+}

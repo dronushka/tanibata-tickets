@@ -3,7 +3,8 @@ import { NavLink } from "@mantine/core"
 import {
     IconHome,
     IconTicket,
-    IconHelp
+    IconHelp,
+    IconQrcode
 } from "@tabler/icons-react"
 import { usePathname  } from "next/navigation"
 import { useSession } from "next-auth/react"
@@ -29,6 +30,14 @@ export default function Navigation() {
                 label="Заказы"
                 icon={<IconTicket />} 
                 active={pathname === "/dashboard/orders"}
+            />
+        </Link>
+        <Link href="/dashboard/scan" passHref legacyBehavior>
+            <NavLink 
+                component="a" 
+                label="Сканер"
+                icon={<IconQrcode />} 
+                active={pathname === "/dashboard/scan"}
             />
         </Link>
     </>
