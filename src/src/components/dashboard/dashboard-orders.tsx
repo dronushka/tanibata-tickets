@@ -28,7 +28,7 @@ export default function DashboardOrders(
 
     const [orders, setOrders] = useState(initOrders)
 
-    const [showDates, setShowDates] = useState(false)
+    // const [showDates, setShowDates] = useState(false)
 
     const getLocalDate = (strDate: string) => {
         console.log(strDate)
@@ -36,8 +36,7 @@ export default function DashboardOrders(
     }
 
     useEffect(() => {
-        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt) })))
-        setShowDates(true)
+        setOrders(initOrders)
     }, [initOrders])
 
     const router = useRouter()

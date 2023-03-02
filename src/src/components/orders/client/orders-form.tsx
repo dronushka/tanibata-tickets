@@ -31,16 +31,13 @@ export default function OrdersForm(
 
     const [orders, setOrders] = useState(initOrders)
 
-    const [showDates, setShowDates] = useState(false)
-
     const getLocalDate = (strDate: string) => {
         console.log(strDate)
         return new Date(strDate).toLocaleString('ru-RU')
     }
     
     useEffect(() => {
-        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt)})))
-        setShowDates(true)
+        setOrders(initOrders)
     }, [initOrders])
 
     const [loading, setLoading] = useState<number | null>(null)
@@ -77,7 +74,7 @@ export default function OrdersForm(
     } | null>(null)
 
 
-    if (!orders || !showDates)
+    if (!orders)
         return <FullPageMessage>
             <Loader size="xl" />
         </FullPageMessage>

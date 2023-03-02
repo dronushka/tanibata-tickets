@@ -84,7 +84,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
         skip: (pageNumber - 1) * perPage,
         take: perPage
     })
-
+    
     const orderCount = await prisma.order.count({
         where: {
             AND: [
@@ -109,19 +109,18 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
         }
     })
 
-    // console.log({pageNumber, orders})
     return <DashboardOrders
         initOrders={
             orders.map(
                 order => ({
                     ...order,
                     paymentData: order.paymentData as PaymentData,
-                    createdAt: order.createdAt.toString()
+                    createdAt: order.createdAt.toLocaleString('ru-RU')
                 }))
         }
         pagination={{
             page: pageNumber,
-            pageCount: Math.floor(orderCount / perPage)
+            pageCount: Math.ceil(orderCount / perPage)
         }}
         filter={filter}
         category={category}

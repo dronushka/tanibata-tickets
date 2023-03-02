@@ -67,6 +67,8 @@ services:
       - file_storage:/var/www/file_storage
     working_dir: /var/www/html
     entrypoint: ['yarn']
+    environment:
+      - TZ=Europe/Moscow
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.www-redirect.redirectregex.regex=^(https?://)www.(.*)$$"
