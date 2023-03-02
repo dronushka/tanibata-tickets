@@ -67,7 +67,6 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
                     ]
                 }
             ]
-
         },
         include: {
             cheque: true,
@@ -85,18 +84,23 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
 
     const orderCount = await prisma.order.count({
         where: {
-            OR: [
+            AND: [
+                { ...categoryFilter },
                 {
-                    paymentData: {
-                        path: "$.name",
-                        string_contains: filter
-                    }
-                },
-                {
-                    paymentData: {
-                        path: "$.email",
-                        string_contains: filter
-                    }
+                    OR: [
+                        {
+                            paymentData: {
+                                path: "$.name",
+                                string_contains: filter
+                            }
+                        },
+                        {
+                            paymentData: {
+                                path: "$.email",
+                                string_contains: filter
+                            }
+                        }
+                    ]
                 }
             ]
         }

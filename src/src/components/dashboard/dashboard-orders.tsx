@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { File, Order, PriceRange, Row, Ticket } from "@prisma/client"
-import { ActionIcon, Button, Group, List, Pagination, Paper, Stack, Text, TextInput } from "@mantine/core"
-import { IconEdit, IconSearch } from "@tabler/icons-react"
+import { ActionIcon, Button, Group, List, LoadingOverlay, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
+import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import OrderStatusText from "../orders/client/order-status-text"
 import { OrderStatus, PaymentData } from "@/types/types"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./orders-status-filter"
-
+// import { events} from "next/router"
 type DashboardOrder = Omit<Order, "createdAt"> & {
     createdAt: string,
     paymentData: PaymentData,
@@ -32,6 +32,8 @@ export default function DashboardOrders(
             category: string
         }
 ) {
+    const [loading, setLoading] = useState(true)
+
     const [orders, setOrders] = useState(initOrders)
 
     const [showDates, setShowDates] = useState(false)
@@ -40,18 +42,54 @@ export default function DashboardOrders(
         console.log(strDate)
         return new Date(strDate).toLocaleString('ru-RU')
     }
-    
+
     useEffect(() => {
-        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt)})))
+        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt) })))
         setShowDates(true)
     }, [initOrders])
 
     const router = useRouter()
 
-    const [ searchFilter, setSearchFilter ] = useState(filter)
-    const [ filterCategory, setFilterCategory ] = useState(category)
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        setLoading(false)
+    }, [searchParams])
+
+    const [searchFilter, setSearchFilter] = useState(filter)
+    const [filterCategory, setFilterCategory] = useState(category)
+
+    const pathname = usePathname()
+
+    const updatePageParams = ({ newPage, newFilter, newCategory }: { newPage?: number, newFilter?: string, newCategory?: string }) => {
+        const params = { //page defaults
+            page: pagination.page,
+            filter,
+            category
+        }
+
+        if (newFilter || newCategory)
+            params.page = 1
+        else if (newPage)
+            params.page = newPage
+
+        if (newFilter)
+            params.filter = newFilter
+
+        if (newCategory)
+            params.category = newCategory
+
+        if (params.page === pagination.page && params.filter === filter && params.category === category)
+            return
+
+        const url = pathname + "?" + Object.entries(params).map(([key, value]) => value && key + "=" + value).join("&")
+        setLoading(true)
+        router.push(url)
+
+    }
 
     return (
+
         <Stack>
             <Paper p="sm" shadow="xs">
                 <Stack>
@@ -60,12 +98,25 @@ export default function DashboardOrders(
                         <TextInput
                             sx={{ flexBasis: 200, flexGrow: 1 }}
                             value={searchFilter}
+                            // onChange={e => setSearchFilter(e.target.value)}
                             onChange={e => setSearchFilter(e.target.value)}
+                            rightSection={
+                                <ActionIcon
+                                    onClick={() => {
+                                        setSearchFilter("")
+                                        updatePageParams({ newFilter: "" })
+                                        // router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))
+                                    }}
+                                >
+                                    <IconX />
+                                </ActionIcon>
+                            }
                         />
                         <Button
                             // sx={{ flexBasis: 100 }}
                             leftIcon={<IconSearch />}
-                            onClick={() => router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
+                            // onClick={() => router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
+                            onClick={() => updatePageParams({ newFilter: searchFilter })}
                         >
                             Найти
                         </Button>
@@ -74,11 +125,16 @@ export default function DashboardOrders(
                         value={filterCategory}
                         onChange={(value) => {
                             setFilterCategory(value)
-                            router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + "&category=" + value)
+                            updatePageParams({ newCategory: value })
+                            // setLoading(true)
+                            // router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + "&category=" + value)
                         }}
                     />
                 </Stack>
             </Paper>
+
+            {loading && <Progress radius="xs" size="sm" value={100} animate />}
+
             <Stack sx={{ maxWidth: 500 }}>
                 {orders?.map(order => <Paper key={order.id} p="sm" shadow="xs">
                     <Group sx={{ alignItems: "flex-start" }}>
@@ -120,7 +176,8 @@ export default function DashboardOrders(
                 page={pagination.page}
                 total={pagination.pageCount}
                 withEdges
-                onChange={(page) => router.push("/dashboard/orders?page=" + page + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
+                // onChange={(page) => router.push("/dashboard/orders?page=" + page + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
+                onChange={(page) => updatePageParams({ newPage: page })}
             />
         </Stack>
     )
