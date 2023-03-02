@@ -82,11 +82,11 @@ model Order {
   tickets     Ticket[]
   user        User     @relation(fields: [userId], references: [id])
   userId      Int
-  fileId      Int?
+  fileId      Int? @unique
 }
 
 model File {
   id    Int     @id @default(autoincrement())
   path  String
-  Order Order[]
+  order Order?
 }

@@ -36,7 +36,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
     if (!order)
         return <p>Заказ не найден</p>
 
-    console.log(order)
+    // console.log(order)
 
     return <DashboardOrderForm order={{
         ...order,
