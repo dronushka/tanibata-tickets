@@ -1,4 +1,4 @@
-import { ClientOrder } from "@/types/types"
+import { ClientOrder, OrderStatus } from "@/types/types"
 import { z } from "zod"
 
 export const getUser = async () => {
@@ -123,5 +123,22 @@ export const uploadCheque = async (orderId: number, cheque: File) => {
             success: false,
             error: (await res.json()).error
         })
+    }
+}
+
+export const setOrderStatus = async (orderId: number, status: OrderStatus) => {
+    const res = await fetch("/api/setOrderStatus", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({ orderId, status })
+    })
+
+    if (res.ok) {
+        return ({ success: true })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так попробуйте позже"
+        }
     }
 }

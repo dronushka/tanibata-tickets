@@ -41,6 +41,6 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
     return <DashboardOrderForm order={{
         ...order,
         paymentData: order.paymentData as PaymentData,
-        createdAt: order.createdAt.toString()
+        createdAt: order.createdAt.toLocaleString('ru-RU')
     }}/>
 }
