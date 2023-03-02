@@ -65,7 +65,7 @@ export default function DashboardOrders(
         else if (newPage)
             params.page = newPage
 
-        if (newFilter)
+        if (newFilter !== undefined)
             params.filter = newFilter
 
         if (newCategory)
