@@ -1,8 +1,9 @@
 "use client"
 
 import { DashboardOrder, OrderStatus } from "@/types/types"
-import { Group, List, Paper, Stack, Text } from "@mantine/core"
+import { Button, Group, List, Paper, Stack, Text } from "@mantine/core"
 import OrderStatusText from "@/components/orders/client/order-status-text"
+import { IconDownload } from "@tabler/icons-react"
 
 export default function DashboardOrderForm({ order }: { order: DashboardOrder }) {
     console.log(order)
@@ -28,6 +29,8 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                         </List.Item>
                     ))}
                 </List>
+
+                {order.cheque && <Button leftIcon={<IconDownload />} component="a" href={"/api/download/" + order.cheque.id}>Скачать чек</Button>}
             </Stack>
         </Paper>
     )
