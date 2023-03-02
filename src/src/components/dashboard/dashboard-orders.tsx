@@ -4,21 +4,13 @@ import { useEffect, useState } from "react"
 import { File, Order, PriceRange, Row, Ticket } from "@prisma/client"
 import { ActionIcon, Button, Group, List, LoadingOverlay, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
-import OrderStatusText from "../orders/client/order-status-text"
-import { OrderStatus, PaymentData } from "@/types/types"
+import OrderStatusText from "@/components/orders/client/order-status-text"
+import { DashboardOrder, OrderStatus, PaymentData } from "@/types/types"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./orders-status-filter"
 // import { events} from "next/router"
-type DashboardOrder = Omit<Order, "createdAt"> & {
-    createdAt: string,
-    paymentData: PaymentData,
-    cheque: File | null,
-    tickets: (Ticket & {
-        row: Row,
-        priceRange: PriceRange
-    })[]
-}
+
 
 export default function DashboardOrders(
     { initOrders, pagination, filter, category }:
@@ -135,14 +127,15 @@ export default function DashboardOrders(
 
             {loading && <Progress radius="xs" size="sm" value={100} animate />}
 
-            <Stack sx={{ maxWidth: 500 }}>
+            <Stack sx={{ maxWidth: 530 }}>
                 {orders?.map(order => <Paper key={order.id} p="sm" shadow="xs">
                     <Group sx={{ alignItems: "flex-start" }}>
                         <Stack sx={{ flexGrow: 1 }}>
                             <Group sx={{ justifyContent: "space-between" }}>
                                 <Group>
-                                    <Text>ID: {order.id}</Text>
-                                    <Text>{order.tickets.reduce((sum, t) => sum += t.priceRange.price, 0).toFixed(2)} р.</Text>
+                                    <Text>Номер заказа: {order.id}</Text>
+                                    {/* <Text>{order.tickets.reduce((sum, t) => sum += t.priceRange.price, 0).toFixed(2)} р.</Text> */}
+                                    <Text>{order.price.toFixed(2)} р.</Text>
                                     {/* <Text>Статус: </Text> */}
                                     {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
                                     {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
