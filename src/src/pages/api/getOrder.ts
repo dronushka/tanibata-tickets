@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return
         }
 
-        res.status(200).json({ ...order, createdAt: order?.createdAt.toString() })
+        res.status(200).json({ ...order, createdAt: order?.createdAt.toLocaleString('ru-RU') })
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ error: e?.message })
