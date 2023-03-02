@@ -23,6 +23,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
             id: res.data
         },
         include: {
+            cheque: true,
             tickets: {
                 include: {
                     row: true,
