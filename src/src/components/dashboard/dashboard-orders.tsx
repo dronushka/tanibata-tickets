@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { File, Order, PriceRange, Row, Ticket } from "@prisma/client"
-import { ActionIcon, Button, Group, List, LoadingOverlay, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
+import { ActionIcon, Box, Button, Group, List, LoadingOverlay, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import OrderStatusText from "@/components/orders/client/order-status-text"
 import { DashboardOrder, OrderStatus, PaymentData } from "@/types/types"
@@ -127,28 +127,24 @@ export default function DashboardOrders(
 
             {loading && <Progress radius="xs" size="sm" value={100} animate />}
 
-            <Stack sx={{ maxWidth: 530 }}>
+            <Stack>
                 {orders?.map(order => <Paper key={order.id} p="sm" shadow="xs">
-                    <Group sx={{ alignItems: "flex-start" }}>
+                    <Group sx={{ alignItems: "flex-start", justifyContent: "space-between", width: "100%" }}>
                         <Stack sx={{ flexGrow: 1 }}>
-                            <Group sx={{ justifyContent: "space-between" }}>
-                                <Group>
-                                    <Text>Номер заказа: {order.id}</Text>
-                                    {/* <Text>{order.tickets.reduce((sum, t) => sum += t.priceRange.price, 0).toFixed(2)} р.</Text> */}
-                                    <Text>{order.price.toFixed(2)} р.</Text>
-                                    {/* <Text>Статус: </Text> */}
-                                    {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                                    {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
-                                </Group>
+                            <Group spacing={5}>
+                                <Text>Заказ № {order.id}</Text>
+                                <Text>от {order.createdAt},</Text>
+                                <Text>на сумму {order.price.toFixed(2)} р.</Text>
+
                             </Group>
 
-                            {/* <Text>Константиновский Константин Константинович</Text> */}
-                            <Text>{order.paymentData.name}</Text>
-                            <Text>{order.paymentData.email}</Text>
-                            <Text>{order.createdAt}</Text>
-
+                            <Group>
+                                <Text>Константиновский Константин Константинович</Text>
+                                {/* <Text>{order.paymentData.name}</Text> */}
+                                <Text>{order.paymentData.email}</Text>
+                            </Group>
                             {/* <Text>Места:</Text> */}
-                            <List type="ordered">
+                            {/* <List type="ordered">
                                 {order.tickets.map(ticket => (
                                     <List.Item key={ticket.id} >
                                         <Group>
@@ -157,11 +153,18 @@ export default function DashboardOrders(
                                         </Group>
                                     </List.Item>
                                 ))}
-                            </List>
+                            </List> */}
+
                         </Stack>
-                        <Link href={"/dashboard/orders/" + order.id} passHref legacyBehavior>
-                            <Button component="a" variant="subtle" leftIcon={<IconEdit />}>Изменить</Button>
-                        </Link>
+                        <Stack sx={{ alignItems: "center" }}>
+                            {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
+                            {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
+                            <Box sx={{ flexShrink: 1 }}>
+                                <Link href={"/dashboard/orders/" + order.id} passHref legacyBehavior>
+                                    <Button component="a" variant="subtle" leftIcon={<IconEdit />}>Изменить</Button>
+                                </Link>
+                            </Box>
+                        </Stack>
                     </Group>
                 </Paper>)}
             </Stack>
