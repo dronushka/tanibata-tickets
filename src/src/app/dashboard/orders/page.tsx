@@ -43,6 +43,9 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
         }
     else if (category !== "all")
         categoryFilter = {
+            NOT: {
+                cheque: null
+            },
             status: category
         }
 

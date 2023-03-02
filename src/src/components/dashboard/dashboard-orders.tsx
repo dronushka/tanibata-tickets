@@ -139,8 +139,8 @@ export default function DashboardOrders(
                             </Group>
 
                             <Group>
-                                <Text>Константиновский Константин Константинович</Text>
-                                {/* <Text>{order.paymentData.name}</Text> */}
+                                {/* <Text>Константиновский Константин Константинович</Text> */}
+                                <Text>{order.paymentData.name}</Text>
                                 <Text>{order.paymentData.email}</Text>
                             </Group>
                             {/* <Text>Места:</Text> */}
