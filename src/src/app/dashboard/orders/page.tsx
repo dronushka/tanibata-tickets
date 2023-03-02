@@ -6,7 +6,7 @@ import { prisma } from "@/db"
 import { PaymentData } from "@/types/types"
 import { z } from "zod"
 
-const perPage = 2
+const perPage = 20
 
 export default async function DashboardOrdersPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)
