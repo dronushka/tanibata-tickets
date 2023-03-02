@@ -74,7 +74,8 @@ export default function DashboardOrders(
         if (params.page === pagination.page && params.filter === filter && params.category === category)
             return
 
-        const url = pathname + "?" + Object.entries(params).map(([key, value]) => value && key + "=" + value).join("&")
+        const url = pathname + "?" 
+        + Object.entries(params).filter(([key, value]) => !!value).map(([key, value]) => value && key + "=" + value).join("&")
         setLoading(true)
         router.push(url)
 
