@@ -3,17 +3,21 @@
 import { DashboardOrder, OrderStatus } from "@/types/types"
 import { Button, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
 import OrderStatusText from "@/components/orders/client/order-status-text"
-import { IconCheck, IconDownload, IconEdit } from "@tabler/icons-react"
+import { IconCheck, IconDownload, IconEdit, IconMailForward, IconTicket } from "@tabler/icons-react"
 import OrderStatusSelect from "./order-status-select"
 import { useEffect, useState } from "react"
-import { setOrderStatus as apiSetOrderStatus } from "@/lib/api-calls"
+import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
+
 export default function DashboardOrderForm({ order }: { order: DashboardOrder }) {
     console.log(order)
-    const [ orderStatus, setOrderStatus ] = useState<OrderStatus>(order.status as OrderStatus)
-    const [ editOrderStatus, setEditOrderStatus ] = useState(false)
-    const [ setStatusError, setSetStatusError ] = useState("")
+    const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status as OrderStatus)
+    const [editOrderStatus, setEditOrderStatus] = useState(false)
+    const [editSendTicketError, setEditSendTicketError] = useState("")
+    const [setStatusError, setSetStatusError] = useState("")
 
-    const [ loading, setLoading ] = useState(false)
+    const [ticketsIsSent, setTicketsIsSent] = useState(!!order.sentTickets.length)
+
+    const [loading, setLoading] = useState(false)
 
     const sendOrderStatus = async () => {
         setLoading(true)
@@ -26,9 +30,19 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
 
         setLoading(false)
     }
-    // useEffect(() => {
-    //     setOrderStatus
-    // }, [editOrderStatus])
+
+    const sendTickets = async () => {
+        setLoading(true)
+        const res = await apiSendTickets(order.id)
+        if (res.success) {
+            setTicketsIsSent(true)
+        } else if (res.error) {
+            setEditSendTicketError(res.error)
+        }
+
+        setLoading(false)
+    }
+
     return (
         <Paper p="sm" shadow="xs">
             <Stack>
@@ -40,7 +54,7 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                     <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
                 </Group>}
                 {editOrderStatus && <Group>
-                    <Select 
+                    <Select
                         disabled={loading}
                         data={[
                             {
@@ -59,7 +73,7 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                                 label: "Завершен",
                                 value: "complete"
                             }
-                        ]}                    
+                        ]}
                         value={orderStatus}
                         onChange={value => value && setOrderStatus(value as OrderStatus)}
                     />
@@ -82,8 +96,38 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                         </List.Item>
                     ))}
                 </List>
-
-                {order.cheque && <Button leftIcon={<IconDownload />} component="a" href={"/api/download/" + order.cheque.id}>Скачать чек</Button>}
+                <Group>
+                    <Button
+                        leftIcon={<IconDownload />}
+                        component="a"
+                        href={"/api/download/" + order.cheque?.id}
+                        disabled={!!order.cheque}
+                    >
+                        Скачать чек
+                    </Button>
+                    <Button
+                        leftIcon={<IconDownload />}
+                        component="a"
+                        href={"/api/getTicketsPDF?orderId=" + order.id}
+                    >
+                        Скачать билеты
+                    </Button>
+                </Group>
+                <Group>
+                    <Text color={ticketsIsSent ? "green" : "red"}>
+                        {ticketsIsSent ? "Билеты отправлены" : "Билеты не отправлены"}
+                    </Text>
+                    {/* {!order.sentTickets.length && <Text color="red">Билеты не отправлены</Text>}
+                    {!!order.sentTickets.length && <Text color="green">Билеты отправлены</Text>} */}
+                    <Button
+                        leftIcon={<IconMailForward />}
+                        loading={loading}
+                        onClick={sendTickets}
+                    >
+                        Отправить билеты
+                    </Button>
+                    <Input.Error>{editSendTicketError}</Input.Error>
+                </Group>
             </Stack>
         </Paper>
     )
