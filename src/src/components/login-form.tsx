@@ -1,59 +1,48 @@
 "use client"
-import { useSession, signIn, signOut } from "next-auth/react"
-import { useState } from "react"
-import { z } from "zod"
-import { Box, Button, Center, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
+
+import { signIn } from "next-auth/react"
+import { useEffect, useState } from "react"
+import {  Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
+import { sendPasswordEmail } from "@/lib/api-calls"
 import { useRouter } from "next/navigation"
 
-export default function LoginForm({callbackUrl}: {callbackUrl: string | undefined} ) {
-    const [ email, setEmail ] = useState<string>("")
-    const [ emailError, setEmailError ] = useState<string>("")
-    const [ emailIsSent, setEmailIsSet ] = useState<boolean>(false)
-    
-    const [ password, setPassword ] = useState<string>("")
-    const [ passwordError, setPasswordError ] = useState<string>("")
-    
-    const [ loading, setLoading ] = useState<boolean>(false)
+export default function LoginForm(
+    { clientEmail, callback, rollback }: 
+    { clientEmail?: string, callback?: () => void, rollback?: () => void }
+) {
+    const [email, setEmail] = useState<string>(String(clientEmail))
+    const [emailError, setEmailError] = useState<string>("")
+    const [emailIsSent, setEmailIsSet] = useState<boolean>(!!clientEmail)
 
-    // const [ aquiredPassword, setAquiredPassword ] = useState<string>("")
-    
-    const emailValidator = z.string().email()
+    const [password, setPassword] = useState<string>("")
+    const [passwordError, setPasswordError] = useState<string>("")
+
+    const [loading, setLoading] = useState<boolean>(false)
+
+    const [counter, setCounter] = useState(0)
+
+    useEffect(() => {
+        counter > 0 && setTimeout(() => setCounter(counter - 1), 1000)
+    }, [counter])
+
+    useEffect(() => {
+        if (counter <= 0) {
+            setCounter(10)
+        }
+    }, [ clientEmail ])
 
     const sendEmail = async () => {
-        const validated = emailValidator.safeParse(email)
-        if (validated.success) {
-
-            setLoading(true)
-
-            const res = await fetch("/api/sendPassword", {
-                method: "POST",
-                headers: new Headers({'content-type': 'application/json'}),
-                // credentials: 'include',
-                body: JSON.stringify({ email })
-            })
-
-            setLoading(false)
-
-            if (res.ok) {
-                // setAquiredPassword((await res.json()).password)
-                setEmailIsSet(true)
-            } else {
-                const response = await res.json()
-                if (response?.error === "user_not_found")
-                    setEmailError("Указанная почта не найдена в системе")
-                else
-                    setEmailError("Что-то пошло не так, попробуйте позже")
-            }
-        } else {
-            setEmailError("Неправильный формат e-mail")
+        setLoading(true)
+        const result = await sendPasswordEmail(email)
+        if (result.success)
+            setEmailIsSet(true)
+        else if (result.error) {
+            setEmailError(result.error)
         }
+        setLoading(false)
     }
 
-    const router = useRouter()
-
-    const passwordValidator = z.string()
-
-    async function login() {
+    const login = async () => {
         setLoading(true)
         try {
             const res = await signIn("credentials", {
@@ -62,11 +51,12 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                 password
             })
             console.log('res', res)
-                
+
             if (res?.ok) {
-                console.log("logged in")
-                
-                router.replace(callbackUrl ?? '/orders')
+                console.log("logged in as ", email)
+                callback && callback()
+                !callback && router.push("/orders")
+                // router.replace(callbackUrl ?? '/orders')
             }
             else
                 setPasswordError("Ошибка аутентификации. Проверьте email или пароль.")
@@ -78,6 +68,8 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
         setLoading(false)
     }
 
+    const router = useRouter()
+
     return (
         <Flex sx={{
             width: "100%",
@@ -88,8 +80,9 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
             <Paper shadow="xs" p="md">
                 {!emailIsSent && (
                     <Stack sx={{ width: 400 }}>
-                        <TextInput 
+                        <TextInput
                             label="E-mail"
+                            name="email"
                             withAsterisk
                             error={emailError}
                             onChange={(e) => {
@@ -108,9 +101,9 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                     </Stack>
                 )}
                 {emailIsSent && (
-                    <Stack sx={{ width: 400}}>
+                    <Stack sx={{ width: 400 }}>
                         {/* {aquiredPassword && <Text>{aquiredPassword}</Text>} */}
-                        <TextInput 
+                        <TextInput
                             type="password"
                             label="Одноразовый пароль"
                             withAsterisk
@@ -127,15 +120,17 @@ export default function LoginForm({callbackUrl}: {callbackUrl: string | undefine
                         </Button>
                         <Button
                             variant="subtle"
+                            disabled={counter > 0}
                             onClick={() => {
                                 setEmailIsSet(false)
                                 setEmail("")
                                 setEmailError("")
                                 setPassword("")
                                 setPasswordError("")
+                                rollback && rollback()
                             }}
                         >
-                            Отправить пароль на другой e-mail
+                            Отправить пароль на другой e-mail {counter > 0 && `(${counter})`}
                         </Button>
                     </Stack>
                 )}

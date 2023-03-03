@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma, createPassword } from "@/db"
 import { z, ZodError } from 'zod'
 import { sendPassword } from '@/mail'
+import { Role, User } from '@prisma/client'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method != "POST")
@@ -12,28 +13,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const validatedEmail = emailValidator.parse(req.body.email)
         
-        const user = await prisma.user.findFirst({
+        let user = await prisma.user.findFirst({
             where: {
                 email: validatedEmail
             }
         })
 
+        if (user) {
+            const userRole = await prisma.role.findUnique({
+                where: {
+                    id: user?.roleId
+                }
+            })
+            if (userRole?.name === 'admin') {
+                res.status(422).end()
+                return 
+            }
+        }
+
         if (!user) {
-            res.status(422).json({error: "user_not_found"})
+            user = await prisma.user.create({
+                data: {
+                    email: validatedEmail,
+                    role: {
+                        connect: { name: "customer" }
+                    }
+                }
+            })
+        }
+        
+        if (!user) {
+            res.status(422).json({error: "cannot_create_user"})
             return
         }
         
-        const password = await createPassword(user, req.body.email)
+
+
+        // if (userRole?.name === "customer") 
+        const password = await createPassword(user)
        
-        const info = await sendPassword(validatedEmail, password)
-        // console.log(info)
-        // res.status(200).json({password})
+        if (!password) {
+            res.status(422).json({error: "cannot_create_password"})
+            return
+        }
+
+        await sendPassword(validatedEmail, password)
+
         res.status(200).end()
 
-        // res.status(422).json({
-        //     error: "email can not be validated",
-        //     email: req.body.email
-        // })
     } catch (e: any) {
         console.error(e)
         let message: any = ""

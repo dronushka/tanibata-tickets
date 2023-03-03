@@ -1,0 +1,118 @@
+version: '3.9'
+
+networks:
+  tt_net:
+
+services:
+  traefik:
+    image: "traefik:v2.7"
+    container_name: "tt_traefik"
+    restart: always
+    command:
+      #- "--log.level=DEBUG"
+      #- "--api.insecure=true"
+      #- "--api=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=g-worlds@ya.ru"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+
+    networks:
+      - tt_net
+    ports:
+      - "80:80"
+      - "443:443"
+    #      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  db:
+    image: mysql:8
+    container_name: tt_db
+    labels:
+      - docker-volume-backup.archive-pre=/bin/sh -c '/usr/bin/mysqldump -uroot -pQMPDIw9ZbOqb27mkn928+9e5ArOMC3dA tt > /tmp/file_storage/tt.sql'
+    restart: always
+    #    ports:
+    #      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - file_storage:/tmp/file_storage
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      #      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=tt
+      - MYSQL_PASSWORD=${MYSQL_TT_PASSWORD}
+      - MYSQL_DATABASE=tt
+    networks:
+      - tt_net
+
+  yarn:
+    image: node:16.13.0
+    container_name: tt_yarn
+    depends_on:
+      - traefik
+      - db
+    expose:
+      - "3000"
+    volumes:
+      - ./src:/var/www/html
+      - file_storage:/var/www/file_storage
+    working_dir: /var/www/html
+    entrypoint: ['yarn']
+    environment:
+      - TZ=Europe/Moscow
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.www-redirect.redirectregex.regex=^(https?://)www.(.*)$$"
+      - "traefik.http.middlewares.www-redirect.redirectregex.replacement=$${1}$${2}"
+      - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
+      - "traefik.http.routers.tt.rule=Host(`superduperbilet.site`) || Host(`www.superduperbilet.site`)"
+      - "traefik.http.routers.tt.entrypoints=websecure"
+      - "traefik.http.routers.tt.tls.certresolver=myresolver"
+      - "traefik.http.routers.tt.middlewares=www-redirect"
+    networks:
+      - tt_net
+
+  backup:
+    # In production, it is advised to lock your image tag to a proper
+    # release version instead of using `latest`.
+    # Check https://github.com/offen/docker-volume-backup/releases
+    # for a list of available releases.
+    image: offen/docker-volume-backup:v2.20.0
+    container_name: tt_backup
+    restart: always
+    environment:
+      BACKUP_FILENAME: backup-%Y-%m-%dT%H-%M-%S.tar.gz
+      BACKUP_PRUNING_PREFIX: backup-
+      BACKUP_RETENTION_DAYS: 7
+    #    env_file: ./backup.env # see below for configuration reference
+    networks:
+      - tt_net
+    volumes:
+      - file_storage:/backup/tt:ro
+      # Mounting the Docker socket allows the script to stop and restart
+      # the container during backup. You can omit this if you don't want
+      # to stop the container. In case you need to proxy the socket, you can
+      # also provide a location by setting `DOCKER_HOST` in the container
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # If you mount a local directory or volume to `/archive` a local
+      # copy of the backup will be stored there. You can override the
+      # location inside of the container by setting `BACKUP_ARCHIVE`.
+      # You can omit this if you do not want to keep local backups.
+      - ./backups:/archive
+
+volumes:
+  file_storage:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: ${PWD}/file_storage

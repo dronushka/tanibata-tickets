@@ -11,28 +11,90 @@ datasource db {
 }
 
 model Role {
-  id    Int @id @default(autoincrement())
-  name  String
-  user  User[]
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  user User[]
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
-  name      String
-  nickname  String
-  age       Int
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  name      String?
+  nickname  String?
+  age       Int?
   phone     String?
   social    String?
+  createdAt DateTime   @default(now())
   passwords Password[]
-  role      Role @relation(fields: [roleId], references: [id])
+  role      Role       @relation(fields: [roleId], references: [id])
   roleId    Int
+  Order     Order[]
 }
 
 model Password {
-  id   Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id])
-  userId Int
-  hash String @unique
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  hash       String   @unique
   created_at DateTime @default(now())
+}
+
+model Ticket {
+  id           Int        @id @default(autoincrement())
+  number       String
+  reserved     Boolean    @default(false)
+  priceRange   PriceRange @relation(fields: [priceRangeId], references: [id])
+  priceRangeId Int
+  row          Row        @relation(fields: [rowId], references: [id])
+  order        Order?     @relation(fields: [orderId], references: [id])
+  orderId      Int?
+  rowId        Int
+}
+
+model Row {
+  id      Int      @id @default(autoincrement())
+  number  Int
+  venue   Venue    @relation(fields: [venueId], references: [id])
+  venueId Int
+  tickets Ticket[]
+}
+
+model Venue {
+  id   Int    @id @default(autoincrement())
+  name String
+  rows Row[]
+}
+
+model PriceRange {
+  id     Int      @id @default(autoincrement())
+  name   String
+  price  Float    @default(0)
+  Ticket Ticket[]
+}
+
+model Order {
+  id          Int          @id @default(autoincrement())
+  paymentData Json
+  price       Float
+  status      String       @default("pending")
+  createdAt   DateTime     @default(now())
+  cheque      File?        @relation(fields: [fileId], references: [id])
+  tickets     Ticket[]
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  fileId      Int?         @unique
+  sentTickets SentTicket[]
+}
+
+model File {
+  id    Int    @id @default(autoincrement())
+  path  String
+  order Order?
+}
+
+model SentTicket {
+  id      Int      @id @default(autoincrement())
+  sentAt  DateTime @default(now())
+  order   Order    @relation(fields: [orderId], references: [id])
+  orderId Int
 }

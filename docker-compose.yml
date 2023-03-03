@@ -2,37 +2,10 @@ version: '3.9'
 
 networks:
   tt_net:
+  traefik_proxy_network:
+     external: true
 
 services:
-  traefik:
-    image: "traefik:v2.7"
-    container_name: "tt_traefik"
-    restart: always
-    command:
-      #- "--log.level=DEBUG"
-      #- "--api.insecure=true"
-      #- "--api=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=g-worlds@ya.ru"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-
-    networks:
-      - tt_net
-    ports:
-      - "80:80"
-      - "443:443"
-    #      - "8080:8080"
-    volumes:
-      - "./letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
   db:
     image: mysql:8
     container_name: tt_db
@@ -58,7 +31,6 @@ services:
     image: node:16.13.0
     container_name: tt_yarn
     depends_on:
-      - traefik
       - db
     expose:
       - "3000"
@@ -67,17 +39,23 @@ services:
       - file_storage:/var/www/file_storage
     working_dir: /var/www/html
     entrypoint: ['yarn']
+    environment:
+      - TZ=Europe/Moscow
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.www-redirect.redirectregex.regex=^(https?://)www.(.*)$$"
       - "traefik.http.middlewares.www-redirect.redirectregex.replacement=$${1}$${2}"
       - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
       - "traefik.http.routers.tt.rule=Host(`superduperbilet.site`) || Host(`www.superduperbilet.site`)"
+      # - "traefik.http.routers.tt.rule=Host(`superduperbilet.site`)"
       - "traefik.http.routers.tt.entrypoints=websecure"
       - "traefik.http.routers.tt.tls.certresolver=myresolver"
       - "traefik.http.routers.tt.middlewares=www-redirect"
+      - "traefik.docker.network=traefik_proxy_network"
+
     networks:
       - tt_net
+      - traefik_proxy_network
 
   backup:
     # In production, it is advised to lock your image tag to a proper

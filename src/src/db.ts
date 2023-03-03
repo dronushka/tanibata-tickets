@@ -11,10 +11,8 @@ export const prisma =
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
-export const createPassword = async (user: User, email: string): Promise<string> => {
-  const randomDigit = () => {
-    return String(Math.floor(Math.random() * 10))
-  }
+export const createPassword = async (user: User): Promise<string> => {
+  const randomDigit = () => String(Math.floor(Math.random() * 10))
 
   let randomPassword = randomDigit() + randomDigit() + randomDigit() + randomDigit() + randomDigit() + randomDigit()
 

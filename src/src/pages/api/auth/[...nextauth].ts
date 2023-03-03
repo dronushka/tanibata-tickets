@@ -1,9 +1,10 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions, SessionUser } from 'next-auth'
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
+import { User } from '@prisma/client'
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
@@ -23,7 +24,7 @@ export const authOptions = {
                 const password = await prisma.password.findFirst({
                     where: {
                         user: {
-                            email: credentials.email
+                            email: credentials?.email
                         }
                     },
                     orderBy: {
@@ -32,21 +33,31 @@ export const authOptions = {
                     take: 1
                 })
 
-                console.log(password)
+                // console.log(password)
 
                 if (!password)
                     return null
 
-                if (bcrypt.compareSync(credentials.password, password.hash)) {
+                if (credentials && bcrypt.compareSync(credentials.password, password.hash)) {
                     const user = await prisma.user.findFirst({
                         where: {
                             email: credentials.email
+                        },
+                        include: {
+                            role: true
                         }
                     })
                     
-                    return { 
-                        id: user.id,
-                        email: user.email
+                    if (user) {
+                        if (user.role.name === "customer")
+                            prisma.password.deleteMany({
+                                where: { userId: user.id }
+                            })
+                        return { 
+                            id: user.id,
+                            email: user.email,
+                            role: user.role.name
+                        }
                     }
                 }
                 return null
@@ -63,7 +74,7 @@ export const authOptions = {
             return token
         },
         session: async ({ session, token }) => {
-            session.user = token.user
+            session.user = token.user as SessionUser
             return session
         }
     }

@@ -1,6 +1,6 @@
-import LoginForm from "./client/login-form"
+import LoginForm from "@/components/login-form"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+// import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { redirect } from "next/navigation"
 
 export default async function LoginPage ({ searchParams }: { searchParams?: { [key: string]: string | undefined }}) {
@@ -9,7 +9,5 @@ export default async function LoginPage ({ searchParams }: { searchParams?: { [k
     // const router = useRouter()
     if (session)
         redirect("/orders")
-    return <LoginForm 
-        callbackUrl={searchParams?.callbackUrl}
-    />
+    return <LoginForm />
 }
