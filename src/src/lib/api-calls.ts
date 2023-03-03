@@ -1,4 +1,4 @@
-import { ClientOrder } from "@/types/types"
+import { ClientOrder, OrderStatus } from "@/types/types"
 import { z } from "zod"
 
 export const getUser = async () => {
@@ -26,6 +26,23 @@ export const getReservedTickets = async () => {
 
     if (res.ok) {
         return ({ success: true, data: (await res.json()).tickets })
+    } else {
+        // const response = await res.json()
+        return {
+            success: false,
+            error: "Что-то пошло не так, попробуйте позже"
+        }
+    }
+}
+
+export const sendTickets = async (orderId: Number) => {
+    const res = await fetch("/api/sendTickets?orderId=" + orderId, {
+        method: "GET",
+        headers: new Headers({ 'content-type': 'application/json' })
+    })
+
+    if (res.ok) {
+        return ({ success: true })
     } else {
         // const response = await res.json()
         return {
@@ -123,5 +140,22 @@ export const uploadCheque = async (orderId: number, cheque: File) => {
             success: false,
             error: (await res.json()).error
         })
+    }
+}
+
+export const setOrderStatus = async (orderId: number, status: OrderStatus) => {
+    const res = await fetch("/api/setOrderStatus", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({ orderId, status })
+    })
+
+    if (res.ok) {
+        return ({ success: true })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так попробуйте позже"
+        }
     }
 }

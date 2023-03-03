@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/db"
 import { z } from "zod"
+import contentDisposition from "content-disposition"
+import generateTicket from "@/lib/generateTicket"
+import { Buffer } from "buffer"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET")
@@ -14,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(401).end()
 
     const validator = z.number()
-    
+
     try {
         const validatedId = validator.parse(Number(req.query.orderId))
 
@@ -22,24 +25,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             where: {
                 id: validatedId
             },
-            include: { 
+            include: {
                 tickets: {
                     include: {
-                        priceRange: true,
                         row: true,
                     }
                 },
-                cheque: true,
                 user: true
             }
         })
-        
-        if (order?.user.id !== session?.user.id) {
-            res.status(401).json({ error: "unauthorized"})
+
+        if (session?.user.role !== "admin" && order?.userId !== session?.user.id) {
+            res.status(401).json({ error: "unauthorized" })
             return
         }
 
-        res.status(200).json({ ...order, createdAt: order?.createdAt.toLocaleString('ru-RU') })
+        // if (order === null)
+
+        // const buffer = fs.readFileSync(filePath)
+        // const pdf = new TextDecoder().decode(await generateTicket())
+        if (order !== null) {
+            const pdf = Buffer.from(await generateTicket(order))
+
+            // console.log(pdf)
+            res.setHeader('Content-Type', 'application/octet-stream')
+            res.setHeader('Content-disposition', contentDisposition("tanibata-tickets-" + order?.id + ".pdf"))
+            res.send(pdf)
+        } else {
+            res.status(422).json({ error: "order_not_found" })
+
+        }
+        // res.end()
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ error: e?.message })

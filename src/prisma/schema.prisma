@@ -73,20 +73,28 @@ model PriceRange {
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   paymentData Json
   price       Float
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  cheque      File?    @relation(fields: [fileId], references: [id])
+  status      String       @default("pending")
+  createdAt   DateTime     @default(now())
+  cheque      File?        @relation(fields: [fileId], references: [id])
   tickets     Ticket[]
-  user        User     @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
   userId      Int
-  fileId      Int?
+  fileId      Int?         @unique
+  sentTickets SentTicket[]
 }
 
 model File {
-  id    Int     @id @default(autoincrement())
+  id    Int    @id @default(autoincrement())
   path  String
-  Order Order[]
+  order Order?
+}
+
+model SentTicket {
+  id      Int      @id @default(autoincrement())
+  sentAt  DateTime @default(now())
+  order   Order    @relation(fields: [orderId], references: [id])
+  orderId Int
 }

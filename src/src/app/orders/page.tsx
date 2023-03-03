@@ -27,5 +27,5 @@ export default async function OrdersPage() {
     })
 
     // console.log(orders)
-    return <OrdersForm initOrders={orders.map(order => ({...order, cheque: !!order.cheque, createdAt: order.createdAt.toString()}))}/>
+    return <OrdersForm initOrders={orders.map(order => ({...order, cheque: !!order.cheque, createdAt: order.createdAt.toLocaleString('ru-RU')}))}/>
 }

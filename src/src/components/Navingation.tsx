@@ -3,13 +3,45 @@ import { NavLink } from "@mantine/core"
 import {
     IconHome,
     IconTicket,
-    IconHelp
+    IconHelp,
+    IconQrcode
 } from "@tabler/icons-react"
 import { usePathname  } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export default function Navigation() {
     const pathname = usePathname()
 
+    const { data: session, status } = useSession()
+
+    if (session?.user.role === "admin")
+        return <>
+        <Link href="/dashboard" passHref legacyBehavior>
+            <NavLink 
+                component="a" 
+                label="Зал"
+                icon={<IconHome />} 
+                active={pathname === "/dashboard"}
+            />
+        </Link>
+        <Link href="/dashboard/orders" passHref legacyBehavior>
+            <NavLink 
+                component="a" 
+                label="Заказы"
+                icon={<IconTicket />} 
+                active={pathname === "/dashboard/orders"}
+            />
+        </Link>
+        <Link href="/dashboard/scan" passHref legacyBehavior>
+            <NavLink 
+                component="a" 
+                label="Сканер"
+                icon={<IconQrcode />} 
+                active={pathname === "/dashboard/scan"}
+            />
+        </Link>
+    </>
+    
     return (
         <>
             <Link href="/" passHref legacyBehavior>

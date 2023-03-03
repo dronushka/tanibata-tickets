@@ -31,15 +31,13 @@ export default function OrdersForm(
 
     const [orders, setOrders] = useState(initOrders)
 
-    const [showDates, setShowDates] = useState(false)
-
     const getLocalDate = (strDate: string) => {
         console.log(strDate)
         return new Date(strDate).toLocaleString('ru-RU')
     }
+
     useEffect(() => {
-        setOrders(initOrders.map(order => ({ ...order, createdAt: getLocalDate(order.createdAt)})))
-        setShowDates(true)
+        setOrders(initOrders)
     }, [initOrders])
 
     const [loading, setLoading] = useState<number | null>(null)
@@ -54,7 +52,7 @@ export default function OrdersForm(
         if (res.success) {
             const newOrder = await getOrder(orderId)
             if (newOrder.success)
-                setOrders(prev => prev.map(order => order.id === orderId ? {...newOrder.data, createdAt: getLocalDate(newOrder.data.createdAt)} : order))
+                setOrders(prev => prev.map(order => order.id === orderId ? { ...newOrder.data, createdAt: getLocalDate(newOrder.data.createdAt) } : order))
             else
                 setChequeError({
                     orderId,
@@ -76,7 +74,7 @@ export default function OrdersForm(
     } | null>(null)
 
 
-    if (!orders || !showDates)
+    if (!orders)
         return <FullPageMessage>
             <Loader size="xl" />
         </FullPageMessage>
@@ -160,8 +158,20 @@ export default function OrdersForm(
                                 <Input.Error>{chequeError?.orderId === order.id ? chequeError.error : ""}</Input.Error>
                             </Box>
                         </Group>}
-                        {order.status === "complete" && <Button leftIcon={<IconDownload />}>Скачать</Button>}
-                        {order.status === "complete" && <Button leftIcon={<IconReceiptRefund />}>Возврат</Button>}
+                        <Button
+                            leftIcon={<IconDownload />}
+                            disabled={order.status !== "complete"}
+                            component="a"
+                            href={"/api/getTicketsPDF?orderId=" + order.id}
+                        >
+                            Скачать билеты
+                        </Button>
+                        <Button
+                            leftIcon={<IconReceiptRefund />}
+                            disabled={!!order.cheque}
+                        >
+                            Возврат
+                        </Button>
                     </Stack>
                 </Paper>
             ))}

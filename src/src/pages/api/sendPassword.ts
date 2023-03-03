@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma, createPassword } from "@/db"
 import { z, ZodError } from 'zod'
 import { sendPassword } from '@/mail'
+import { Role, User } from '@prisma/client'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method != "POST")
@@ -17,6 +18,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 email: validatedEmail
             }
         })
+
+        if (user) {
+            const userRole = await prisma.role.findUnique({
+                where: {
+                    id: user?.roleId
+                }
+            })
+            if (userRole?.name === 'admin') {
+                res.status(422).end()
+                return 
+            }
+        }
 
         if (!user) {
             user = await prisma.user.create({
@@ -34,6 +47,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return
         }
         
+
+
+        // if (userRole?.name === "customer") 
         const password = await createPassword(user)
        
         if (!password) {
