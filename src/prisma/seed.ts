@@ -52,7 +52,7 @@ async function main() {
 
   const adminRole = await prisma.role.findFirst({ where: { name: "admin" } })
 
-  if (adminRole)
+  if (adminRole) {
     await prisma.user.create({
       data: {
         email: "gworlds@gmail.com",
@@ -72,6 +72,26 @@ async function main() {
       }
     })
 
+    await prisma.user.create({
+      data: {
+        email: "everilion@gmail.com",
+        name: "admin",
+        nickname: "admin",
+        age: 99,
+        role: {
+          connect: {
+            id: adminRole.id
+          }
+        },
+        passwords: {
+          create: {
+            hash: bcrypt.hashSync("secret", 10)
+          }
+        }
+      }
+    })
+
+  }
   const customerRole = await prisma.role.findFirst({ where: { name: "customer" } })
 
   if (customerRole)
