@@ -1,4 +1,4 @@
-import { File as DBFile, Order, PriceRange, Row, Ticket, Venue } from "@prisma/client"
+import { File as DBFile, Order, PriceRange, Row, SentTicket, Ticket, Venue } from "@prisma/client"
 import { z } from "zod"
 
 export type ClientTicket = Ticket & { 
@@ -38,6 +38,7 @@ export type DashboardOrder = Omit<Order, "createdAt"> & {
     createdAt: string,
     paymentData: PaymentData,
     cheque: DBFile | null,
+    sentTickets: SentTicket[],
     tickets: (Ticket & {
         row: Row,
         priceRange: PriceRange

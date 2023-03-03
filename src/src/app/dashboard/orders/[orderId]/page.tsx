@@ -24,6 +24,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
         },
         include: {
             cheque: true,
+            sentTickets: true,
             tickets: {
                 include: {
                     row: true,
