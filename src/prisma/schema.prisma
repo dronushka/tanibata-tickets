@@ -79,6 +79,7 @@ enum OrderStatus {
   RETURNED
   COMPLETE
   USED
+  CANCELLED
 }
 
 model Order {
