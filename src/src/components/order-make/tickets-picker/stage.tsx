@@ -1,5 +1,5 @@
 "use client"
-import { Box, Container, Flex, MantineTheme, Text } from "@mantine/core"
+import { Flex, MantineTheme, Text } from "@mantine/core"
 
 export default function Stage() {
     return (

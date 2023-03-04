@@ -1,13 +1,11 @@
 "use client"
 
-import { Box, Button, FileButton, Flex, Group, Input, Paper, Stack, Text, TextInput } from "@mantine/core"
-import { IconArrowLeft, IconUpload } from "@tabler/icons-react"
+import { Button, Flex, Group, Paper, Stack, TextInput } from "@mantine/core"
+import { IconArrowLeft } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 import MaskInput from "../mask-input"
-import { PaymentData, paymentDataSchema } from "@/types/types"
-import { initialOrder, useOrder } from "./use-order"
-import { User } from "@prisma/client"
-import { useSession, signOut } from "next-auth/react"
+import { initialOrder, PaymentData, paymentDataSchema, useOrder } from "./use-order"
+import { signOut } from "next-auth/react"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -19,13 +17,9 @@ type PaymentFormErrors = {
 } | null
 
 export default function OrderForm() {
-    const { defaultPaymentData, order, nextStage, prevStage } = useOrder()
+    const { order, nextStage } = useOrder()
 
-    const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
-
-    // useEffect(() => {
-    //     defaultPaymentData && setPaymentData(defaultPaymentData)
-    // }, [defaultPaymentData])
+    const [ paymentData, setPaymentData ] = useState<PaymentData>(initialOrder.paymentData)
 
     useEffect(() => {
         if (order)
@@ -35,7 +29,7 @@ export default function OrderForm() {
     const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
 
     const setField = (field: keyof PaymentData, value: string | File | null) => {
-        setPaymentData(prev => ({ ...prev, [field]: value }))
+        setPaymentData((prev: PaymentData) => ({ ...prev, [field]: value }))
         setPaymentFormErrors(prev => {
             if (prev)
                 delete prev[field]
@@ -45,7 +39,6 @@ export default function OrderForm() {
 
     const sendPaymentOrder = () => {
         const validated = paymentDataSchema.safeParse(paymentData)
-        console.log(validated)
 
         if (validated.success === false) {
             setPaymentFormErrors(validated.error.flatten().fieldErrors)
@@ -56,7 +49,6 @@ export default function OrderForm() {
             nextStage({ ...order, paymentData: validated.data })
     }
 
-    console.log({ paymentData })
     return (
         <Paper shadow="sm" radius="md" p="md">
             <Stack>

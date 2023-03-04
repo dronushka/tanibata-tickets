@@ -1,13 +1,13 @@
-import { Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Paper, Stack, Text } from "@mantine/core"
-import { IconUpload } from "@tabler/icons-react"
 import { useState } from "react"
-import { z } from "zod"
 import { useOrder } from "./use-order"
+import { z } from "zod"
+import { Box, Button, FileButton, Flex, Group, Input, List, Paper, Stack, Text } from "@mantine/core"
+import { IconUpload } from "@tabler/icons-react"
 
 export default function PaymentForm() {
-    const { order, setOrder, nextStage } = useOrder()
+    const { order, nextStage } = useOrder()
 
-    const [ cheque, setCheque ] = useState<File | undefined>(order?.cheque)
+    const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
 
     const [chequeError, setChequeError] = useState<string>("")
 
@@ -25,12 +25,11 @@ export default function PaymentForm() {
     }
 
     const send = () => {
-        // const res = chequeValidator.safeParse(order?.cheque)
-        // console.log('send', !order?.cheque, !res.success)
-        // if (!order?.cheque || !res.success)
-        //     setChequeError("Приложите файл")
-        // else
-        order && nextStage({ ...order, cheque })
+        const res = chequeValidator.safeParse(cheque)
+        if (res.success)
+            order && nextStage({ ...order, cheque })
+        else
+            setChequeError(res.error.toString())
     }
 
     if (!order)
