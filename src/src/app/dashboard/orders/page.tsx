@@ -73,6 +73,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
         },
         include: {
             cheque: true,
+            sentTickets: true,
             tickets: {
                 include: {
                     row: true,
