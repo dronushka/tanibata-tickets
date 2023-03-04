@@ -1,13 +1,12 @@
 'use client'
 
-import { getReservedTickets } from "@/lib/api-calls"
-import { TicketRow } from "@/types/types"
-import { Group, Loader, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { Ticket } from "@prisma/client"
-import { memo, useContext, useEffect, useState } from "react"
-import TicketButton from "../ticket-button"
-import { useOrder } from "../use-order"
+import { TicketRow, useOrder } from "../use-order"
+import { getReservedTickets } from "@/lib/api-calls"
 import { TicketContext } from "./tickets-picker"
+import { memo, useContext, useEffect, useState } from "react"
+import { Group, LoadingOverlay, MantineTheme, Stack, Sx } from "@mantine/core"
+import TicketButton from "../ticket-button"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected && oldPros.reserved === newProps.reserved

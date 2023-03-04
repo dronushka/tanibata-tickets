@@ -1,7 +1,6 @@
 import DashboardOrderForm from "@/components/dashboard/dashboard-order-form"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import { PaymentData } from "@/types/types"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { z } from "zod"
@@ -41,7 +40,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
 
     return <DashboardOrderForm order={{
         ...order,
-        paymentData: order.paymentData as PaymentData,
-        createdAt: order.createdAt.toLocaleString('ru-RU')
+        createdAt: order.createdAt.toLocaleString('ru-RU'),
+        sentTickets: !!order.sentTickets.length
     }}/>
 }

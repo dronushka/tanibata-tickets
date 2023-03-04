@@ -1,9 +1,8 @@
 import { getReservedTickets } from "@/lib/api-calls"
-import { ClientTicket, ClientVenue } from "@/types/types"
 import { Box, Button, Flex, Loader } from "@mantine/core"
-import { Ticket } from "@prisma/client"
+import { Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
-import { useOrder } from "../use-order"
+import { ClientTicket, TicketRow, useOrder } from "../use-order"
 import Hall from "./hall"
 import Stage from "./stage"
 import Summary from "./summary"
@@ -20,8 +19,8 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue }: { venue: ClientVenue }) {
-    const { order, nextStage, prevStage, setOrder } = useOrder()
+export default function TicketsPicker({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null } ) {
+    const { prevStage } = useOrder()
 
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
 

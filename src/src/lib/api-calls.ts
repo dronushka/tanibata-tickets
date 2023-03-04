@@ -1,4 +1,5 @@
-import { ClientOrder, OrderStatus } from "@/types/types"
+import { ClientOrder } from "@/types/types"
+import { OrderStatus } from "@prisma/client"
 import { z } from "zod"
 
 export const getUser = async () => {
@@ -148,6 +149,23 @@ export const setOrderStatus = async (orderId: number, status: OrderStatus) => {
         method: "POST",
         headers: new Headers({ 'content-type': 'application/json' }),
         body: JSON.stringify({ orderId, status })
+    })
+
+    if (res.ok) {
+        return ({ success: true })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так попробуйте позже"
+        }
+    }
+}
+
+export const requestReturn = async (orderId: number) => {
+    const res = await fetch("/api/requestReturn", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({ orderId })
     })
 
     if (res.ok) {
