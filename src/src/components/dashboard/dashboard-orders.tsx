@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { File, Order, PriceRange, Row, Ticket } from "@prisma/client"
-import { ActionIcon, Box, Button, Group, List, LoadingOverlay, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
+import { ActionIcon, Box, Button, Group, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import OrderStatusText from "@/components/orders/client/order-status-text"
-import { DashboardOrder, OrderStatus, PaymentData } from "@/types/types"
+import { DashboardOrder } from "@/types/types"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./orders-status-filter"
@@ -158,7 +157,7 @@ export default function DashboardOrders(
                         </Stack>
                         <Stack sx={{ alignItems: "center" }}>
                             {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                            {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
+                            {order.cheque && <OrderStatusText status={order.status} />}
                             <Box sx={{ flexShrink: 1 }}>
                                 <Link href={"/dashboard/orders/" + order.id} passHref legacyBehavior>
                                     <Button component="a" variant="subtle" leftIcon={<IconEdit />}>Изменить</Button>

@@ -5,6 +5,7 @@ import DashboardOrders from "@/components/dashboard/dashboard-orders"
 import { prisma } from "@/db"
 import { PaymentData } from "@/types/types"
 import { z } from "zod"
+import { sendTickets } from "@/lib/api-calls"
 
 const perPage = 20
 
@@ -116,7 +117,8 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
                 order => ({
                     ...order,
                     paymentData: order.paymentData as PaymentData,
-                    createdAt: order.createdAt.toLocaleString('ru-RU')
+                    createdAt: order.createdAt.toLocaleString('ru-RU'),
+                    sentTickets: order.sentTickets.map(sentTicket => ({ ...sentTicket, sentAt: sentTicket.sentAt.toLocaleString('ru-RU') }))
                 }))
         }
         pagination={{

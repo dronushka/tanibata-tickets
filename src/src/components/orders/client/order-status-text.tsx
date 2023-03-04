@@ -1,26 +1,34 @@
-import { OrderStatus } from "@/types/types"
 import { Group, MantineColor, Text } from "@mantine/core"
+import { OrderStatus } from "@prisma/client"
 
-export default function OrderStatusText ({status} : {status: OrderStatus}) {
+export default function OrderStatusText({ status }: { status: OrderStatus }) {
     let statusText = ""
     let statusColor: MantineColor = ""
 
     switch (status) {
-        case "pending":
+        case OrderStatus.UNPAID:
+            statusText = "Не оплачен"
+            statusColor = "red"
+            break
+        case OrderStatus.PENDING:
             statusText = "В обработке"
             statusColor = "yellow"
             break
-        case "complete":
+        case OrderStatus.COMPLETE:
             statusText = "Завершен"
             statusColor = "green"
             break
-        case "returnRequested":
+        case OrderStatus.RETURN_REQUESTED:
             statusText = "Запрос на возврат"
             statusColor = "red"
             break
-        case "returned":
+        case OrderStatus.RETURNED:
             statusText = "Возвращен"
             statusColor = "blue"
+            break
+        case OrderStatus.CANCELLED:
+            statusText = "Отменен"
+            statusColor = "gray"
             break
     }
 

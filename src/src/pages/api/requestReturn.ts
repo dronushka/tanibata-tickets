@@ -4,6 +4,7 @@ import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
 import { OrderStatus } from '@prisma/client'
+import { emailTransporter } from '@/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -15,14 +16,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(401).end()
         
     const validator = z.object({
-        id: z.number(),
-        status: z.nativeEnum(OrderStatus)
+        id: z.number()
     })
 
     try {
         const validated = validator.parse({
-            id: Number(req.body.orderId),
-            status: req.body.status
+            id: Number(req.body.orderId)
         })
 
         const order = await prisma.order.findUnique({
@@ -31,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        if (session?.user.role !== "admin" && order?.userId !== session?.user.id) {
+        if (order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }
@@ -41,8 +40,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 id: order?.id,
             },
             data: {
-                status: validated.status
+                status: OrderStatus.RETURN_REQUESTED
             }
+        })
+
+        const admins = await prisma.user.findMany({
+            where: {
+                role: {
+                    name: "admin"
+                }
+            }
+        })
+
+        admins && admins.forEach(user => {
+            emailTransporter.sendMail({
+                from: `"Tanibata" <${process.env.MAIL_USER}>`,
+                to: user.email,
+                subject: "Танибата. Зарос на возврат билетов. Номер заказа: " + order?.id, // Subject line
+                html: `<p>Зарос на возврат билетов. Номер заказа: </p><p><b><a href="${process.env.NEXTAUTH_URL}/dashboard/orders/${order?.id}">${order?.id}</a></b></p>`
+              })
         })
 
         res.status(200).end()

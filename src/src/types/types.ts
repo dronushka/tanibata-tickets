@@ -32,13 +32,13 @@ export type ClientOrder = {
     cheque?: File
 }
 
-export type OrderStatus = "pending" | "complete" | "returnRequested" | "returned"
+// export type OrderStatus = "pending" | "complete" | "returnRequested" | "returned"
 
 export type DashboardOrder = Omit<Order, "createdAt"> & {
     createdAt: string,
     paymentData: PaymentData,
     cheque: DBFile | null,
-    sentTickets: SentTicket[],
+    sentTickets: (Omit<SentTicket, "sentAt"> & { sentAt: string})[],
     tickets: (Ticket & {
         row: Row,
         priceRange: PriceRange

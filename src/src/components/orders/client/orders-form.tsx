@@ -1,17 +1,17 @@
 'use client'
 import FullPageMessage from "@/components/full-page-message"
-import { getOrder, uploadCheque } from "@/lib/api-calls"
-import { OrderStatus } from "@/types/types"
+import { requestReturn as apiRequestReturn, setOrderStatus as apiSetOrderStatus, uploadCheque } from "@/lib/api-calls"
 import { Box, Button, FileButton, Group, Input, List, Loader, Paper, Stack, Text } from "@mantine/core"
-import { Order, PriceRange, Row, Ticket } from "@prisma/client"
-import { IconDownload, IconReceiptRefund, IconUpload } from "@tabler/icons-react"
-import { useEffect, useState } from "react"
+import { File as DBFile, Order, OrderStatus, PriceRange, Row, Ticket } from "@prisma/client"
+import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icons-react"
+import { useState } from "react"
 import OrderStatusText from "./order-status-text"
+import { useRouter } from "next/navigation"
 
 type HydratedOrder = Omit<Order, "createdAt"> & (
     {
         createdAt: string,
-        cheque: boolean,
+        cheque: DBFile | null,
         tickets: (Ticket & (
             {
                 row: Row,
@@ -21,26 +21,15 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
     }
 )
 
-export default function OrdersForm(
-    { initOrders }:
-        {
-            initOrders: HydratedOrder[]
-        }
-) {
-    // console.log(initOrders)
-
-    const [orders, setOrders] = useState(initOrders)
-
-    const getLocalDate = (strDate: string) => {
-        console.log(strDate)
-        return new Date(strDate).toLocaleString('ru-RU')
-    }
-
-    useEffect(() => {
-        setOrders(initOrders)
-    }, [initOrders])
+export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
+    const router = useRouter()
 
     const [loading, setLoading] = useState<number | null>(null)
+
+    const [orderError, setOrderError] = useState<{
+        orderId: number,
+        error?: string
+    } | null>(null)
 
     const sendCheque = async (orderId: number, file: File | null) => {
         if (!file)
@@ -50,16 +39,9 @@ export default function OrdersForm(
 
         const res = await uploadCheque(orderId, file)
         if (res.success) {
-            const newOrder = await getOrder(orderId)
-            if (newOrder.success)
-                setOrders(prev => prev.map(order => order.id === orderId ? { ...newOrder.data, createdAt: getLocalDate(newOrder.data.createdAt) } : order))
-            else
-                setChequeError({
-                    orderId,
-                    error: "Что-то пошло не так, пожалуйста обновите страницу и попробуйте снова"
-                })
+            router.refresh()
         } else {
-            setChequeError({
+            setOrderError({
                 orderId,
                 error: res.error
             })
@@ -68,11 +50,37 @@ export default function OrdersForm(
         setLoading(null)
     }
 
-    const [chequeError, setChequeError] = useState<{
-        orderId: number,
-        error: string
-    } | null>(null)
+    const requestReturn = async (orderId: number) => {
+        setLoading(orderId)
 
+        const res = await apiRequestReturn(orderId)
+        if (res.success) {
+            router.refresh()
+        } else {
+            setOrderError({
+                orderId,
+                error: res.error
+            })
+        }
+
+        setLoading(null)
+    }
+
+    const setOrderStatus = async (orderId: number) => {
+        setLoading(orderId)
+
+        const res = await apiSetOrderStatus(orderId, OrderStatus.CANCELLED)
+        if (res.success) {
+            router.refresh()
+        } else {
+            setOrderError({
+                orderId,
+                error: res.error
+            })
+        }
+
+        setLoading(null)
+    }
 
     if (!orders)
         return <FullPageMessage>
@@ -90,7 +98,7 @@ export default function OrdersForm(
                     shadow="md"
                     p="md"
                     sx={{
-                        maxWidth: 420
+                        maxWidth: 450
                     }}
                 >
                     <Stack>
@@ -98,18 +106,10 @@ export default function OrdersForm(
                             <Text>Номер заказа: {order.id}</Text>
                             <Group>
                                 <Text>Статус:</Text>
-                                {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                                {order.cheque && <OrderStatusText status={order.status as OrderStatus} />}
+                                <OrderStatusText status={order.status} />
                             </Group>
                         </Group>
-                        {/* <Text>{new Date(order.createdAt).toLocaleString('ru-RU')}</Text> */}
                         <Text>{order.createdAt}</Text>
-                        {/* <Text>
-                            {new Intl.DateTimeFormat('ru-RU', {
-                                year: 'numeric', month: 'numeric', day: 'numeric',
-                                hour: 'numeric', minute: 'numeric'
-                            }).format(new Date(order.createdAt))}
-                        </Text> */}
                         <Text>Места:</Text>
                         <List type="ordered">
                             {order.tickets.map(ticket => (
@@ -121,57 +121,87 @@ export default function OrdersForm(
                                 </List.Item>
                             ))}
                         </List>
-
-
-                        {order.status === "pending" && <Group>
-                            <Box>
-                                {/* {cheque?.orderId === order.id && <Text>{cheque.name}</Text>} */}
-                                <Text color="gray" size="sm">Файл размером не более 2 Мб,</Text>
-                                <Text color="gray" size="sm">Файл формате: jpeg, png, pdf</Text>
-                            </Box>
-                            <Box>
-                                {order.id === loading && <Button
-                                    loading
-                                    // color={chequeError?.orderId === order.id ? "red" : "primary"}
-                                    variant="outline"
-                                    leftIcon={<IconUpload />}
-                                >
-                                    Приложить чек
-                                </Button>}
-                                {order.id !== loading && <FileButton
-                                    onChange={(value) => sendCheque(order.id, value)}
-                                    accept="image/png,image/jpeg,application/pdf"
-                                >
-                                    {(props) => (
-                                        <Button
-                                            {...props}
-                                            // loading={order.id === loading}
-                                            disabled={!!loading && loading !== order.id}
-                                            color={chequeError?.orderId === order.id ? "red" : "primary"}
-                                            variant="outline"
-                                            leftIcon={<IconUpload />}
-                                        >
-                                            Приложить чек
-                                        </Button>
-                                    )}
-                                </FileButton>}
-                                <Input.Error>{chequeError?.orderId === order.id ? chequeError.error : ""}</Input.Error>
-                            </Box>
-                        </Group>}
+                        <Group>
+                            {
+                                order.status !== OrderStatus.UNPAID && !order.cheque &&
+                                <Text color="red">Чек не найден!</Text>
+                            }
+                            {
+                                order.status !== OrderStatus.UNPAID && order.cheque &&
+                                <a href={"/api/download/" + order.cheque.id}>Чек приложен</a>
+                            }
+                        </Group>
+                        {(order.status === OrderStatus.UNPAID || order.status === OrderStatus.PENDING) &&
+                            <Group>
+                                <Box>
+                                    <Text color="gray" size="sm">Файл размером не более 2 Мб,</Text>
+                                    <Text color="gray" size="sm">Файл формате: jpeg, png, pdf</Text>
+                                </Box>
+                                <Box>
+                                    {order.id === loading && <Button
+                                        loading
+                                        variant="outline"
+                                        leftIcon={<IconUpload />}
+                                    >
+                                        {order.cheque ? "Приложить другой" : "Приложить чек"}
+                                    </Button>}
+                                    {order.id !== loading && <FileButton
+                                        onChange={(value) => sendCheque(order.id, value)}
+                                        accept="image/png,image/jpeg,application/pdf"
+                                    >
+                                        {(props) => (
+                                            <Button
+                                                {...props}
+                                                // loading={order.id === loading}
+                                                disabled={!!loading && loading !== order.id}
+                                                color={orderError?.orderId === order.id ? "red" : "primary"}
+                                                variant="outline"
+                                                leftIcon={<IconUpload />}
+                                            >
+                                                {order.cheque ? "Приложить другой" : "Приложить чек"}
+                                            </Button>
+                                        )}
+                                    </FileButton>}
+                                </Box>
+                            </Group>
+                        }
                         <Button
                             leftIcon={<IconDownload />}
-                            disabled={order.status !== "complete"}
+                            disabled={order.status !== OrderStatus.COMPLETE && order.status !== OrderStatus.USED}
                             component="a"
                             href={"/api/getTicketsPDF?orderId=" + order.id}
                         >
                             Скачать билеты
                         </Button>
-                        <Button
-                            leftIcon={<IconReceiptRefund />}
-                            disabled={!!order.cheque}
-                        >
-                            Возврат
-                        </Button>
+
+                        {order.status === OrderStatus.UNPAID &&
+                            <Button
+                                leftIcon={<IconX />}
+                                loading={loading === order.id}
+                                disabled={!!loading && loading !== order.id}
+                                onClick={() => setOrderStatus(order.id)}
+                            >
+                                Отменить
+                            </Button>
+                        }
+                        {order.status !== OrderStatus.UNPAID &&
+                            <Button
+                                leftIcon={<IconReceiptRefund />}
+                                loading={loading === order.id}
+                                disabled={
+                                    !!loading && loading !== order.id ||
+                                    !order.cheque ||
+                                    order.status === OrderStatus.RETURN_REQUESTED ||
+                                    order.status === OrderStatus.RETURNED ||
+                                    order.status === OrderStatus.USED ||
+                                    order.status === OrderStatus.CANCELLED
+                                }
+                                onClick={() => requestReturn(order.id)}
+                            >
+                                Возврат
+                            </Button>
+                        }
+                        <Input.Error>{orderError?.orderId === order.id ? orderError.error : ""}</Input.Error>
                     </Stack>
                 </Paper>
             ))}
