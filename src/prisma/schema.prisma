@@ -72,11 +72,20 @@ model PriceRange {
   Ticket Ticket[]
 }
 
+enum OrderStatus {
+  UNPAID
+  PENDING
+  RETURN_REQUESTED
+  RETURNED
+  COMPLETE
+  USED
+}
+
 model Order {
   id          Int          @id @default(autoincrement())
   paymentData Json
   price       Float
-  status      String       @default("pending")
+  status      OrderStatus  @default(UNPAID)
   createdAt   DateTime     @default(now())
   cheque      File?        @relation(fields: [fileId], references: [id])
   tickets     Ticket[]
