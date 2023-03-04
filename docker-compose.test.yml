@@ -16,7 +16,7 @@ services:
     #      - "3306:3306"
     volumes:
       - ./mysql:/var/lib/mysql
-      - file_storage_prod:/tmp/file_storage
+      - file_storage_test:/tmp/file_storage
 
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
@@ -36,7 +36,7 @@ services:
       - "3000"
     volumes:
       - ./src:/var/www/html
-      - file_storage_prod:/var/www/file_storage
+      - file_storage_test:/var/www/file_storage
     working_dir: /var/www/html
     entrypoint: ['yarn']
     environment:
@@ -57,7 +57,7 @@ services:
       - traefik_proxy_network
 
 volumes:
-  file_storage_prod:
+  file_storage_test:
     driver: local
     driver_opts:
       type: 'none'
