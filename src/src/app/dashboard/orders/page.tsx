@@ -1,11 +1,10 @@
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import DashboardOrders from "@/components/dashboard/dashboard-orders"
 import { prisma } from "@/db"
-import { PaymentData } from "@/types/types"
 import { z } from "zod"
-import { sendTickets } from "@/lib/api-calls"
+import DashboardOrders from "@/components/dashboard/dashboard-orders"
+import { OrderStatus, Prisma } from "@prisma/client"
 
 const perPage = 20
 
@@ -15,63 +14,48 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     if (session?.user.role !== 'admin')
         redirect('/dashboard/login')
 
-    // const pageNumber = searchParams?.page && typeof searchParams.page === "string" ? parseInt(searchParams?.page) : 1
-    let pageNumber = 1
-    const pageNumberValidator = z.string().regex(/^\d+$/)
-    const res = pageNumberValidator.safeParse(searchParams?.page)
+    const pageNumberValidated = z.string().regex(/^\d+$/).safeParse(searchParams?.page)
+    const pageNumber = pageNumberValidated.success ? pageNumberValidated.data : "1"
 
-    if (res.success)
-        pageNumber = Number(res.data)
+    const filterValidated = z.string().safeParse(searchParams?.filter)
+    const filter = filterValidated.success ? filterValidated.data : undefined
 
-    let filter = ""
-    const filterValidator = z.string()
-    const resFilter = filterValidator.safeParse(searchParams?.filter)
+    const statusValidated = z.nativeEnum(OrderStatus).safeParse(searchParams?.status)
+    const status = statusValidated.success ? statusValidated.data : undefined
 
-    if (resFilter.success)
-        filter = resFilter.data
+    // const filterWhere = filter && 
 
-    let category = "all"
-    const categoryValidator = z.enum(["unpaid", "pending", "returnRequested", "returned", "complete"])
-    const resCategory = categoryValidator.safeParse(searchParams?.category)
+    const statusWhere = status && {
+        status
+    }
 
-    if (resCategory.success)
-        category = resCategory.data
+    const ordersAndWhere = []
+    if (filter)
+        ordersAndWhere.push(
+            {
+                OR: [
+                    {
+                        paymentData: {
+                            path: "$.name",
+                            string_contains: filter
+                        }
+                    },
+                    {
+                        paymentData: {
+                            path: "$.email",
+                            string_contains: filter
+                        }
+                    }
+                ]
+            }
+        )
 
-    let categoryFilter = {}
-    if (category === "unpaid")
-        categoryFilter = {
-            cheque: null
-        }
-    else if (category !== "all")
-        categoryFilter = {
-            NOT: {
-                cheque: null
-            },
-            status: category
-        }
+    if (status)
+        ordersAndWhere.push({ status })
+    
 
     const orders = await prisma.order.findMany({
-        where: {
-            AND: [
-                { ...categoryFilter },
-                {
-                    OR: [
-                        {
-                            paymentData: {
-                                path: "$.name",
-                                string_contains: filter
-                            }
-                        },
-                        {
-                            paymentData: {
-                                path: "$.email",
-                                string_contains: filter
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
+        where: {AND: ordersAndWhere},
         include: {
             cheque: true,
             sentTickets: true,
@@ -83,49 +67,28 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             }
         },
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        skip: (pageNumber - 1) * perPage,
+        skip: (Number(pageNumber) - 1) * perPage,
         take: perPage
     })
-    
+
     const orderCount = await prisma.order.count({
-        where: {
-            AND: [
-                { ...categoryFilter },
-                {
-                    OR: [
-                        {
-                            paymentData: {
-                                path: "$.name",
-                                string_contains: filter
-                            }
-                        },
-                        {
-                            paymentData: {
-                                path: "$.email",
-                                string_contains: filter
-                            }
-                        }
-                    ]
-                }
-            ]
-        }
+        where: {AND: ordersAndWhere}
     })
 
     return <DashboardOrders
-        initOrders={
+        orders={
             orders.map(
                 order => ({
                     ...order,
-                    paymentData: order.paymentData as PaymentData,
                     createdAt: order.createdAt.toLocaleString('ru-RU'),
-                    sentTickets: order.sentTickets.map(sentTicket => ({ ...sentTicket, sentAt: sentTicket.sentAt.toLocaleString('ru-RU') }))
+                    sentTickets: !!order.sentTickets.length
                 }))
         }
         pagination={{
-            page: pageNumber,
+            page: Number(pageNumber),
             pageCount: Math.ceil(orderCount / perPage)
         }}
         filter={filter}
-        category={category}
+        status={status}
     />
 }

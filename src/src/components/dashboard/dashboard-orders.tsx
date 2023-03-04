@@ -8,35 +8,29 @@ import { DashboardOrder } from "@/types/types"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./orders-status-filter"
+import { File as DBFile, Order, OrderStatus, SentTicket, Ticket } from "@prisma/client"
+import { PaymentData } from "../order-make/use-order"
 // import { events} from "next/router"
 
 
 export default function DashboardOrders(
-    { initOrders, pagination, filter, category }:
+    { orders, pagination, filter, status }:
         {
-            initOrders: DashboardOrder[],
+            orders: (Omit<Order, "createdAt"> & { 
+                cheque: DBFile | null,
+                createdAt: string,
+                tickets: Ticket[],
+                sentTickets: boolean
+            })[],
             pagination: {
                 page: number,
                 pageCount: number
             },
-            filter: string,
-            category: string
+            filter?: string,
+            status?: OrderStatus
         }
 ) {
     const [loading, setLoading] = useState(true)
-
-    const [orders, setOrders] = useState(initOrders)
-
-    // const [showDates, setShowDates] = useState(false)
-
-    const getLocalDate = (strDate: string) => {
-        console.log(strDate)
-        return new Date(strDate).toLocaleString('ru-RU')
-    }
-
-    useEffect(() => {
-        setOrders(initOrders)
-    }, [initOrders])
 
     const router = useRouter()
 
@@ -47,18 +41,23 @@ export default function DashboardOrders(
     }, [searchParams])
 
     const [searchFilter, setSearchFilter] = useState(filter)
-    const [filterCategory, setFilterCategory] = useState(category)
+    const [filterStatus, setFilterStatus] = useState<OrderStatus | "ALL" | undefined>(status)
 
     const pathname = usePathname()
 
-    const updatePageParams = ({ newPage, newFilter, newCategory }: { newPage?: number, newFilter?: string, newCategory?: string }) => {
-        const params = { //page defaults
+    const updatePageParams = ({ newPage, newFilter, newStatus }: { newPage?: number, newFilter?: string, newStatus?: OrderStatus | "ALL" }) => {
+        const params: {
+            page?: number,
+            filter?: string,
+            status?: OrderStatus | "ALL"
+        } = { //page defaults
             page: pagination.page,
             filter,
-            category
+            status
         }
 
-        if (newFilter || newCategory)
+        console.log(params)
+        if (newFilter || newStatus)
             params.page = 1
         else if (newPage)
             params.page = newPage
@@ -66,10 +65,10 @@ export default function DashboardOrders(
         if (newFilter !== undefined)
             params.filter = newFilter
 
-        if (newCategory)
-            params.category = newCategory
+        if (newStatus !== undefined)
+            params.status = newStatus
 
-        if (params.page === pagination.page && params.filter === filter && params.category === category)
+        if (params.page === pagination.page && params.filter === filter && params.status === status)
             return
 
         const url = pathname + "?" 
@@ -88,15 +87,13 @@ export default function DashboardOrders(
                         <Text>Поиск</Text>
                         <TextInput
                             sx={{ flexBasis: 200, flexGrow: 1 }}
-                            value={searchFilter}
-                            // onChange={e => setSearchFilter(e.target.value)}
+                            value={searchFilter ?? ""}
                             onChange={e => setSearchFilter(e.target.value)}
                             rightSection={
                                 <ActionIcon
                                     onClick={() => {
                                         setSearchFilter("")
                                         updatePageParams({ newFilter: "" })
-                                        // router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))
                                     }}
                                 >
                                     <IconX />
@@ -104,21 +101,17 @@ export default function DashboardOrders(
                             }
                         />
                         <Button
-                            // sx={{ flexBasis: 100 }}
                             leftIcon={<IconSearch />}
-                            // onClick={() => router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
                             onClick={() => updatePageParams({ newFilter: searchFilter })}
                         >
                             Найти
                         </Button>
                     </Group>
                     <OrdersStatusFilter
-                        value={filterCategory}
+                        status={filterStatus || "ALL"}
                         onChange={(value) => {
-                            setFilterCategory(value)
-                            updatePageParams({ newCategory: value })
-                            // setLoading(true)
-                            // router.push("/dashboard/orders?page=1" + (searchFilter ? `&filter=${searchFilter}` : "") + "&category=" + value)
+                            setFilterStatus(value)
+                            updatePageParams({ newStatus: value })
                         }}
                     />
                 </Stack>
@@ -127,7 +120,7 @@ export default function DashboardOrders(
             {loading && <Progress radius="xs" size="sm" value={100} animate />}
 
             <Stack>
-                {orders?.map(order => <Paper key={order.id} p="sm" shadow="xs">
+                {orders.map(order => <Paper key={order.id} p="sm" shadow="xs">
                     <Group sx={{ alignItems: "flex-start", justifyContent: "space-between", width: "100%" }}>
                         <Stack sx={{ flexGrow: 1 }}>
                             <Group spacing={5}>
@@ -138,26 +131,14 @@ export default function DashboardOrders(
                             </Group>
 
                             <Group>
-                                {/* <Text>Константиновский Константин Константинович</Text> */}
-                                <Text>{order.paymentData.name}</Text>
-                                <Text>{order.paymentData.email}</Text>
+                                <Text>{(order.paymentData as PaymentData).name}</Text>
+                                <Text>{(order.paymentData as PaymentData).email}</Text>
                             </Group>
-                            {/* <Text>Места:</Text> */}
-                            {/* <List type="ordered">
-                                {order.tickets.map(ticket => (
-                                    <List.Item key={ticket.id} >
-                                        <Group>
-                                            <Text>Ряд: {ticket.row.number} Место: {ticket.number}</Text>
-                                            <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
-                                        </Group>
-                                    </List.Item>
-                                ))}
-                            </List> */}
-
                         </Stack>
                         <Stack sx={{ alignItems: "center" }}>
-                            {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                            {order.cheque && <OrderStatusText status={order.status} />}
+                            {/* {!order.cheque && <Text color="red">Заказ не оплачен</Text>} */}
+                            <OrderStatusText status={order.status} />
+                            {order.status !== OrderStatus.UNPAID && !order.cheque && <Text color="red">Чек не найден</Text>} 
                             <Box sx={{ flexShrink: 1 }}>
                                 <Link href={"/dashboard/orders/" + order.id} passHref legacyBehavior>
                                     <Button component="a" variant="subtle" leftIcon={<IconEdit />}>Изменить</Button>
@@ -171,7 +152,6 @@ export default function DashboardOrders(
                 page={pagination.page}
                 total={pagination.pageCount}
                 withEdges
-                // onChange={(page) => router.push("/dashboard/orders?page=" + page + (searchFilter ? `&filter=${searchFilter}` : "") + (category ? `&category=${filterCategory}` : ""))}
                 onChange={(page) => updatePageParams({ newPage: page })}
             />
         </Stack>

@@ -30,6 +30,10 @@ export default function OrderStatusText({ status }: { status: OrderStatus }) {
             statusText = "Отменен"
             statusColor = "gray"
             break
+        case OrderStatus.USED:
+            statusText = "Использован"
+            statusColor = "gray"
+            break
     }
 
     return <Text color={statusColor}>{statusText}</Text>
