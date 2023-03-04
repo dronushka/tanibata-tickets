@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/db"
+import { OrderStatus } from "@prisma/client"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET")
@@ -17,9 +18,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             where: {
                 OR: [
                     {
-                        orderId: {
-                            gt: 0
-                        }
+                        AND: [
+                            {
+                                orderId: {
+                                    gt: 0
+                                }
+                            },
+                            {
+                                order: {
+                                    NOT: {
+                                        status: OrderStatus.CANCELLED
+                                    }
+                                }
+                            }
+                        ],
+
                     },
                     {
                         reserved: true
@@ -32,7 +45,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        res.status(200).json({ tickets })
+        res.status(200).json({
+            tickets: tickets.map(ticket => ({
+                ...ticket,
+                order: ticket.order && {
+                    ...ticket.order,
+                    createdAt: ticket.order.createdAt.toLocaleString('ru-RU')
+                }
+            }))
+        })
     } catch (e: any) {
         console.error(e)
         res.status(500).json({ error: e?.message })

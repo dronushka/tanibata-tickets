@@ -50,7 +50,7 @@ export default function LoginForm(
                 email,
                 password
             })
-            console.log('res', res)
+            // console.log('res', res)
 
             if (res?.ok) {
                 console.log("logged in as ", email)

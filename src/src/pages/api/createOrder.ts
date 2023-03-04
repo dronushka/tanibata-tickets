@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import formidable, { Fields, File, Files } from 'formidable'
-import { ClientTicket } from "@/types/types"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
+import { OrderStatus } from "@prisma/client"
+import { ClientTicket } from "@/components/order-make/use-order"
+import formidable, { Fields, File, Files } from 'formidable'
 
 export const config = {
     api: {
@@ -50,13 +51,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         )
 
-        if  (!tickets || !tickets.length)
+        if (!tickets || !tickets.length)
             throw "no tickets specified"
         // console.log('createOrder', paymentData, tickets, cheque)
 
         const dbTickets = await prisma.ticket.findMany({
             where: {
-                id: { in: tickets.map(ticket => ticket.id) }
+                AND: [
+                    {
+                        id: { in: tickets.map(ticket => ticket.id) }
+                    },
+                    {
+                        order: {
+                            NOT: {
+                                status: OrderStatus.CANCELLED
+                            }
+                        }
+                    }
+                ]
             },
             include: {
                 priceRange: true,
@@ -102,8 +114,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             }
         })
-        
-        res.status(200).json({ orderId: order.id})
+
+        res.status(200).json({ orderId: order.id })
 
     } catch (e: any) {
         console.error(e)

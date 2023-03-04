@@ -1,23 +1,31 @@
 "use client"
 
-import { DashboardOrder, OrderStatus } from "@/types/types"
-import { Button, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
-import OrderStatusText from "@/components/orders/client/order-status-text"
-import { IconCheck, IconDownload, IconEdit, IconMailForward, IconTicket } from "@tabler/icons-react"
-import OrderStatusSelect from "./order-status-select"
-import { useEffect, useState } from "react"
+import { File as DBFile, Order, OrderStatus, PriceRange, Row, Ticket } from "@prisma/client"
+import { useState } from "react"
 import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
+import { Button, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
+import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
+import OrderStatusText from "@/components/orders/client/order-status-text"
+import { useRouter } from "next/navigation"
+import { PaymentData } from "../order-make/use-order"
 
-export default function DashboardOrderForm({ order }: { order: DashboardOrder }) {
-    console.log(order)
-    const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status as OrderStatus)
+export default function DashboardOrderForm({ order }: { order: (Omit<Order, "createdAt"> & { 
+    cheque: DBFile | null,
+    createdAt: string,
+    tickets: (Ticket & { row: Row, priceRange: PriceRange})[],
+    sentTickets: boolean
+}) }) {
+    // console.log(order)
+    const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status)
     const [editOrderStatus, setEditOrderStatus] = useState(false)
     const [editSendTicketError, setEditSendTicketError] = useState("")
     const [setStatusError, setSetStatusError] = useState("")
 
-    const [ticketsIsSent, setTicketsIsSent] = useState(!!order.sentTickets.length)
+    // const [ticketsIsSent, setTicketsIsSent] = useState(!!order.sentTickets)
 
     const [loading, setLoading] = useState(false)
+
+    const router = useRouter()
 
     const sendOrderStatus = async () => {
         setLoading(true)
@@ -35,7 +43,7 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
         setLoading(true)
         const res = await apiSendTickets(order.id)
         if (res.success) {
-            setTicketsIsSent(true)
+            router.refresh()
         } else if (res.error) {
             setEditSendTicketError(res.error)
         }
@@ -58,21 +66,33 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                         disabled={loading}
                         data={[
                             {
+                                label: "Не оплачен",
+                                value: OrderStatus.UNPAID
+                            },
+                            {
                                 label: "В обработке",
-                                value: "pending"
+                                value: OrderStatus.PENDING
                             },
                             {
                                 label: "Запрос на возврат",
-                                value: "returnRequested"
+                                value: OrderStatus.RETURN_REQUESTED
                             },
                             {
                                 label: "Возвращено",
-                                value: "returned"
+                                value: OrderStatus.RETURNED
                             },
                             {
                                 label: "Завершен",
-                                value: "complete"
-                            }
+                                value: OrderStatus.COMPLETE
+                            },
+                            {
+                                label: "Отменен",
+                                value: OrderStatus.CANCELLED
+                            },
+                            {
+                                label: "Использован",
+                                value: OrderStatus.USED
+                            },
                         ]}
                         value={orderStatus}
                         onChange={value => value && setOrderStatus(value as OrderStatus)}
@@ -81,8 +101,8 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                 </Group>}
                 <Input.Error>{setStatusError}</Input.Error>
                 {/* <OrderStatusSelect value={orderStatus} onChange={setOrderStatus}/> */}
-                <Text>{order.paymentData.name}</Text>
-                <Text>{order.paymentData.email}</Text>
+                <Text>{(order.paymentData as PaymentData).name}</Text>
+                <Text>{(order.paymentData as PaymentData).email}</Text>
                 <Text>{order.createdAt}</Text>
 
                 {/* <Text>Места:</Text> */}
@@ -97,11 +117,12 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                     ))}
                 </List>
                 <Group>
+                    {!order.cheque && <Text color="red">Чек не найден</Text>} 
                     <Button
                         leftIcon={<IconDownload />}
                         component="a"
                         href={"/api/download/" + order.cheque?.id}
-                        disabled={!!order.cheque}
+                        disabled={!order.cheque}
                     >
                         Скачать чек
                     </Button>
@@ -114,8 +135,8 @@ export default function DashboardOrderForm({ order }: { order: DashboardOrder })
                     </Button>
                 </Group>
                 <Group>
-                    <Text color={ticketsIsSent ? "green" : "red"}>
-                        {ticketsIsSent ? "Билеты отправлены" : "Билеты не отправлены"}
+                    <Text color={order.sentTickets ? "green" : "red"}>
+                        {order.sentTickets ? "Билеты отправлены" : "Билеты не отправлены"}
                     </Text>
                     {/* {!order.sentTickets.length && <Text color="red">Билеты не отправлены</Text>}
                     {!!order.sentTickets.length && <Text color="green">Билеты отправлены</Text>} */}

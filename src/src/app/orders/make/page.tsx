@@ -2,21 +2,22 @@ import { prisma } from "@/db"
 import MakeOrder from "@/components/order-make/make-order"
 import { getServerSession } from "next-auth/next"
 import { User } from "@prisma/client"
-import { ClientVenue } from "@/types/types"
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
+// import { ClientVenue } from "@/types/types"
 
 export default async function Page() {
-    const session = await getServerSession()
+    const session = await getServerSession(authOptions)
 
     let user: User | null = null
 
-    if (session?.user?.email)
+    if (session?.user?.id)
         user = await prisma.user.findUnique({
             where: {
-                email: session.user.email
+                id: session.user.id
             }
         })
 
-    const venue = await prisma.venue.findFirst({
+    const venue = await prisma.venue.findUnique({
         where: {
             id: 1
         },
@@ -33,10 +34,12 @@ export default async function Page() {
         }
     })
 
-    let clientVenue: ClientVenue = null
-
-    if (venue)
-        clientVenue = {
+    return <MakeOrder
+        user={user && {
+            ...user,
+            createdAt: user.createdAt.toLocaleString("ru-RU")
+        }}
+        venue={venue && {
             ...venue,
             rows: venue.rows.map(
                 row => (
@@ -53,7 +56,6 @@ export default async function Page() {
                     }
                 )
             )
-        }
-
-    return <MakeOrder user={user ?? undefined} venue={clientVenue} />
+        }}
+    />
 }

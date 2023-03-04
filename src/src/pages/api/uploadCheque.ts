@@ -6,6 +6,7 @@ import { z, ZodError } from "zod"
 import { authOptions } from "./auth/[...nextauth]"
 import fs from "fs"
 import path from "path"
+import { OrderStatus } from "@prisma/client"
 
 export const config = {
     api: {
@@ -26,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { orderId, cheque } = await new Promise<
             {
                 orderId: number,
-                cheque: File
+                cheque: any
             }
         >(
             function (resolve, reject) {
@@ -36,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     resolve({
                         orderId: parseInt(String(fields.orderId)),
-                        cheque: files.cheque as File
+                        cheque: files.cheque
                     })
                 })
             }
@@ -44,16 +45,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const validator = z.object({
             orderId: z.number().gt(0, "invalid_order_id"),
-            cheque: z.custom<File>(val => val instanceof File, "no_file")
+            cheque: z.custom<File>(val => val instanceof File, "no_file") //TODO validate mime and size
         })
 
-        validator.parse({
+        const validated = validator.parse({
             orderId,
             cheque
         })
 
         const order = await prisma.order.findUnique({
-            where: { id: orderId }
+            where: { id: validated.orderId }
         })
 
         if (!order) {
@@ -66,16 +67,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         fs.copyFileSync(
-            cheque.filepath,
-            path.join(process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage", cheque.newFilename)
+            validated.cheque.filepath,
+            path.join(process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage", validated.cheque.newFilename)
         )
+
+        let orderStatus = order.status
+        if (orderStatus === OrderStatus.UNPAID)
+            orderStatus = OrderStatus.PENDING
 
         await prisma.order.update({
             where: { id: order.id },
             data: {
+                status: orderStatus,
                 cheque: {
                     create: {
-                        path: cheque.newFilename
+                        path: validated.cheque.newFilename
                     }
                 }
             }

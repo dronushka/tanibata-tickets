@@ -1,26 +1,19 @@
 "use client"
 
-import { ClientVenue, OrderStage } from "@/types/types"
-import { Box, Button, Center, Container, Flex, Loader, Paper, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
-import { PriceRange, Row, Ticket, User, Venue } from "@prisma/client"
+import { Row, User, Venue } from "@prisma/client"
+import { Button, Container, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
+import { ClientTicket, OrderProvider, OrderStage, TicketRow, useOrder } from "./use-order"
 import Link from "next/link"
 import FullPageMessage from "../full-page-message"
 import LoginForm from "../login-form"
-import Hall from "./tickets-picker/hall"
 import OrderError from "./order-error"
 import OrderForm from "./order-form"
 import PaymentForm from "./payment-form"
-import Stage from "./tickets-picker/stage"
-import Summary from "./tickets-picker/summary"
-import { OrderProvider, useOrder } from "./use-order"
 import TicketsPicker from "./tickets-picker/tickets-picker"
 
-function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
-
-
-
+function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null }) {
     const { status } = useSession()
 
     const { order, nextStage, prevStage, setOrder } = useOrder()
@@ -31,7 +24,7 @@ function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
     }
 
     // console.log({ user })
-    console.log({ order })
+    // console.log({ order })
 
     if (!order || status === "loading")
         return (
@@ -67,9 +60,7 @@ function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
                 {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {order.stage === "form" && <OrderForm />}
                 {order.stage === "tickets" && <TicketsPicker venue={venue} />}
-
                 {order.stage === "payment" && <PaymentForm />}
-                
                 {(order.stage === "makeReservation" || order.stage === "complete" || order.stage === "error") && (
                     <FullPageMessage>
                         <Stack sx={{ minWidth: 250, maxWidth: 400, alignItems: "center" }}>
@@ -97,11 +88,11 @@ function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
                                 <Button
                                     variant="subtle"
                                     onClick={() => setOrder && setOrder(prev => ({
-                                            ...prev,
-                                            stage: "tickets",
-                                            tickets: new Map,
-                                            error: undefined
-                                        }))
+                                        ...prev,
+                                        stage: "tickets",
+                                        tickets: new Map,
+                                        error: undefined
+                                    }))
                                     }
                                 >
                                     Попробовать еще раз
@@ -114,15 +105,12 @@ function Scaffolding({ user, venue }: { user?: User, venue: ClientVenue }) {
             </Container>
         </Stack>
     )
-
-    // return (
-    //     <FullPageMessage>
-    //         <Loader size="xl" />
-    //     </FullPageMessage>
-    // )
 }
 
-export default function MakeOrder({ user, venue }: { user?: User, venue: ClientVenue }) {
+export default function MakeOrder(
+    { user, venue }:
+        { user: (Omit<User, "createdAt"> & { createdAt: string }) | null, venue: (Venue & { rows: TicketRow[] }) | null }
+) {
     return (
         <OrderProvider initPaymentData={{
             name: user?.name ?? "",
@@ -131,7 +119,6 @@ export default function MakeOrder({ user, venue }: { user?: User, venue: ClientV
             phone: user?.phone ?? "",
             nickname: user?.nickname ?? "",
             social: user?.social ?? "",
-            // cheque: null
         }}>
             <Scaffolding venue={venue} />
         </OrderProvider>
