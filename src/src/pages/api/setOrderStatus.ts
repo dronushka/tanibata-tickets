@@ -4,6 +4,7 @@ import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
 import { OrderStatus } from '@prisma/client'
+import { emailTransporter } from '@/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -13,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!session)
         res.status(401).end()
-        
+
     const validator = z.object({
         id: z.number(),
         status: z.nativeEnum(OrderStatus)
@@ -45,6 +46,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
+        if (validated.status === OrderStatus.RETURNED) {
+            const user = await prisma.user.findUnique({
+                where: { id: order?.userId}
+            })
+            
+            emailTransporter.sendMail({
+                from: `"Tanibata" <${process.env.MAIL_USER}>`,
+                to: user?.email,
+                subject: "Танибата. Возврат билетов. Номер заказа: " + order?.id, // Subject line
+                html: `<p>Зарос на возврат билетов принят. Деньги вернутся на использованную при покупки карту в ближайшее время.</p>`
+            })
+        }
+
+
         res.status(200).end()
     } catch (e: any) {
         console.error(e)
@@ -56,5 +71,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(422).json({
             error: message
         })
-    } 
+    }
 }
