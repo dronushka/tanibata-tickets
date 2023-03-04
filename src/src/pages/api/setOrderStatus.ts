@@ -50,12 +50,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const user = await prisma.user.findUnique({
                 where: { id: order?.userId}
             })
-            
+
             emailTransporter.sendMail({
                 from: `"Tanibata" <${process.env.MAIL_USER}>`,
                 to: user?.email,
                 subject: "Танибата. Возврат билетов. Номер заказа: " + order?.id, // Subject line
-                html: `<p>Зарос на возврат билетов принят. Деньги вернутся на использованную при покупки карту в ближайшее время.</p>`
+                html: `<p>Запрос на возврат билетов принят. Деньги вернутся на использованную при покупки карту в ближайшее время.</p>`
             })
         }
 
