@@ -1,4 +1,4 @@
-import { ClientOrder } from "@/types/types"
+import { ClientOrder } from "@/components/order-make/use-order"
 import { OrderStatus } from "@prisma/client"
 import { z } from "zod"
 
