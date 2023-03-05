@@ -28,7 +28,12 @@ export default function TicketButton(
                 newTickets.delete(ticket.id)
                 return newTickets
             } else {
-                return new Map(prev).set(ticket.id, ticket)
+                const newTickets = new Map(prev).set(ticket.id, ticket)
+                return new Map(
+                    [...newTickets.entries()].sort(([k, v], [k2, v2])=> {
+                        return parseInt(v.rowNumber) - parseInt(v2.rowNumber) || parseInt(v.number) - parseInt(v2.number)
+                    })
+                )
             }
         })
     }

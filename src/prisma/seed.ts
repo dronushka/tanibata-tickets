@@ -28,6 +28,7 @@ const createVenueByRows = (_rows: { priceRange: PriceRange, ticketCount: number 
     for (let j = 1; j <= _rows[i].ticketCount; j++) {
       tickets.create.push({
         number: String(j),
+        sortNumber: j,
         priceRange: {
           connect: {
             id: _rows[i].priceRange.id

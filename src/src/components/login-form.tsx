@@ -77,9 +77,9 @@ export default function LoginForm(
             justifyContent: "center",
             alignItems: "center"
         }}>
-            <Paper shadow="xs" p="md">
+            <Paper shadow="xs" p="md"  sx={{ maxWidth: 400 }}>
                 {!emailIsSent && (
-                    <Stack sx={{ width: 400 }}>
+                    <Stack>
                         <TextInput
                             label="E-mail"
                             name="email"
@@ -101,7 +101,7 @@ export default function LoginForm(
                     </Stack>
                 )}
                 {emailIsSent && (
-                    <Stack sx={{ width: 400 }}>
+                    <Stack>
                         {/* {aquiredPassword && <Text>{aquiredPassword}</Text>} */}
                         <TextInput
                             type="password"
