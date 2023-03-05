@@ -1,9 +1,8 @@
 "use client"
 
-import { ClientTicket } from "@/types/types"
 import { Button, Divider, Group, Paper, Stack, Text } from "@mantine/core"
 import { useContext } from "react"
-import { useOrder } from "../use-order"
+import { ClientTicket, useOrder } from "../use-order"
 import { TicketContext } from "./tickets-picker"
 
 export default function Summary() {

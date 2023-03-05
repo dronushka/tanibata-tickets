@@ -1,8 +1,7 @@
-import { ClientTicket } from "@/types/types"
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { Ticket } from "@prisma/client"
 import { Dispatch, SetStateAction } from "react"
+import { ClientTicket } from "./use-order"
 
 export default function TicketButton(
     {
