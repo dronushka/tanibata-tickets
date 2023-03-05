@@ -56,7 +56,7 @@ function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null 
                     Заказ завершен
                 </Stepper.Completed>
             </Stepper>
-            <Flex sx={{ flexGrow: 1 }}>
+            <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {order.stage === "form" && <OrderForm />}
                 {order.stage === "tickets" && <TicketsPicker venue={venue} />}
