@@ -33,7 +33,7 @@ function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null 
             </FullPageMessage>
         )
 
-    console.log(order.stage, getStepNumber(order.stage))
+    // console.log(order.stage, getStepNumber(order.stage))
     return (
         <Stack sx={{ height: "100%" }}>
             <Stepper active={getStepNumber(order.stage)} breakpoint="sm" allowNextStepsSelect={false}>

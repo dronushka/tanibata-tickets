@@ -81,7 +81,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder, paymentData: initPaymentData })
 
     const setStage = (value: OrderStage, error?: string) => {
-        console.log({ error })
+        error && console.error(error)
         setOrder(prev => ({ ...prev, stage: value, error }))
     }
 
@@ -97,7 +97,7 @@ export const OrderProvider = ({ initPaymentData, children }: { initPaymentData: 
     }, [session, status])
 
     const nextStage = async (newOrder?: ClientOrder) => {
-        console.log(order.stage)
+        // console.log(order.stage)
         if (!order)
             return
 

@@ -30,7 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 tickets: {
                     include: {
                         row: true,
-                    }
+                    },
+                    orderBy: [
+                        { row: { number: "asc"} },
+                        { sortNumber: "asc" }
+                    ]
                 },
                 user: true
             }

@@ -21,9 +21,14 @@ export default async function OrdersPage() {
                 include: {
                     priceRange: true,
                     row: true
-                }
+                },
+                orderBy: [
+                    { row: { number: "asc" } },
+                    { sortNumber: "asc" }
+                ]
             }
-        }
+        },
+
     })
 
     // console.log(orders)
