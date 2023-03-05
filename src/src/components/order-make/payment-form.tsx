@@ -11,7 +11,47 @@ export default function PaymentForm() {
 
     const [chequeError, setChequeError] = useState<string>("")
 
-    const chequeValidator = z.custom<File>(val => val instanceof File, "Приложите файл")
+    // const chequeValidator = z
+    //     .custom<File>(file => {
+    //         console.log('file', file) 
+    //         return file instanceof File
+    //     }
+    //         , "Приложите файл")
+    //     .refine(file => file?.size < 2 * 1024 * 1024, "Размер файл не должен превышать 2МБ")
+    //     .refine(file => ["image/png", "image/jpeg", "application/pdf"].find(f => f === file?.type), "Допустимые форматы файла: jpeg, png, pdf")
+    
+    const chequeValidator = z.custom<File>().superRefine((file, ctx) => {
+        if (!(file instanceof File)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Приложите файл",
+            fatal: true,
+          })
+      
+          return z.NEVER
+        }
+      
+        if (file.size > 2 * 1024 * 1024) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Размер файл не должен превышать 2МБ",
+            fatal: true
+          })
+
+          return z.NEVER
+        }
+
+        if (!(["image/png", "image/jpeg", "application/pdf"].find(f => f === file.type))) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Допустимые форматы файла: jpeg, png, pdf",
+              fatal: true
+            })
+  
+            return z.NEVER
+          }
+        
+      })
 
     const changeCheque = (value: File) => {
         const res = chequeValidator.safeParse(value)
@@ -21,15 +61,15 @@ export default function PaymentForm() {
             setCheque(value)
         }
         else
-            setChequeError(res.error.toString())
+            setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
     const send = () => {
         const res = chequeValidator.safeParse(cheque)
         if (res.success)
             order && nextStage({ ...order, cheque })
-        else
-            setChequeError(res.error.toString())
+        else 
+            setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
     if (!order)
