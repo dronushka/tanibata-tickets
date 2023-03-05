@@ -22,12 +22,25 @@ export type OrderContext = {
 }
 
 export const paymentDataSchema = z.object({
-    name: z.string().min(1, "Введите имя"),
+    name: z.string().min(1, "Введите имя").refine(value => value.trim().split(' ').length >= 2, "Введите полное имя"),
     phone: z.string().min(10, "Введите телефон").max(10),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),
-    social: z.string().optional()
+    social: z.string().superRefine((val, ctx) => {
+        const re = new RegExp(/^https:\/\/vk\.com\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]+$/)
+
+        if (val.length > 0 && !re.test(val)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Адрес не распознан",
+              fatal: true
+            })
+  
+            return z.NEVER
+          }
+    })
+    // regex(/^https?:\/\/example\.com(\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]*)?$/, "Формат не распознан").optional()
 })
 
 export type PaymentData = z.infer<typeof paymentDataSchema>

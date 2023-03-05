@@ -88,7 +88,8 @@ export default function OrderForm() {
                     <TextInput
                         label="Адрес страницы VK (если есть, для оперативной связи)"
                         value={paymentData.social}
-                        onChange={(e) => setPaymentData(prev => ({ ...prev, social: e.target.value }))}
+                        onChange={(e) => setField("social", e.target.value)}
+                        error={paymentFormErrors?.social?.join(', ')}
                     />
                     <Flex justify="flex-end">
                         <Group>
