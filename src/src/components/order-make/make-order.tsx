@@ -1,7 +1,7 @@
 "use client"
 
 import { Row, User, Venue } from "@prisma/client"
-import { Button, Container, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
+import { Button, Container, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
 import { ClientTicket, OrderProvider, OrderStage, TicketRow, useOrder } from "./use-order"
@@ -56,14 +56,14 @@ function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null 
                     Заказ завершен
                 </Stepper.Completed>
             </Stepper>
-            <Container sx={{ flexGrow: 1 }}>
+            <Flex sx={{ flexGrow: 1 }}>
                 {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {order.stage === "form" && <OrderForm />}
                 {order.stage === "tickets" && <TicketsPicker venue={venue} />}
                 {order.stage === "payment" && <PaymentForm />}
                 {(order.stage === "makeReservation" || order.stage === "complete" || order.stage === "error") && (
                     <FullPageMessage>
-                        <Stack sx={{ minWidth: 250, maxWidth: 400, alignItems: "center" }}>
+                        <Stack sx={{ minWidth: 250, maxWidth: 300, alignItems: "center" }}>
                             {order.stage === "makeReservation" && <>
                                 <Loader size="lg" />
                                 <Text>Бронируем билеты</Text>
@@ -102,7 +102,7 @@ function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null 
                         </Stack>
                     </FullPageMessage>
                 )}
-            </Container>
+            </Flex>
         </Stack>
     )
 }

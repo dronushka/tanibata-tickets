@@ -19,7 +19,7 @@ type PaymentFormErrors = {
 export default function OrderForm() {
     const { order, nextStage } = useOrder()
 
-    const [ paymentData, setPaymentData ] = useState<PaymentData>(initialOrder.paymentData)
+    const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
 
     useEffect(() => {
         if (order)
@@ -50,53 +50,60 @@ export default function OrderForm() {
     }
 
     return (
-        <Paper shadow="sm" radius="md" p="md">
-            <Stack>
-                <TextInput
-                    label="ФИО"
-                    withAsterisk
-                    value={paymentData?.name}
-                    onChange={e => setField("name", e.target.value)}
-                    error={paymentFormErrors?.name?.join(', ')}
-                />
-                <MaskInput
-                    label="Телефон"
-                    withAsterisk
-                    mask="+7 (999) 999-99-99"
-                    value={paymentData.phone}
-                    onChange={value => setField("phone", value)}
-                    error={paymentFormErrors?.phone?.join(', ')}
-                />
-                <TextInput
-                    label="Возраст"
-                    withAsterisk
-                    value={paymentData.age}
-                    onChange={e => setField("age", e.target.value.replace(/\D/, ''))}
-                    error={paymentFormErrors?.age?.join(', ')}
-                />
-                <TextInput
-                    label="Никнейм"
-                    value={paymentData.nickname}
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, nickname: e.target.value }))}
-                />
-                <TextInput
-                    label="Адрес страницы VK (если есть, для оперативной связи)"
-                    value={paymentData.social}
-                    onChange={(e) => setPaymentData(prev => ({ ...prev, social: e.target.value }))}
-                />
-                <Flex justify="flex-end">
-                    <Group>
-                        <Button
-                            leftIcon={<IconArrowLeft />}
-                            variant="default"
-                            onClick={() => signOut()}
-                        >
-                            Войти с другим e-mail
-                        </Button>
-                        <Button onClick={sendPaymentOrder}>Далее</Button>
-                    </Group>
-                </Flex>
-            </Stack>
-        </Paper>
+        <Flex sx={{
+            width: "100%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+        }}>
+            <Paper shadow="sm" radius="md" p="md">
+                <Stack>
+                    <TextInput
+                        label="ФИО"
+                        withAsterisk
+                        value={paymentData?.name}
+                        onChange={e => setField("name", e.target.value)}
+                        error={paymentFormErrors?.name?.join(', ')}
+                    />
+                    <MaskInput
+                        label="Телефон"
+                        withAsterisk
+                        mask="+7 (999) 999-99-99"
+                        value={paymentData.phone}
+                        onChange={value => setField("phone", value)}
+                        error={paymentFormErrors?.phone?.join(', ')}
+                    />
+                    <TextInput
+                        label="Возраст"
+                        withAsterisk
+                        value={paymentData.age}
+                        onChange={e => setField("age", e.target.value.replace(/\D/, ''))}
+                        error={paymentFormErrors?.age?.join(', ')}
+                    />
+                    <TextInput
+                        label="Никнейм"
+                        value={paymentData.nickname}
+                        onChange={(e) => setPaymentData(prev => ({ ...prev, nickname: e.target.value }))}
+                    />
+                    <TextInput
+                        label="Адрес страницы VK (если есть, для оперативной связи)"
+                        value={paymentData.social}
+                        onChange={(e) => setPaymentData(prev => ({ ...prev, social: e.target.value }))}
+                    />
+                    <Flex justify="flex-end">
+                        <Group>
+                            <Button
+                                leftIcon={<IconArrowLeft />}
+                                variant="default"
+                                onClick={() => signOut()}
+                            >
+                                Войти с другим e-mail
+                            </Button>
+                            <Button onClick={sendPaymentOrder}>Далее</Button>
+                        </Group>
+                    </Flex>
+                </Stack>
+            </Paper>
+        </Flex>
     )
 }
