@@ -42,6 +42,7 @@ model Password {
 model Ticket {
   id           Int        @id @default(autoincrement())
   number       String
+  sortNumber   Int        @default(0)
   reserved     Boolean    @default(false)
   priceRange   PriceRange @relation(fields: [priceRangeId], references: [id])
   priceRangeId Int

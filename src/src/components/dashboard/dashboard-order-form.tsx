@@ -3,18 +3,27 @@
 import { File as DBFile, Order, OrderStatus, PriceRange, Row, Ticket } from "@prisma/client"
 import { useState } from "react"
 import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
-import { Button, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
+import { Button, createStyles, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
 import OrderStatusText from "@/components/orders/client/order-status-text"
 import { useRouter } from "next/navigation"
 import { PaymentData } from "../order-make/use-order"
+import Link from "next/link"
 
-export default function DashboardOrderForm({ order }: { order: (Omit<Order, "createdAt"> & { 
-    cheque: DBFile | null,
-    createdAt: string,
-    tickets: (Ticket & { row: Row, priceRange: PriceRange})[],
-    sentTickets: boolean
-}) }) {
+const useStyles = createStyles((theme) => ({
+    header: {
+        flexBasis: 120
+    },
+}))
+
+export default function DashboardOrderForm({ order }: {
+    order: (Omit<Order, "createdAt"> & {
+        cheque: DBFile | null,
+        createdAt: string,
+        tickets: (Ticket & { row: Row, priceRange: PriceRange })[],
+        sentTickets: boolean
+    })
+}) {
     // console.log(order)
     const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status)
     const [editOrderStatus, setEditOrderStatus] = useState(false)
@@ -51,11 +60,24 @@ export default function DashboardOrderForm({ order }: { order: (Omit<Order, "cre
         setLoading(false)
     }
 
+    const { classes } = useStyles()
+
     return (
         <Paper p="sm" shadow="xs">
             <Stack>
-                <Text>Номер заказа: {order.id}</Text>
-                <Text>{order.price.toFixed(2)} р.</Text>
+                <Group>
+                    <Text className={classes.header}>Номер заказа:</Text>
+                    <Text>{order.id}</Text>
+                </Group>
+                <Group>
+                    <Text className={classes.header}>Дата заказа:</Text>
+                    <Text>{order.createdAt}</Text>
+                </Group>
+                <Group>
+                    <Text className={classes.header}>Сумма заказа:</Text>
+                    <Text>{order.price.toFixed(2)} р.</Text>
+                </Group>
+
                 {!editOrderStatus && <Group>
                     {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
                     {order.cheque && <OrderStatusText status={orderStatus} />}
@@ -101,23 +123,38 @@ export default function DashboardOrderForm({ order }: { order: (Omit<Order, "cre
                 </Group>}
                 <Input.Error>{setStatusError}</Input.Error>
                 {/* <OrderStatusSelect value={orderStatus} onChange={setOrderStatus}/> */}
-                <Text>{(order.paymentData as PaymentData).name}</Text>
-                <Text>{(order.paymentData as PaymentData).email}</Text>
-                <Text>{order.createdAt}</Text>
-
-                {/* <Text>Места:</Text> */}
-                <List type="ordered">
-                    {order.tickets.map(ticket => (
-                        <List.Item key={ticket.id} >
-                            <Group>
-                                <Text>Ряд: {ticket.row.number} Место: {ticket.number}</Text>
-                                <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
-                            </Group>
-                        </List.Item>
-                    ))}
-                </List>
                 <Group>
-                    {!order.cheque && <Text color="red">Чек не найден</Text>} 
+                    <Text className={classes.header}>ФИО:</Text>
+                    <Text>{(order.paymentData as PaymentData).name}</Text>
+                </Group>
+                <Group>
+                    <Text className={classes.header}>E-mail:</Text>
+                    <Text>{(order.paymentData as PaymentData).email}</Text>
+                </Group>
+                <Group>
+                    <Text className={classes.header}>Телефон:</Text>
+                    <Text>{(order.paymentData as PaymentData).phone}</Text>
+                </Group>
+                <Group>
+                    <Text className={classes.header}>Ссылка на VK:</Text>
+                    {(order.paymentData as PaymentData).social && <Link target="_blank" href={(order.paymentData as PaymentData).social}>{(order.paymentData as PaymentData).social}</Link>}
+                    {!(order.paymentData as PaymentData).social && <Text>Нет</Text>}
+                </Group>
+                <Group sx={{alignItems: "flex-start"}}>
+                    <Text className={classes.header}>Места:</Text>
+                    <List type="ordered">
+                        {order.tickets.map(ticket => (
+                            <List.Item key={ticket.id}>
+                                <Group>
+                                    <Text>Ряд: {ticket.row.number} Место: {ticket.number}</Text>
+                                    <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
+                                </Group>
+                            </List.Item>
+                        ))}
+                    </List>
+                </Group>
+                <Group>
+                    {!order.cheque && <Text color="red">Чек не найден</Text>}
                     <Button
                         leftIcon={<IconDownload />}
                         component="a"

@@ -28,7 +28,11 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
                 include: {
                     row: true,
                     priceRange: true
-                }
+                },
+                orderBy: [
+                    { row: { number: "asc" } },
+                    { sortNumber: "asc" }
+                ]
             }
         }
     })

@@ -13,7 +13,7 @@ export default function Summary() {
     return (
         <Paper shadow="sm" radius="md" p="md">
             <Stack>
-                <Text size="sm" fw={700}>Выбрано {order ? `(${order.tickets.size})` : ""}:</Text>
+                <Text size="sm" fw={700}>Выбрано {selectedTickets.size ? `(${selectedTickets.size})` : ""}:</Text>
                 {[...selectedTickets.values()].map(ticket => (
                     <Group key={ticket.id} sx={{justifyContent: "space-between"}}>
                         <Text size="sm">Ряд: {ticket.rowNumber}, Место: {ticket.number}</Text>

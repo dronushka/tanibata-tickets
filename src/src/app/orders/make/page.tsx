@@ -27,7 +27,11 @@ export default async function Page() {
                     tickets: {
                         include: {
                             priceRange: true
-                        }
+                        },
+                        orderBy: [
+                            { row: { number: "asc" } },
+                            { sortNumber: "desc" }
+                        ]
                     }
                 }
             }

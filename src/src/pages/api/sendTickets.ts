@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/db"
 import { z } from "zod"
-import contentDisposition from "content-disposition"
 import generateTicket from "@/lib/generateTicket"
 import { Buffer } from "buffer"
 import { emailTransporter } from "@/mail"
@@ -30,7 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 tickets: {
                     include: {
                         row: true,
-                    }
+                    },
+                    orderBy: [
+                        { row: { number: "asc"} },
+                        { sortNumber: "asc" }
+                    ]
                 },
                 user: true
             }
