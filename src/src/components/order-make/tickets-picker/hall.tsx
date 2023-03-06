@@ -67,7 +67,7 @@ export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
             }}>
                 {
                     rows && rows.map((row, i) => (
-                        <Flex key={row.id} sx={getRowSx(i)}>
+                        <Flex key={i} sx={getRowSx(i)}>
                             <Text fz="xs" sx={{ flexBasis: 40, whiteSpace: "nowrap" }}>{`Ряд ${row.number}`}</Text>
                             <Flex
                                 sx={{flexGrow: 1, justifyContent: "center", flexWrap: "nowrap", gap: 2 }}

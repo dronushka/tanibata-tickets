@@ -1,10 +1,13 @@
 import { Box, Button, Flex, Loader, Stack } from "@mantine/core"
-import { Venue } from "@prisma/client"
+import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ClientTicket, TicketRow, useOrder } from "../use-order"
+import { TicketRow, useOrder } from "../use-order"
 import Hall from "./hall"
 import Stage from "./stage"
 import Summary from "./summary"
+
+export type ClientTicket = Ticket & { priceRange: PriceRange | null }
+export type ClientTicketSetter = Dispatch<SetStateAction<Map<number, ClientTicket>>>
 
 export const TicketContext = createContext<
     {
@@ -18,7 +21,8 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null }) {
+export default function TicketsPicker({ venue }: { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }) {
+    console.log(venue)
     const { prevStage } = useOrder()
 
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)

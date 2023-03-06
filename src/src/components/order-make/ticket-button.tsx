@@ -1,7 +1,6 @@
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { Dispatch, SetStateAction } from "react"
-import { ClientTicket } from "./use-order"
+import { ClientTicket, ClientTicketSetter } from "./tickets-picker/tickets-picker"
 
 export default function TicketButton(
     {
@@ -13,7 +12,7 @@ export default function TicketButton(
     }:
         {
             ticket: ClientTicket,
-            setSelectedTickets: Dispatch<SetStateAction<Map<number, ClientTicket>>>,
+            setSelectedTickets: ClientTicketSetter,
             selected: boolean,
             reserved?: boolean,
             sx: Sx
@@ -31,7 +30,7 @@ export default function TicketButton(
                 const newTickets = new Map(prev).set(ticket.id, ticket)
                 return new Map(
                     [...newTickets.entries()].sort(([k, v], [k2, v2])=> {
-                        return parseInt(v.rowNumber) - parseInt(v2.rowNumber) || parseInt(v.number) - parseInt(v2.number)
+                        return (v.rowNumber ? parseInt(v.rowNumber) : 0) - (v2.rowNumber ? parseInt(v2.rowNumber) : 0) || parseInt(v.number) - parseInt(v2.number)
                     })
                 )
             }
@@ -42,11 +41,11 @@ export default function TicketButton(
 
     if (selected)
         colorCode = "yellow"
-    else if (ticket.priceRange.id === 1)
+    else if (ticket.priceRange?.id === 1)
         colorCode = "green"
-    else if (ticket.priceRange.id === 2)
+    else if (ticket.priceRange?.id === 2)
         colorCode = "violet"
-    else if (ticket.priceRange.id === 3)
+    else if (ticket.priceRange?.id === 3)
         colorCode = "pink"
 
     return (
@@ -69,7 +68,7 @@ export default function TicketButton(
                 <Stack spacing="xs">
                     <Text size="xs">Ряд: {ticket.rowNumber}</Text>
                     <Text size="xs">Место: {ticket.number}</Text>
-                    <Text size="xs">Цена: {ticket.priceRange.price}</Text>
+                    <Text size="xs">Цена: {ticket.priceRange?.price ?? 0}</Text>
                 </Stack>
             </Popover.Dropdown>
         </Popover>

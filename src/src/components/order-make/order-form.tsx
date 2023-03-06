@@ -60,13 +60,15 @@ export default function OrderForm() {
                 <Stack>
                     <TextInput
                         label="ФИО"
+                        name="fullname"
                         withAsterisk
-                        value={paymentData?.name}
+                        value={paymentData.name}
                         onChange={e => setField("name", e.target.value)}
                         error={paymentFormErrors?.name?.join(', ')}
                     />
                     <MaskInput
                         label="Телефон"
+                        name="phone"
                         withAsterisk
                         mask="+7 (999) 999-99-99"
                         value={paymentData.phone}
@@ -75,6 +77,7 @@ export default function OrderForm() {
                     />
                     <TextInput
                         label="Возраст"
+                        name="age"
                         withAsterisk
                         value={paymentData.age}
                         onChange={e => setField("age", e.target.value.replace(/\D/, ''))}
@@ -82,11 +85,13 @@ export default function OrderForm() {
                     />
                     <TextInput
                         label="Никнейм"
+                        name="nickname"
                         value={paymentData.nickname}
                         onChange={(e) => setPaymentData(prev => ({ ...prev, nickname: e.target.value }))}
                     />
                     <TextInput
                         label="Адрес страницы VK (если есть, для оперативной связи)"
+                        name="social"
                         value={paymentData.social}
                         onChange={(e) => setField("social", e.target.value)}
                         error={paymentFormErrors?.social?.join(', ')}

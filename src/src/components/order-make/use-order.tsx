@@ -1,4 +1,4 @@
-import { PriceRange, Row, Ticket } from "@prisma/client"
+import { PriceRange, Ticket } from "@prisma/client"
 import { useSession } from "next-auth/react"
 import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react"
 import { z } from "zod"
@@ -6,12 +6,20 @@ import { createOrder, getUser, uploadCheque } from "@/lib/api-calls"
 
 export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
 
-export type ClientTicket = Ticket & {
-    rowNumber: string,
-    priceRange: PriceRange
-}
+// export type ClientTicket = Ticket & {
+//     rowNumber: string,
+//     priceRange: PriceRange
+// }
 
-export type TicketRow = Row & { tickets: ClientTicket[] }
+// export type TicketRow = {
+//     rowNumber: string, 
+//     tickets: ClientTicket[] 
+// }
+
+export type TicketRow = {
+    number: string,
+    tickets: (Ticket & { priceRange: PriceRange | null })[]
+}
 
 export type OrderContext = {
     defaultPaymentData?: PaymentData,
@@ -22,7 +30,7 @@ export type OrderContext = {
 }
 
 export const paymentDataSchema = z.object({
-    name: z.string().min(1, "Введите имя").refine(value => value.trim().split(' ').length >= 2, "Введите полное имя"),
+    name: z.string().min(1, "Введите имя").refine(value => value.trim().split(' ').length >= 2, "Введите полностью фамилию, имя и отчество"),
     phone: z.string().min(10, "Введите телефон").max(10),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
@@ -50,7 +58,7 @@ export type ClientOrder = {
     stage: OrderStage,
     error?: string,
     paymentData: PaymentData,
-    tickets: Map<number, ClientTicket>,
+    tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
     cheque?: File
 }
 

@@ -1,10 +1,10 @@
 "use client"
 
-import { Row, User, Venue } from "@prisma/client"
+import { User, Venue } from "@prisma/client"
 import { Button, Container, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
 import { useSession } from "next-auth/react"
-import { ClientTicket, OrderProvider, OrderStage, TicketRow, useOrder } from "./use-order"
+import { OrderProvider, OrderStage, TicketRow, useOrder } from "./use-order"
 import Link from "next/link"
 import FullPageMessage from "../full-page-message"
 import LoginForm from "../login-form"
@@ -13,7 +13,7 @@ import OrderForm from "./order-form"
 import PaymentForm from "./payment-form"
 import TicketsPicker from "./tickets-picker/tickets-picker"
 
-function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null }) {
+function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }) {
     const { status } = useSession()
 
     const { order, nextStage, prevStage, setOrder } = useOrder()
@@ -109,7 +109,7 @@ function Scaffolding({ venue }: { venue: (Venue & { rows: TicketRow[] }) | null 
 
 export default function MakeOrder(
     { user, venue }:
-        { user: (Omit<User, "createdAt"> & { createdAt: string }) | null, venue: (Venue & { rows: TicketRow[] }) | null }
+        { user: (Omit<User, "createdAt"> & { createdAt: string }) | null, venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }
 ) {
     return (
         <OrderProvider initPaymentData={{
