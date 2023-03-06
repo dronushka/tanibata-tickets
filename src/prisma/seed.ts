@@ -97,7 +97,7 @@ async function main() {
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            noPlaces: false
+            noPlaces: true
         }
     })
 
