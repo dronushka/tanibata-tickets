@@ -16,8 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const user = await prisma.user.findUnique({
             where: {
                 email: session?.user.email
-            },
-            include: { role: true }
+            }
         })
         
         res.status(200).json(user)
