@@ -16,8 +16,8 @@ model User {
   phone     String?
   social    String?
   createdAt DateTime   @default(now())
-  role      Role  @default(CUSTOMER)
-  Order     Order[]
+  role      Role       @default(CUSTOMER)
+  order     Order[]
   passwords Password[]
 }
 
@@ -43,7 +43,7 @@ model Ticket {
   venueId       Int?
   order         Order?      @relation(fields: [orderId], references: [id])
   priceRange    PriceRange? @relation(fields: [priceRangeId], references: [id])
-  Venue         Venue?      @relation(fields: [venueId], references: [id])
+  venue         Venue?      @relation(fields: [venueId], references: [id])
 
   // @@index([orderId], map: "Ticket_orderId_fkey")
   // @@index([priceRangeId], map: "Ticket_priceRangeId_fkey")
@@ -51,14 +51,15 @@ model Ticket {
 }
 
 model Venue {
-  id         Int          @id @default(autoincrement())
-  name       String
-  active     Boolean      @default(false)
-  address    String       @default("")
-  noPlaces   Boolean      @default(false)
-  start      DateTime     @default(now())
-  PriceRange PriceRange[]
-  Ticket     Ticket[]
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String       @default("")
+  active      Boolean      @default(false)
+  address     String       @default("")
+  noPlaces    Boolean      @default(false)
+  start       DateTime     @default(now())
+  priceRange  PriceRange[]
+  tickets     Ticket[]
 }
 
 model PriceRange {
@@ -66,8 +67,8 @@ model PriceRange {
   price   Float    @default(0)
   name    String
   venueId Int?
-  Venue   Venue?   @relation(fields: [venueId], references: [id])
-  Ticket  Ticket[]
+  venue   Venue?   @relation(fields: [venueId], references: [id])
+  tickets  Ticket[]
 
   // @@index([venueId], map: "PriceRange_venueId_fkey")
 }
