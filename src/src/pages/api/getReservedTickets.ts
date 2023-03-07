@@ -26,10 +26,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             },
                             {
                                 order: {
-                                    NOT: {
-                                        status: OrderStatus.CANCELLED
-                                    }
+                                    AND: [
+                                        {
+                                            NOT: {
+                                                status: OrderStatus.CANCELLED
+                                            }
+                                        },
+                                        {
+                                            NOT: {
+                                                status: OrderStatus.RETURNED
+                                            }
+                                        }
+                                    ]
                                 }
+
                             }
                         ],
 

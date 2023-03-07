@@ -20,10 +20,9 @@ export default async function OrdersPage() {
             tickets: {
                 include: {
                     priceRange: true,
-                    row: true
                 },
                 orderBy: [
-                    { row: { number: "asc" } },
+                    { sortRowNumber: "asc" },
                     { sortNumber: "asc" }
                 ]
             }

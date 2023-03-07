@@ -12,6 +12,7 @@ import OrderError from "./order-error"
 import OrderForm from "./order-form"
 import PaymentForm from "./payment-form"
 import TicketsPicker from "./tickets-picker/tickets-picker"
+import TicketsForm from "./tickets-form"
 
 function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }) {
     const { status } = useSession()
@@ -26,7 +27,7 @@ function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string
     // console.log({ user })
     // console.log({ order })
 
-    if (!order || status === "loading")
+    if (!venue || !order || status === "loading")
         return (
             <FullPageMessage>
                 <Loader size="xl" />
@@ -59,7 +60,8 @@ function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {order.stage === "form" && <OrderForm />}
-                {order.stage === "tickets" && <TicketsPicker venue={venue} />}
+                {order.stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} />}
+                {order.stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} />}
                 {order.stage === "payment" && <PaymentForm />}
                 {(order.stage === "makeReservation" || order.stage === "complete" || order.stage === "error") && (
                     <FullPageMessage>

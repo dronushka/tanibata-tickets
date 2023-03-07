@@ -3,7 +3,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { OrderStatus } from "@prisma/client"
-import { ClientTicket } from "@/components/order-make/use-order"
+import { ClientTicket } from "@/components/order-make/tickets-picker/tickets-picker"
 import formidable, { Fields, File, Files } from 'formidable'
 
 export const config = {
@@ -83,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return
             }
             else {
-                price += ticket.priceRange.price
+                price += ticket.priceRange?.price ?? 0
             }
         }
 

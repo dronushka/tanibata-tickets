@@ -1,11 +1,10 @@
 import { prisma } from "@/db"
-import MakeOrder from "@/components/order-make/make-order"
-import { getServerSession } from "next-auth/next"
-import { PriceRange, Ticket, User } from "@prisma/client"
+import { User } from "@prisma/client"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { getServerSession } from "next-auth/next"
+import { z } from "zod"
 import { TicketRow } from "@/components/order-make/use-order"
-import { string, z } from "zod"
-// import { ClientVenue } from "@/types/types"
+import MakeOrder from "@/components/order-make/make-order"
 
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)

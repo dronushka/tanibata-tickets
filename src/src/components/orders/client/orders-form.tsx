@@ -2,7 +2,7 @@
 import FullPageMessage from "@/components/full-page-message"
 import { requestReturn as apiRequestReturn, setOrderStatus as apiSetOrderStatus, uploadCheque } from "@/lib/api-calls"
 import { Box, Button, FileButton, Group, Input, List, Loader, Paper, Stack, Text } from "@mantine/core"
-import { File as DBFile, Order, OrderStatus, PriceRange, Row, Ticket } from "@prisma/client"
+import { File as DBFile, Order, OrderStatus, PriceRange, Ticket } from "@prisma/client"
 import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icons-react"
 import { useState } from "react"
 import OrderStatusText from "./order-status-text"
@@ -14,8 +14,7 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
         cheque: DBFile | null,
         tickets: (Ticket & (
             {
-                row: Row,
-                priceRange: PriceRange
+                priceRange: PriceRange | null
             }
         ))[]
     }
@@ -115,8 +114,8 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                             {order.tickets.map(ticket => (
                                 <List.Item key={ticket.id} >
                                     <Group>
-                                        <Text>Ряд: {ticket.row.number} Место: {ticket.number}</Text>
-                                        <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
+                                        <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
+                                        <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
                                     </Group>
                                 </List.Item>
                             ))}
