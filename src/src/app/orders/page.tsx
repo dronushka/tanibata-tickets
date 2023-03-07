@@ -20,6 +20,7 @@ export default async function OrdersPage() {
             tickets: {
                 include: {
                     priceRange: true,
+                    venue: true,
                 },
                 orderBy: [
                     { sortRowNumber: "asc" },
@@ -33,6 +34,7 @@ export default async function OrdersPage() {
     // console.log(orders)
     return <OrdersForm orders={orders.map(order => ({
         ...order,
-        createdAt: order.createdAt.toLocaleString('ru-RU')
+        createdAt: order.createdAt.toLocaleString('ru-RU'),
+        tickets: order.tickets.map(ticket => ({ ...ticket, venue: { ...ticket.venue, start: ticket.venue?.start.toLocaleString('ru-RU')}}))
     }))}/>
 }
