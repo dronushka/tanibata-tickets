@@ -53,7 +53,15 @@ export const authOptions: NextAuthOptions = {
                         return { 
                             id: user.id,
                             email: user.email,
-                            role: user.role
+                            role: user.role,
+                            paymentData: {
+                                name: user?.name ?? "",
+                                email: user?.email ?? "",
+                                age: user?.age ? String(user.age) : "",
+                                phone: user?.phone ?? "",
+                                nickname: user?.nickname ?? "",
+                                social: user?.social ?? "",
+                            }
                         }
                     }
                 }

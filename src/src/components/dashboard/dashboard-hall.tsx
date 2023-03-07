@@ -2,7 +2,7 @@
 
 import { Box, Flex, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { Order, PriceRange, Row, Ticket, Venue } from "@prisma/client"
-import Stage from "../order-make/tickets-picker/stage"
+import Stage from "../MakeOrder/TicketsPicker/Stage"
 import DashboardTicketButton from "./dashboard-ticket-button"
 
 export default function DashboardHall({ venue, reserved, total }:

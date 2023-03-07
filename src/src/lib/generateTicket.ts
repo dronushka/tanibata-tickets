@@ -1,9 +1,9 @@
-import { Template, BLANK_PDF, generate, Schema, TextSchema } from '@pdfme/generator'
-import { Order, Row, Ticket, User } from '@prisma/client'
+import { Template, BLANK_PDF, generate, TextSchema } from '@pdfme/generator'
+import { Order, Ticket, User } from '@prisma/client'
 // import { Template, BLANK_PDF } from '@pdfme/ui'; <- Template types and BLANK_PDF can also be imported from @pdfme/ui.
 // import QRCode from 'qrcode'
 
-export default async function generateTicket(order: Order & { user: User, tickets: (Ticket & { row: Row })[] }) {
+export default async function generateTicket(order: Order & { user: User, tickets: Ticket[] }) {
     // const qrCode = await QRCode.toDataURL("1")
     const tickets: Record<string, TextSchema> = {}
     const ticketValues: Record<string, string> = {}
@@ -15,7 +15,7 @@ export default async function generateTicket(order: Order & { user: User, ticket
             width: 100,
             height: 10
         }
-        ticketValues[ticket.id] = `${key + 1}. Ряд: ${ticket.row.number}, место ${ticket.number}`
+        ticketValues[ticket.id] = `${key + 1}. Ряд: ${ticket.rowNumber}, место ${ticket.number}`
     })
 
     const template: Template = {

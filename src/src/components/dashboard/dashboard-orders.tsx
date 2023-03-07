@@ -4,12 +4,12 @@ import { useEffect, useState } from "react"
 import { ActionIcon, Box, Button, Group, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import OrderStatusText from "@/components/orders/client/order-status-text"
-import { DashboardOrder } from "@/types/types"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./orders-status-filter"
 import { File as DBFile, Order, OrderStatus, SentTicket, Ticket } from "@prisma/client"
-import { PaymentData } from "../order-make/use-order"
+import { PaymentData } from "../MakeOrder/useOrder"
+
 // import { events} from "next/router"
 
 

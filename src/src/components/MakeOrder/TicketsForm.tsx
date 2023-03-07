@@ -2,13 +2,18 @@ import { Button, Container, Flex, Group, Paper, Stack, Text, TextInput } from "@
 import { Venue } from "@prisma/client"
 import { IconMinus, IconPlus } from "@tabler/icons-react"
 import { useState } from "react"
-import { TicketRow, useOrder } from "./use-order"
+import { ClientOrder, TicketRow } from "./types"
+// import { TicketRow, useOrder } from "./use-order"
 
 export default function TicketsForm(
-    { venue }:
-        { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }
+    { venue, prevStage, nextStage }:
+        { 
+            venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null,
+            prevStage: () => void,
+            nextStage: (order: ClientOrder) => void 
+        }
 ) {
-    const { prevStage, nextStage } = useOrder()
+    // const { prevStage, nextStage } = useOrder()
 
     const [ticketCount, setTicketCount] = useState(1)
 

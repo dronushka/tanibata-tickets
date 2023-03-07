@@ -1,18 +1,17 @@
 'use client'
 
-import { Ticket } from "@prisma/client"
-import { TicketRow, useOrder } from "../use-order"
-import { getReservedTickets } from "@/lib/api-calls"
-import { memo, useContext, useEffect, useState } from "react"
-import { Flex, Group, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
-import { TicketContext } from "./tickets-picker"
-import TicketButton from "../ticket-button"
+import { memo, useContext, useEffect, useState, useTransition } from "react"
+import { Flex, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
+import { TicketContext } from "./TicketsPicker"
+import TicketButton from "../TicketButton"
+import { useRouter } from "next/navigation"
+import { TicketRow } from "../useOrder"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected && oldPros.reserved === newProps.reserved
 })
 
-export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
+export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[], reserved: number[] }) {
     const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexDirection: "row", flexWrap: "nowrap", flexGrow: 1, gap: 10 }
         if (rowIndex === 9)
@@ -27,39 +26,22 @@ export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
         return defaultSx
     }
 
-    const [reservedTickets, setReservedTickets] = useState<Ticket[]>([])
-
-    const [loadingTickets, setLoadingTickets] = useState<boolean>(true)
-
-    const { setOrder } = useOrder() //TODO move out order context from here
-
+    const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
+    const router = useRouter()
+    const [ isPending, startTransition ] = useTransition()
+    
     useEffect(() => {
-        const fetchReservedTickets = async () => {
-            const res = await getReservedTickets()
-            if (res.success)
-                setReservedTickets(res.data)
-            else
-                setOrder && setOrder(prev => ({
-                    ...prev,
-                    stage: "error",
-                    error: res.error,
-                    tickets: new Map
-                }))
-            setLoadingTickets(false)
-        }
-
-        if (loadingTickets)
-            fetchReservedTickets()
-    }, [loadingTickets])
-
-
+        router && startTransition(() => router.refresh())
+        setInitialUpdate(false)
+    }, [ router ])
+        
     const { selectedTickets, setSelectedTickets } = useContext(TicketContext)
 
     const dimension = 17
 
     return (
         <div style={{ position: 'relative' }}>
-            <LoadingOverlay visible={loadingTickets} overlayBlur={2} />
+            <LoadingOverlay visible={initialUpdate || isPending} overlayBlur={2} />
             <Stack spacing={2} sx={{
                 "& > :nth-child(10)": {
                     marginBottom: dimension,
@@ -78,7 +60,7 @@ export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
                                             key={ticket.id}
                                             sx={getTicketSx(i, j)}
                                             selected={!!selectedTickets.has(ticket.id)}
-                                            reserved={!!reservedTickets.find(rt => rt.id === ticket.id)}
+                                            reserved={!!reserved.find(id => id === ticket.id)}
                                             ticket={ticket}
                                             setSelectedTickets={setSelectedTickets}
                                         />

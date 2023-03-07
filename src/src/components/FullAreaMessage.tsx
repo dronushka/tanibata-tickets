@@ -1,7 +1,9 @@
-import { Flex, Paper, Stack, Text } from "@mantine/core"
+"use client"
+
+import { Flex, Paper } from "@mantine/core"
 import { ReactNode } from "react"
 
-export default function FullPageMessage({children}: {children: ReactNode}) {
+export default function FullAreaMessage({children}: {children: ReactNode}) {
     return (
         <Flex sx={{
             width: "100%",

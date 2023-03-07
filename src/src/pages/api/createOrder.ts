@@ -3,7 +3,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { OrderStatus } from "@prisma/client"
-import { ClientTicket } from "@/components/order-make/tickets-picker/tickets-picker"
+import { ClientTicket } from "@/components/MakeOrder/TicketsPicker/TicketsPicker"
 import formidable, { Fields, File, Files } from 'formidable'
 
 export const config = {
@@ -57,18 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const dbTickets = await prisma.ticket.findMany({
             where: {
-                AND: [
-                    {
-                        id: { in: tickets.map(ticket => ticket.id) }
-                    },
-                    {
-                        order: {
-                            NOT: {
-                                status: OrderStatus.CANCELLED
-                            }
-                        }
-                    }
-                ]
+                id: { in: tickets.map(ticket => ticket.id) }
             },
             include: {
                 priceRange: true,
@@ -78,7 +67,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let price = 0
         for (let ticket of dbTickets) {
-            if (ticket.order) {
+            if (
+                ticket.reserved
+                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)) {
                 res.status(422).json({ error: "some_tickets_are_bought" })
                 return
             }

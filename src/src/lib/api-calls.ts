@@ -1,40 +1,6 @@
-import { ClientOrder } from "@/components/order-make/use-order"
+import { ClientOrder } from "@/components/MakeOrder/useOrder"
 import { OrderStatus } from "@prisma/client"
 import { z } from "zod"
-
-export const getUser = async () => {
-    const res = await fetch("/api/getUser", {
-        method: "GET",
-        headers: new Headers({ 'content-type': 'application/json' })
-    })
-
-    if (res.ok) {
-        return ({ success: true, data: await res.json() })
-    } else {
-        const response = await res.json()
-        return {
-            success: false,
-            error: "Что-то пошло не так, попробуйте позже"
-        }
-    }
-}
-
-export const getReservedTickets = async () => {
-    const res = await fetch("/api/getReservedTickets", {
-        method: "GET",
-        headers: new Headers({ 'content-type': 'application/json' })
-    })
-
-    if (res.ok) {
-        return ({ success: true, data: (await res.json()).tickets })
-    } else {
-        // const response = await res.json()
-        return {
-            success: false,
-            error: "Что-то пошло не так, попробуйте позже"
-        }
-    }
-}
 
 export const sendTickets = async (orderId: Number) => {
     const res = await fetch("/api/sendTickets?orderId=" + orderId, {
@@ -102,18 +68,6 @@ export const createOrder = async (order: ClientOrder) => {
         body: formData
     })
 
-    if (res.ok) {
-        return ({ success: true, data: await res.json() })
-    } else {
-        return ({
-            success: false,
-            error: (await res.json()).error
-        })
-    }
-}
-
-export const getOrder = async (orderId: number) => {
-    const res = await fetch("/api/getOrder?orderId=" + orderId)
     if (res.ok) {
         return ({ success: true, data: await res.json() })
     } else {

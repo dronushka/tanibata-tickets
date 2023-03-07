@@ -1,11 +1,11 @@
 "use client"
-import FullPageMessage from "@/components/full-page-message"
-import { Box, Button, Stack, Text } from "@mantine/core"
+import FullAreaMessage from "@/components/FullAreaMessage"
+import { Button, Stack, Text } from "@mantine/core"
 import { Venue } from "@prisma/client"
 import Link from "next/link"
 
 export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> & { start: string })[] }) {
-    return <FullPageMessage>
+    return <FullAreaMessage>
         <Stack>
             <Text>Бла, бла, бла важная информация</Text>
             {venues.map(venue => <>
@@ -17,5 +17,5 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
             </>)}
 
         </Stack>
-    </FullPageMessage>
+    </FullAreaMessage>
 }

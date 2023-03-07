@@ -2,7 +2,7 @@ import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import OrdersForm from "../../components/orders/client/orders-form"
+import OrdersForm from "../../components/orders/client/OrdersForm"
 
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)

@@ -1,5 +1,5 @@
 import { prisma } from "@/db"
-import ClientMain from "./client-main"
+import ClientMain from "./ClientMain"
 
 export default async function Page() {
     const venues = await prisma.venue.findMany({

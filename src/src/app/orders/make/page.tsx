@@ -1,10 +1,11 @@
-import { prisma } from "@/db"
-import { User } from "@prisma/client"
+import { TicketRow } from "@/components/MakeOrder/useOrder"
+import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
+import { prisma } from "@/db"
+import { OrderStatus, User } from "@prisma/client"
 import { z } from "zod"
-import { TicketRow } from "@/components/order-make/use-order"
-import MakeOrder from "@/components/order-make/make-order"
+import MakeOrder from "@/components/MakeOrder/MakeOrder"
 
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)
@@ -19,19 +20,20 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
         })
 
     const venueIdValidator = z.string().regex(/^\d+$/)
-    const vanueIdValidated = venueIdValidator.parse(searchParams?.venue)
+    const venueIdValidated = venueIdValidator.safeParse(searchParams?.venue)
 
-    // if (!searchParams?.venue && Number(searchParams?.venue))
-    //     return <p>Мероприятие не найдено</p>
+    if (venueIdValidated.success === false)
+        notFound()
 
     const venue = await prisma.venue.findUnique({
         where: {
-            id: Number(vanueIdValidated)
+            id: Number(venueIdValidated.data)
         },
         include: {
             tickets: {
                 include: {
-                    priceRange: true
+                    priceRange: true,
+                    order: true
                 },
                 orderBy: [
                     { sortRowNumber: "asc" },
@@ -41,28 +43,41 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
         }
     })
 
-    // const ticketRows: Map<string, Ticket & { priceRange: PriceRange}> = new Map
+    if (venue === null)
+        notFound()
+
     const ticketRowMap = new Map<string, TicketRow>()
 
-    if (venue?.tickets)
+    if (venue.tickets)
         for (let ticket of venue.tickets) {
             const rowNumber = ticket.rowNumber ?? "default"
 
             if (!ticketRowMap.has(rowNumber))
                 ticketRowMap.set(rowNumber, { number: rowNumber, tickets: [] })
 
-            ticketRowMap.get(rowNumber)?.tickets.push(ticket)
+            ticketRowMap.get(rowNumber)?.tickets.push({
+                ...ticket,
+                order: ticket.order && {
+                    ...ticket.order,
+                    createdAt: ticket.order.createdAt.toLocaleString('ru-RU')
+                }
+            })
         }
 
+    const { tickets: prismaTickets, ...restVenue } = venue
+    const clientVenue = {
+        ...restVenue,
+        start: restVenue.start.toLocaleString('ru-RU'),
+        rows: [...ticketRowMap.values()],
+        reservedTickets: prismaTickets
+            .filter(ticket =>
+                ticket.reserved
+                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
+            )
+            .map(ticket => ticket.id)
+    }
+
     return <MakeOrder
-        user={user && {
-            ...user,
-            createdAt: user.createdAt.toLocaleString("ru-RU")
-        }}
-        venue={venue && {
-            ...venue,
-            start: venue.start.toLocaleString("ru-RU"),
-            rows: [...ticketRowMap.values()]
-        }}
+        venue={clientVenue}
     />
 }

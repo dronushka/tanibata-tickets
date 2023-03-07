@@ -1,24 +1,13 @@
 import { useState } from "react"
-import { useOrder } from "./use-order"
 import { z } from "zod"
 import { Box, Button, FileButton, Flex, Group, Input, List, Paper, Stack, Text } from "@mantine/core"
 import { IconUpload } from "@tabler/icons-react"
+import { ClientOrder } from "./useOrder"
 
-export default function PaymentForm() {
-    const { order, nextStage } = useOrder()
-
+export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void}) {
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
 
     const [chequeError, setChequeError] = useState<string>("")
-
-    // const chequeValidator = z
-    //     .custom<File>(file => {
-    //         console.log('file', file) 
-    //         return file instanceof File
-    //     }
-    //         , "Приложите файл")
-    //     .refine(file => file?.size < 2 * 1024 * 1024, "Размер файл не должен превышать 2МБ")
-    //     .refine(file => ["image/png", "image/jpeg", "application/pdf"].find(f => f === file?.type), "Допустимые форматы файла: jpeg, png, pdf")
     
     const chequeValidator = z.custom<File>().superRefine((file, ctx) => {
         if (!(file instanceof File)) {
@@ -67,15 +56,12 @@ export default function PaymentForm() {
     const send = () => {
         const res = chequeValidator.safeParse(cheque)
         if (res.success)
-            order && nextStage({ ...order, cheque })
+            onSubmit({ ...order, cheque })
         else 
             setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
-    if (!order)
-        return <></>
-
-    const sum = [...order.tickets.values()].reduce((s, ticket) => (s += ticket.priceRange.price), 0)
+    const sum = [...order.tickets.values()].reduce((s, ticket) => (s += (ticket.priceRange?.price ?? 0)), 0)
 
     return (
         <Paper shadow="sm" radius="md" p="md">
@@ -86,7 +72,7 @@ export default function PaymentForm() {
                         <List.Item key={ticket.id} >
                             <Group>
                                 <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
+                                <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
                             </Group>
                         </List.Item>
                     ))}

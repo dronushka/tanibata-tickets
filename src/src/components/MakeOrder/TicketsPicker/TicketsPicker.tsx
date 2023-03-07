@@ -1,10 +1,10 @@
 import { Box, Button, Flex, Loader, Stack } from "@mantine/core"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
-import { TicketRow, useOrder } from "../use-order"
-import Hall from "./hall"
-import Stage from "./stage"
-import Summary from "./summary"
+import { ClientOrder, TicketRow } from "../useOrder"
+import Hall from "./Hall"
+import Stage from "./Stage"
+import Summary from "./Summary"
 
 export type ClientTicket = Ticket & { priceRange: PriceRange | null }
 export type ClientTicketSetter = Dispatch<SetStateAction<Map<number, ClientTicket>>>
@@ -21,15 +21,17 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue }: { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }) {
-    console.log(venue)
-    const { prevStage } = useOrder()
+export default function TicketsPicker({ venue, order, prevStage, nextStage }: 
+    { 
+        venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }),
+        order: ClientOrder,
+        prevStage: () => void,
+        nextStage: (order: ClientOrder) => void
+    }
+    ) {
 
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
-
-    if (!venue)
-        return <Loader size="xl" />
-
+    
     return (
         <TicketContext.Provider value={{ selectedTickets, setSelectedTickets }}>
             <Stack>
@@ -38,14 +40,14 @@ export default function TicketsPicker({ venue }: { venue: (Omit<Venue, "start"> 
                 }}>
                     <Box>
                         <Stage />
-                        <Hall rows={venue.rows} />
+                        <Hall rows={venue.rows} reserved={venue.reservedTickets} />
                     </Box>
 
                     <Flex sx={{
                         alignItems: "center",
                         padding: 20
                     }}>
-                        <Summary />
+                        <Summary order={order} onSubmit={nextStage} />
                     </Flex>
                 </Flex>
                 <Flex>
