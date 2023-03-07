@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Ticket` ADD COLUMN `OCCVersion` INTEGER NOT NULL DEFAULT 0;

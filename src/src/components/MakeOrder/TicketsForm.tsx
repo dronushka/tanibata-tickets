@@ -2,23 +2,29 @@ import { Button, Container, Flex, Group, Paper, Stack, Text, TextInput } from "@
 import { Venue } from "@prisma/client"
 import { IconMinus, IconPlus } from "@tabler/icons-react"
 import { useState } from "react"
-import { ClientOrder, TicketRow } from "./types"
-// import { TicketRow, useOrder } from "./use-order"
+import { ClientOrder, TicketRow } from "./useOrder"
 
 export default function TicketsForm(
-    { venue, prevStage, nextStage }:
+    { venue, order, prevStage, nextStage }:
         { 
-            venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null,
+            venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }),
+            order: ClientOrder,
             prevStage: () => void,
             nextStage: (order: ClientOrder) => void 
         }
 ) {
     // const { prevStage, nextStage } = useOrder()
-
+    const totalTickets = venue.rows.reduce((sum, row) => sum += row.tickets.length, 0)
+    // console.log({totalTickets, reserved: venue.reservedTickets.length})
     const [ticketCount, setTicketCount] = useState(1)
 
     const setCount = (count: number) => {
-        setTicketCount(ticketCount + count >= 1 ? ticketCount + count : 1)
+        let newTicketCount = ticketCount + count
+        if (newTicketCount > totalTickets - venue.reservedTickets.length)
+            newTicketCount = totalTickets - venue.reservedTickets.length
+        if (newTicketCount < 1)
+            newTicketCount = 1
+        setTicketCount(newTicketCount)
     }
 
     return (
@@ -44,7 +50,7 @@ export default function TicketsForm(
                 </Paper>
                 <Group position="center">
                     <Button variant="default" onClick={prevStage}>Назад</Button>
-                    <Button>Далее</Button>
+                    <Button onClick={() => nextStage({...order, ticketsCount: ticketCount})}>Далее</Button>
                 </Group>
             </Stack>
         </Flex>

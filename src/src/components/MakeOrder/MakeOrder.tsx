@@ -93,7 +93,7 @@ export default function MakeOrder(
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
                 {stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
-                {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
                 {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
                 {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
                     <FullAreaMessage>

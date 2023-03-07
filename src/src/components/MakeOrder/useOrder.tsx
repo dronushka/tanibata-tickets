@@ -1,4 +1,4 @@
-import { createOrder, uploadCheque } from "@/lib/api-calls"
+import { createNoSeatsOrder, createOrder, uploadCheque } from "@/lib/api-calls"
 import { Order, PriceRange, Ticket } from "@prisma/client"
 import { useState } from "react"
 import { z } from "zod"
@@ -36,6 +36,7 @@ export type PaymentData = z.infer<typeof paymentDataSchema>
 export type ClientOrder = {
     orderId?: number,
     paymentData: PaymentData,
+    ticketsCount?: number,
     tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
     cheque?: File
 }
@@ -80,7 +81,7 @@ export const useOrder = (initialOrder: ClientOrder) => {
             case "tickets":
                 if (newOrder) {
                     setStage("makeReservation")
-                    const result = await createOrder(newOrder)
+                    const result = newOrder.ticketsCount !== undefined ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
                     if (result.success) {
                         setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
                         setStage("payment")

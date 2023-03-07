@@ -78,6 +78,29 @@ export const createOrder = async (order: ClientOrder) => {
     }
 }
 
+export const createNoSeatsOrder = async (order: ClientOrder) => {
+    console.log('sending', order)
+
+    const formData = new FormData
+    formData.append('paymentInfo', JSON.stringify(order.paymentData))
+    formData.append('ticketCount', JSON.stringify(order.ticketsCount ?? 1))
+    order.cheque && formData.append('cheque', order.cheque)
+
+    const res = await fetch("/api/createNoSeatsOrder", {
+        method: "POST",
+        body: formData
+    })
+
+    if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
+    }
+}
+
 export const uploadCheque = async (orderId: number, cheque: File) => {
     const formData = new FormData
     formData.append("orderId", String(orderId))
