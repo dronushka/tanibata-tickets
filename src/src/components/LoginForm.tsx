@@ -1,10 +1,11 @@
 "use client"
 
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import {  Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
 import { sendPasswordEmail } from "@/lib/api-calls"
 import { useRouter } from "next/navigation"
+import FullAreaLoading from "./FullAreaLoading"
 
 export default function LoginForm(
     { clientEmail, callback, rollback }: 
@@ -70,6 +71,9 @@ export default function LoginForm(
 
     const router = useRouter()
 
+    const { status } = useSession()
+    if (status === "loading")
+        return <FullAreaLoading />
     return (
         <Flex sx={{
             width: "100%",

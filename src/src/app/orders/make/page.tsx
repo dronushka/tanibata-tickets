@@ -1,14 +1,11 @@
+import { TicketRow } from "@/components/MakeOrder/useOrder"
 import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { User } from "@prisma/client"
 import { z } from "zod"
-import { TicketRow } from "@/components/MakeOrder/types"
-import FullAreaLoading from "@/components/full-area-loading"
-import FullPageMessage from "@/components/full-page-message"
 import MakeOrder from "@/components/MakeOrder/MakeOrder"
-
 
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)
@@ -27,8 +24,6 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
 
     if (venueIdValidated.success === false)
         notFound()
-    // if (!searchParams?.venue && Number(searchParams?.venue))
-    //     return <p>Мероприятие не найдено</p>
 
     const venue = await prisma.venue.findUnique({
         where: {

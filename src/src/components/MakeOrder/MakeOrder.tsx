@@ -1,43 +1,67 @@
 "use client"
 
-import { User, Venue } from "@prisma/client"
-import { Button, Container, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
-import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
+import { useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { OrderProvider, OrderStage, TicketRow, useOrder } from "./use-order"
+import { Venue } from "@prisma/client"
 import Link from "next/link"
-import FullPageMessage from "../full-page-message"
-import LoginForm from "../login-form"
-import OrderError from "./order-error"
-import OrderForm from "./order-form"
-import PaymentForm from "./payment-form"
-import TicketsPicker from "./tickets-picker/tickets-picker"
-import TicketsForm from "./tickets-form"
+import { Button, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
+import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
+import FullAreaMessage from "../FullAreaMessage"
+import LoginForm from "../LoginForm"
+import OrderError from "./OrderError"
+import OrderForm from "./OrderForm"
+import PaymentForm from "./PaymentForm"
+import TicketsPicker from "./TicketsPicker/TicketsPicker"
+import TicketsForm from "./TicketsForm"
+import { ClientOrder, OrderStage, PaymentData, TicketRow, useOrder } from "./useOrder"
 
-function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }) {
-    const { status } = useSession()
+export const getStepNumber = (step?: OrderStage) => {
+    const stages = ["authenticate", "form", "tickets", "payment", "complete"]
+    return stages.findIndex(s => s === step)
+}
 
-    const { order, nextStage, prevStage, setOrder } = useOrder()
-
-    const getStepNumber = (step?: OrderStage) => {
-        const stages = ["authenticate", "form", "tickets", "payment", "complete"]
-        return stages.findIndex(s => s === step)
+export default function MakeOrder(
+    { paymentData, venue }:
+        { paymentData: PaymentData, venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] })}
+) {
+    const initialOrder: ClientOrder = {
+        paymentData: { ...paymentData },
+        tickets: new Map(),
+        cheque: undefined
     }
+
+
+    const  { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
+
+    const { data: session, status } = useSession()
+
+    // const router = useRouter()
+
+    useEffect(() => {
+        if (!setStage || !setOrder)
+            return
+
+        if (status === "unauthenticated")
+            setStage("authenticate")
+
+        if (status === "authenticated" && stage === "authenticate") {
+            setStage("form")
+            setOrder(prev => ({
+                ...prev,
+                paymentData: session.user.paymentData
+            }))
+        }
+    }, [status, session, stage, setStage, setOrder])
 
     // console.log({ user })
     // console.log({ order })
 
-    if (!venue || !order || status === "loading")
-        return (
-            <FullPageMessage>
-                <Loader size="xl" />
-            </FullPageMessage>
-        )
 
     // console.log(order.stage, getStepNumber(order.stage))
     return (
         <Stack sx={{ height: "100%" }}>
-            <Stepper active={getStepNumber(order.stage)} breakpoint="sm" allowNextStepsSelect={false}>
+            
+            <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
                 <Stepper.Step allowStepClick={false} label="Авторизация">
                     Введите email и одноразовый пароль
                 </Stepper.Step>
@@ -57,20 +81,21 @@ function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string
                     Заказ завершен
                 </Stepper.Completed>
             </Stepper>
+
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
-                {order.stage === "authenticate" && <LoginForm callback={nextStage} />}
-                {order.stage === "form" && <OrderForm />}
-                {order.stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} />}
-                {order.stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} />}
-                {order.stage === "payment" && <PaymentForm />}
-                {(order.stage === "makeReservation" || order.stage === "complete" || order.stage === "error") && (
-                    <FullPageMessage>
+                {stage === "authenticate" && <LoginForm callback={nextStage} />}
+                {stage === "form" && <OrderForm order={order} onSubmit={nextStage}/>}
+                {stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
+                {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
+                    <FullAreaMessage>
                         <Stack sx={{ minWidth: 250, maxWidth: 300, alignItems: "center" }}>
-                            {order.stage === "makeReservation" && <>
+                            {stage === "makeReservation" && <>
                                 <Loader size="lg" />
                                 <Text>Бронируем билеты</Text>
                             </>}
-                            {order.stage === "complete" && <>
+                            {stage === "complete" && <>
                                 <ThemeIcon variant="outline" color="green" size="xl" sx={{ border: 0 }}>
                                     <IconCheck size={40} />
                                 </ThemeIcon>
@@ -81,12 +106,12 @@ function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string
                                     </Button>
                                 </Link>
                             </>}
-                            {order.stage === "error" && <>
+                            {stage === "error" && <>
                                 <ThemeIcon variant="outline" color="red" size="xl" sx={{ border: 0 }}>
                                     <IconAlertTriangle size={40} />
                                 </ThemeIcon>
                                 <Text>Не удалось забронировать билеты!</Text>
-                                <OrderError text={order.error} />
+                                <OrderError text={error} />
                                 <Button
                                     variant="subtle"
                                     onClick={() => setOrder && setOrder(prev => ({
@@ -102,27 +127,9 @@ function Scaffolding({ venue }: { venue: (Omit<Venue, "start"> & { start: string
 
                             </>}
                         </Stack>
-                    </FullPageMessage>
+                    </FullAreaMessage>
                 )}
             </Flex>
         </Stack>
-    )
-}
-
-export default function MakeOrder(
-    { user, venue }:
-        { user: (Omit<User, "createdAt"> & { createdAt: string }) | null, venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] }) | null }
-) {
-    return (
-        <OrderProvider initPaymentData={{
-            name: user?.name ?? "",
-            email: user?.email ?? "",
-            age: user?.age ? String(user.age) : "",
-            phone: user?.phone ?? "",
-            nickname: user?.nickname ?? "",
-            social: user?.social ?? "",
-        }}>
-            <Scaffolding venue={venue} />
-        </OrderProvider>
     )
 }

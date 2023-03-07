@@ -1,6 +1,6 @@
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { ClientTicket, ClientTicketSetter } from "./tickets-picker/tickets-picker"
+import { ClientTicket, ClientTicketSetter } from "./TicketsPicker/TicketsPicker"
 
 export default function TicketButton(
     {

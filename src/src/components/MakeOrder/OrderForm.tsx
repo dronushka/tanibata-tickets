@@ -3,9 +3,9 @@
 import { Button, Flex, Group, Paper, Stack, TextInput } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
-import MaskInput from "../mask-input"
-import { initialOrder, PaymentData, paymentDataSchema, useOrder } from "./use-order"
+import MaskInput from "../MaskInput"
 import { signOut } from "next-auth/react"
+import { ClientOrder, PaymentData, paymentDataSchema } from "./useOrder"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -16,10 +16,10 @@ type PaymentFormErrors = {
     social?: string[]
 } | null
 
-export default function OrderForm() {
-    const { order, nextStage } = useOrder()
+export default function OrderForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void}) {
+    // const { order, nextStage } = useOrder()
 
-    const [paymentData, setPaymentData] = useState<PaymentData>(initialOrder.paymentData)
+    const [paymentData, setPaymentData] = useState<PaymentData>(order.paymentData)
 
     useEffect(() => {
         if (order)
@@ -46,7 +46,7 @@ export default function OrderForm() {
         }
 
         if (order)
-            nextStage({ ...order, paymentData: validated.data })
+            onSubmit({ ...order, paymentData: validated.data })
     }
 
     return (

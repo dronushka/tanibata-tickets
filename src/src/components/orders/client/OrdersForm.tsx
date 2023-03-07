@@ -1,11 +1,11 @@
 'use client'
-import FullPageMessage from "@/components/full-page-message"
+import FullAreaMessage from "@/components/FullAreaMessage"
 import { requestReturn as apiRequestReturn, setOrderStatus as apiSetOrderStatus, uploadCheque } from "@/lib/api-calls"
 import { Box, Button, FileButton, Group, Input, List, Loader, Paper, Stack, Text } from "@mantine/core"
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket } from "@prisma/client"
 import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icons-react"
 import { useState } from "react"
-import OrderStatusText from "./order-status-text"
+import OrderStatusText from "./OrderStatusText"
 import { useRouter } from "next/navigation"
 
 type HydratedOrder = Omit<Order, "createdAt"> & (
@@ -82,9 +82,9 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
     }
 
     if (!orders)
-        return <FullPageMessage>
+        return <FullAreaMessage>
             <Loader size="xl" />
-        </FullPageMessage>
+        </FullAreaMessage>
 
     if (orders.length === 0)
         return <Text>У вас пока нет заказов</Text>

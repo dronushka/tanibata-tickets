@@ -3,7 +3,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { OrderStatus } from "@prisma/client"
-import { ClientTicket } from "@/components/order-make/tickets-picker/tickets-picker"
+import { ClientTicket } from "@/components/MakeOrder/TicketsPicker/TicketsPicker"
 import formidable, { Fields, File, Files } from 'formidable'
 
 export const config = {
