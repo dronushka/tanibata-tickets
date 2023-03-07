@@ -3,7 +3,7 @@ import { prisma } from "@/db"
 import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
-import { OrderStatus } from '@prisma/client'
+import { OrderStatus, Role } from '@prisma/client'
 import { emailTransporter } from '@/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -46,9 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const admins = await prisma.user.findMany({
             where: {
-                role: {
-                    name: "admin"
-                }
+                role: Role.ADMIN
             }
         })
 

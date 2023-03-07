@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             include: {
                 tickets: {
                     include: {
-                        row: true,
+                        venue: true
                     }
                 },
                 user: true

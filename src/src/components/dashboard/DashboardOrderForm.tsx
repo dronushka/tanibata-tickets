@@ -1,14 +1,16 @@
 "use client"
 
-import { File as DBFile, Order, OrderStatus, PriceRange, Row, Ticket } from "@prisma/client"
+import { File as DBFile, Order, OrderStatus, PriceRange, Ticket } from "@prisma/client"
 import { useState } from "react"
 import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
 import { Button, createStyles, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
-import OrderStatusText from "@/components/orders/client/order-status-text"
+
 import { useRouter } from "next/navigation"
-import { PaymentData } from "../MakeOrder/use-order"
+
 import Link from "next/link"
+import OrderStatusText from "../orders/client/OrderStatusText"
+import { PaymentData } from "../MakeOrder/useOrder"
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -20,7 +22,7 @@ export default function DashboardOrderForm({ order }: {
     order: (Omit<Order, "createdAt"> & {
         cheque: DBFile | null,
         createdAt: string,
-        tickets: (Ticket & { row: Row, priceRange: PriceRange })[],
+        tickets: (Ticket & { priceRange: PriceRange | null })[],
         sentTickets: boolean
     })
 }) {
@@ -146,8 +148,8 @@ export default function DashboardOrderForm({ order }: {
                         {order.tickets.map(ticket => (
                             <List.Item key={ticket.id}>
                                 <Group>
-                                    <Text>Ряд: {ticket.row.number} Место: {ticket.number}</Text>
-                                    <Text>{ticket.priceRange.price.toFixed(2)} р.</Text>
+                                    <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
+                                    <Text>{ticket.priceRange?.price.toFixed(2) ?? 0} р.</Text>
                                 </Group>
                             </List.Item>
                         ))}

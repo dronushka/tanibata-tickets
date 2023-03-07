@@ -1,14 +1,13 @@
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { Order, PriceRange, Row, Ticket } from "@prisma/client"
+import { Order, PriceRange, Ticket } from "@prisma/client"
 import { useRouter } from "next/navigation"
 
 
-export default function DashboardTicketButton({ row, ticket, sx }:
+export default function DashboardTicketButton({ ticket, sx }:
     {
-        row: Row,
         ticket: Ticket & {
-            priceRange: PriceRange;
+            priceRange: PriceRange | null;
             order: (Omit<Order, "createdAt"> & {
                 createdAt: string;
             }) | null
@@ -24,11 +23,11 @@ export default function DashboardTicketButton({ row, ticket, sx }:
 
     if (ticket.orderId)
         colorCode = "gray"
-    else if (ticket.priceRange.id === 1)
+    else if (ticket.priceRange?.id === 1)
         colorCode = "green"
-    else if (ticket.priceRange.id === 2)
+    else if (ticket.priceRange?.id === 2)
         colorCode = "violet"
-    else if (ticket.priceRange.id === 3)
+    else if (ticket.priceRange?.id === 3)
         colorCode = "pink"
 
     return (
@@ -52,9 +51,9 @@ export default function DashboardTicketButton({ row, ticket, sx }:
             </Popover.Target>
             <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
                 <Stack spacing="xs">
-                    <Text size="xs">Ряд: {row.number}</Text>
+                    <Text size="xs">Ряд: {ticket.rowNumber}</Text>
                     <Text size="xs">Место: {ticket.number}</Text>
-                    <Text size="xs">Цена: {ticket.priceRange.price}</Text>
+                    <Text size="xs">Цена: {ticket.priceRange?.price ?? 0}</Text>
                     {ticket.orderId && <Text size="xs">Заказ №{ticket.orderId}</Text>}
                 </Stack>
             </Popover.Dropdown>

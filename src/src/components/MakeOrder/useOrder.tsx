@@ -7,7 +7,7 @@ export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation"
 
 export type TicketRow = {
     number: string,
-    tickets: (Ticket & { priceRange: PriceRange | null, order: (Omit<Order, "createdAt"> & { createdAt: String }) | null })[]
+    tickets: (Ticket & { priceRange: PriceRange | null, order: (Omit<Order, "createdAt"> & { createdAt: string }) | null })[]
 }
 
 export const paymentDataSchema = z.object({

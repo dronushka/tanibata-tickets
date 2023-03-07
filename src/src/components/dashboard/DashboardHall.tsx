@@ -1,23 +1,13 @@
 "use client"
 
 import { Box, Flex, MantineTheme, Stack, Sx, Text } from "@mantine/core"
-import { Order, PriceRange, Row, Ticket, Venue } from "@prisma/client"
+import { Order, PriceRange, Ticket, Venue } from "@prisma/client"
 import Stage from "../MakeOrder/TicketsPicker/Stage"
-import DashboardTicketButton from "./dashboard-ticket-button"
+import { TicketRow } from "../MakeOrder/useOrder"
+import DashboardTicketButton from "./DashboardTicketButton"
 
-export default function DashboardHall({ venue, reserved, total }:
-    {
-        venue: (Venue & {
-            rows: (Row & {
-                tickets: (Ticket & {
-                    priceRange: PriceRange;
-                    order: (Omit<Order, "createdAt"> & { createdAt: string }) | null;
-                })[];
-            })[];
-        }),
-        reserved: number,
-        total: number
-    }
+export default function DashboardHall({ venue }:
+    { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
 ) {
     const dimension = 17
 
@@ -35,9 +25,12 @@ export default function DashboardHall({ venue, reserved, total }:
         return defaultSx
     }
 
+    const reserved = venue.reservedTickets.length
+    const total = venue.rows.reduce((sum, row) => sum += row.tickets.length, 0)
     // console.log(venue)
     return (
         <Stack>
+            <Text fw="bold">{venue.name} {venue.start}</Text>
             <Text>Заполненность зала: {reserved}/{total} ({((reserved / total) * 100).toFixed(2)}%)</Text>
             <Stage />
             <Stack spacing={2} sx={{
@@ -46,7 +39,7 @@ export default function DashboardHall({ venue, reserved, total }:
                 }
             }}>
                 {venue.rows && venue.rows.map((row, i) => (
-                    <Flex key={row.id} sx={getRowSx(i)}>
+                    <Flex key={i} sx={getRowSx(i)}>
                         <Text fz="xs" sx={{ flexBasis: 40, whiteSpace: "nowrap" }}>{`Ряд ${row.number}`}</Text>
                         <Flex
                             sx={{ flexGrow: 1, justifyContent: "center", flexWrap: "nowrap", gap: 2 }}
@@ -56,7 +49,6 @@ export default function DashboardHall({ venue, reserved, total }:
                                     <DashboardTicketButton
                                         key={ticket.id}
                                         sx={getTicketSx(i, j)}
-                                        row={row}
                                         ticket={ticket}
                                     />
                                 ))

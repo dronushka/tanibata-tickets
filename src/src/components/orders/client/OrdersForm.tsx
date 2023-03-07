@@ -14,7 +14,7 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
         cheque: DBFile | null,
         tickets: (Ticket & (
             {
-                venue: Omit<Venue, "start"> & { start: string}
+                venue: Omit<Venue, "start"> & { start: string} | null
                 priceRange: PriceRange | null
             }
         ))[]
@@ -115,7 +115,7 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                             {order.tickets.map(ticket => (
                                 <List.Item key={ticket.id} >
                                     <Group>
-                                        <Text>{ticket.venue.name}</Text>
+                                        <Text>{ticket.venue?.name}</Text>
                                         <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
                                         <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
                                     </Group>

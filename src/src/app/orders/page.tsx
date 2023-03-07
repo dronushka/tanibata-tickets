@@ -35,6 +35,6 @@ export default async function OrdersPage() {
     return <OrdersForm orders={orders.map(order => ({
         ...order,
         createdAt: order.createdAt.toLocaleString('ru-RU'),
-        tickets: order.tickets.map(ticket => ({ ...ticket, venue: { ...ticket.venue, start: ticket.venue?.start.toLocaleString('ru-RU')}}))
+        tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
     }))}/>
 }

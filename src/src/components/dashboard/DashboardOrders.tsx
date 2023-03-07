@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { ActionIcon, Box, Button, Group, Pagination, Paper, Progress, Stack, Text, TextInput } from "@mantine/core"
 import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
-import OrderStatusText from "@/components/orders/client/order-status-text"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import OrdersStatusFilter from "./orders-status-filter"
+import OrdersStatusFilter from "./OrdersStatusFilter"
 import { File as DBFile, Order, OrderStatus, SentTicket, Ticket } from "@prisma/client"
 import { PaymentData } from "../MakeOrder/useOrder"
+import OrderStatusText from "../orders/client/OrderStatusText"
 
 // import { events} from "next/router"
 
@@ -30,6 +30,7 @@ export default function DashboardOrders(
             status?: OrderStatus
         }
 ) {
+    console.log(orders)
     const [loading, setLoading] = useState(true)
 
     const router = useRouter()

@@ -40,7 +40,7 @@ model Ticket {
   sortNumber    Int         @default(0)
   rowNumber     String?
   sortRowNumber Int?        @default(0)
-  venueId       Int?
+  venueId       Int
   order         Order?      @relation(fields: [orderId], references: [id])
   priceRange    PriceRange? @relation(fields: [priceRangeId], references: [id])
   venue         Venue?      @relation(fields: [venueId], references: [id])
