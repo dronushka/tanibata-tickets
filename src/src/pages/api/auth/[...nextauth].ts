@@ -2,7 +2,7 @@ import NextAuth, { NextAuthOptions, SessionUser } from 'next-auth'
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
-import { User } from '@prisma/client'
+import { Role, User } from '@prisma/client'
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -42,21 +42,26 @@ export const authOptions: NextAuthOptions = {
                     const user = await prisma.user.findFirst({
                         where: {
                             email: credentials.email
-                        },
-                        include: {
-                            role: true
                         }
                     })
                     
                     if (user) {
-                        if (user.role.name === "customer")
+                        if (user.role === Role.CUSTOMER)
                             prisma.password.deleteMany({
                                 where: { userId: user.id }
                             })
                         return { 
                             id: user.id,
                             email: user.email,
-                            role: user.role.name
+                            role: user.role,
+                            paymentData: {
+                                name: user?.name ?? "",
+                                email: user?.email ?? "",
+                                age: user?.age ? String(user.age) : "",
+                                phone: user?.phone ?? "",
+                                nickname: user?.nickname ?? "",
+                                social: user?.social ?? "",
+                            }
                         }
                     }
                 }

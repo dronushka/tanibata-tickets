@@ -2,7 +2,7 @@ import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import OrdersForm from "../../components/orders/client/orders-form"
+import OrdersForm from "../../components/orders/client/OrdersForm"
 
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)
@@ -20,10 +20,10 @@ export default async function OrdersPage() {
             tickets: {
                 include: {
                     priceRange: true,
-                    row: true
+                    venue: true,
                 },
                 orderBy: [
-                    { row: { number: "asc" } },
+                    { sortRowNumber: "asc" },
                     { sortNumber: "asc" }
                 ]
             }
@@ -34,6 +34,7 @@ export default async function OrdersPage() {
     // console.log(orders)
     return <OrdersForm orders={orders.map(order => ({
         ...order,
-        createdAt: order.createdAt.toLocaleString('ru-RU')
+        createdAt: order.createdAt.toLocaleString('ru-RU'),
+        tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
     }))}/>
 }

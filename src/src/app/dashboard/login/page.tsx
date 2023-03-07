@@ -1,4 +1,4 @@
-import DashboardLoginForm from "@/components/dashboard/dashboard-login-form"
+import DashboardLoginForm from "@/components/dashboard/DashboardLoginForm"
 
 export default function DashboardLoginPage () {
     return <DashboardLoginForm />

@@ -31,10 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(401).end()
 
     try {
-        const { paymentData, tickets, cheque } = await new Promise<
+        const { paymentData, ticketsCount, cheque } = await new Promise<
             {
                 paymentData: OrderData,
-                tickets: ClientTicket[],
+                ticketsCount: number,
                 cheque: File
             }
         >(
@@ -44,38 +44,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     if (err) return reject(err)
                     resolve({
                         paymentData: JSON.parse(fields.paymentInfo as string),
-                        tickets: JSON.parse(fields.tickets as string),
+                        ticketsCount: Number(fields.ticketCount as string),
                         cheque: files.cheque as File
                     })
                 })
             }
         )
 
-        if (!tickets || !tickets.length)
+        if (!ticketsCount)
             throw "no tickets specified"
         // console.log('createOrder', paymentData, tickets, cheque)
 
         const dbTickets = await prisma.ticket.findMany({
             where: {
-                id: { in: tickets.map(ticket => ticket.id) }
+                orderId: null,
+                venueId: 2
             },
             include: {
-                priceRange: true,
-                order: true
-            }
+                priceRange: true
+            },
+            take: ticketsCount
         })
+
+        if (dbTickets.length < ticketsCount) {
+            res.status(422).json({ error: "some_tickets_are_bought" })
+            return
+        }
 
         let price = 0
         for (let ticket of dbTickets) {
-            if (
-                ticket.reserved
-                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)) {
-                res.status(422).json({ error: "some_tickets_are_bought" })
-                return
-            }
-            else {
-                price += ticket.priceRange?.price ?? 0
-            }
+           price += ticket.priceRange?.price ?? 0    
         }
 
         await prisma.user.update({
@@ -101,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 },
                 tickets: {
-                    connect: tickets.map(ticket => ({ id: ticket.id }))
+                    connect: dbTickets.map(ticket => ({ id: ticket.id }))
                 }
             }
         })

@@ -3,15 +3,15 @@ import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { prisma } from "@/db"
 import { z } from "zod"
-import DashboardOrders from "@/components/dashboard/dashboard-orders"
-import { OrderStatus, Prisma } from "@prisma/client"
+import DashboardOrders from "@/components/dashboard/DashboardOrders"
+import { OrderStatus, Prisma, Role } from "@prisma/client"
 
 const perPage = 20
 
 export default async function DashboardOrdersPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)
 
-    if (session?.user.role !== 'admin')
+    if (session?.user.role !== Role.ADMIN)
         redirect('/dashboard/login')
 
     const pageNumberValidated = z.string().regex(/^\d+$/).safeParse(searchParams?.page)
@@ -61,9 +61,12 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             sentTickets: true,
             tickets: {
                 include: {
-                    row: true,
                     priceRange: true
-                }
+                },
+                orderBy: [
+                    { sortRowNumber: "asc" },
+                    { sortNumber: "asc" }
+                ]
             }
         },
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],

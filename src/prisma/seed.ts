@@ -1,182 +1,178 @@
-import { PriceRange, PrismaClient } from '@prisma/client'
+import { PriceRange, Prisma, PrismaClient, Role, Venue } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-const createSquareVenueRows = (rowsCount: number, colsCount: number) => {
-  const rows: any = { create: [] }
+const getShowTickets = (venue: Venue, rows: Array<any>) => {
+    const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
+    
+    for (let i = 0; i <= rows.length - 1; i++) {
+        for (let j = 1; j <= rows[i].ticketCount; j++) {
+            const ticket: any = {
+                number: String(j),
+                sortNumber: j,
+                rowNumber: String(rows[i].number),
+                sortRowNumber: i,
+                venueId: venue.id
+            }
 
-  for (let i = 1; i <= rowsCount; i++) {
-    const tickets: any = { create: [] }
-    for (let j = 1; j <= colsCount; j++) {
-      tickets.create.push({ number: String(j) })
+            if (rows[i].reserved)
+                ticket.reserved = true
+
+            if (rows[i].priceRange)
+                ticket.priceRangeId = rows[i].priceRange.id
+                   
+
+            tickets.push(ticket)
+        }
     }
-    rows.create.push({
-      number: i,
-      tickets: tickets
-    })
-  }
+    return tickets
 
-  return rows
 }
 
-const createVenueByRows = (_rows: { priceRange: PriceRange, ticketCount: number }[]) => {
-  const rows: any = { create: [] }
-
-  for (let i = 0; i <= _rows.length - 1; i++) {
-    const tickets: any = { create: [] }
-    for (let j = 1; j <= _rows[i].ticketCount; j++) {
-      tickets.create.push({
-        number: String(j),
-        sortNumber: j,
-        priceRange: {
-          connect: {
-            id: _rows[i].priceRange.id
-          }
+const getConcertTickets = (venue: Venue, count: number, priceRange: PriceRange) => {
+    const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
+    for (let i = 0; i < count - 1; i++) {
+        const ticket: any = {
+            number: String(i),
+            sortNumber: i,
+            venueId: venue.id,
+            priceRangeId: priceRange.id
         }
-      })
-    }
-    rows.create.push({
-      number: i + 1,
-      tickets: tickets
-    })
-  }
 
-  // console.log(rows)
-  return rows
+        tickets.push(ticket)
+    }
+
+    return tickets
 }
 
 async function main() {
-  console.log("Creating users and roles")
+    console.log("Creating users")
 
-  await prisma.role.createMany({ data: [{ name: "customer" }, { name: "admin" }] })
-
-  const adminRole = await prisma.role.findFirst({ where: { name: "admin" } })
-
-  if (adminRole) {
     await prisma.user.create({
-      data: {
-        email: "gworlds@gmail.com",
-        name: "admin",
-        nickname: "admin",
-        age: 99,
-        role: {
-          connect: {
-            id: adminRole.id
-          }
-        },
-        passwords: {
-          create: {
-            hash: bcrypt.hashSync(process.env.DEFAULT_ADMIN_PASSWORD ?? "secret", 10)
-          }
+        data: {
+            email: "gworlds@gmail.com",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN,
+            passwords: {
+                create: {
+                    hash: bcrypt.hashSync(process.env.DEFAULT_ADMIN_PASSWORD ?? "secret", 10)
+                }
+            }
         }
-      }
     })
 
     await prisma.user.create({
-      data: {
-        email: "everilion@gmail.com",
-        name: "admin",
-        nickname: "admin",
-        age: 99,
-        role: {
-          connect: {
-            id: adminRole.id
-          }
-        },
-        passwords: {
-          create: {
-            hash: bcrypt.hashSync("secret", 10)
-          }
+        data: {
+            email: "everilion@gmail.com",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN,
+            passwords: {
+                create: {
+                    hash: bcrypt.hashSync("secret", 10)
+                }
+            }
         }
-      }
     })
 
-  }
-  const customerRole = await prisma.role.findFirst({ where: { name: "customer" } })
+    console.log("Creating venues")
 
-  if (customerRole)
-    await prisma.user.create({
-      data: {
-        email: "g-worlds@ya.ru",
-        name: "testUser",
-        nickname: "tester",
-        age: 20,
-        role: {
-          connect: {
-            id: customerRole.id
-          }
+    const venueShow = await prisma.venue.create({
+        data: {
+            name: "Нянфест. Косплей-шоу.",
+            address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
+            description: "Описание косплей-шоу ...",
+            start: new Date("2023-03-25 13:00"),
+            active: true,
+            noPlaces: false
         }
-      }
     })
 
-  console.log("Creating price ranges")
+    const venueConcert = await prisma.venue.create({
+        data: {
+            name: "Нянфест. Концерт.",
+            address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
+            description: "Описание концерта ...",
+            start: new Date("2023-03-25 18:00"),
+            active: true,
+            noPlaces: true
+        }
+    })
 
-  await prisma.priceRange.createMany({
-    data: [
-      {
-        name: "Зона 1",
-        price: 1000,
-      },
-      {
-        name: "Зона 2",
-        price: 2000
-      },
-      {
-        name: "Зона 3",
-        price: 3000
-      }
+    console.log("Creating price ranges")
+
+    const showPriceZone1 = await prisma.priceRange.create({
+        data: {
+            name: "Стандарт",
+            price: 1000,
+            venueId: venueShow.id
+        }
+    })
+
+    const showPriceZone2 = await prisma.priceRange.create({
+        data: {
+            name: "VIP",
+            price: 2000,
+            venueId: venueShow.id
+        }
+    })
+
+    const concertPriceZone = await prisma.priceRange.create({
+        data: {
+            name: "Стандарт",
+            price: 500,
+            venueId: venueConcert.id
+        }
+    })
+
+    console.log("Creating tickets")
+
+    const rows = [
+        { number: 1, priceRange: showPriceZone2, ticketCount: 21 },
+        { number: 2, priceRange: showPriceZone2, ticketCount: 22 },
+        { number: 3, priceRange: showPriceZone2, ticketCount: 23 },
+        { number: 4, priceRange: showPriceZone2, ticketCount: 25 },
+        { number: 5, priceRange: showPriceZone2, ticketCount: 26 },
+        { number: 6, priceRange: showPriceZone2, ticketCount: 27 },
+        { number: 7, priceRange: showPriceZone2, ticketCount: 28 },
+        { number: 8, priceRange: showPriceZone2, ticketCount: 28 },
+        { number: 9, priceRange: showPriceZone2, ticketCount: 28 },
+        { number: 10, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 11, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 12, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 13, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 14, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 15, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 16, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 17, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 18, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 19, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 20, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 21, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 22, priceRange: showPriceZone1, ticketCount: 28 },
+        { number: 23, reserved: true, ticketCount: 28 },
+        { number: 24, reserved: true, ticketCount: 28 },
+        { number: 25, reserved: true, ticketCount: 28 },
     ]
-  })
 
-  const priceRanges = await prisma.priceRange.findMany()
-  // console.log(priceRanges)
-  console.log("Creating venue and tickets")
+    await prisma.ticket.createMany({
+        data: getShowTickets(venueShow, rows) || []
+    })
 
-  const rows = [
-    { priceRange: priceRanges[2], ticketCount: 21 },
-    { priceRange: priceRanges[2], ticketCount: 22 },
-    { priceRange: priceRanges[2], ticketCount: 23 },
-    { priceRange: priceRanges[2], ticketCount: 25 },
-    { priceRange: priceRanges[2], ticketCount: 26 },
-    { priceRange: priceRanges[2], ticketCount: 27 },
-    { priceRange: priceRanges[2], ticketCount: 28 },
-    { priceRange: priceRanges[2], ticketCount: 28 },
-    { priceRange: priceRanges[2], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[1], ticketCount: 28 },
-    { priceRange: priceRanges[0], ticketCount: 28 },
-    { priceRange: priceRanges[0], ticketCount: 28 },
-    { priceRange: priceRanges[0], ticketCount: 28 },
-  ]
-
-  // const rows = [
-  //   { priceRange: priceRanges[0], ticketCount: 2 }
-  // ]
-  await prisma.venue.create({
-    data: {
-      name: "ОДНТ",
-      rows: createVenueByRows(rows)
-    }
-  })
+    await prisma.ticket.createMany({
+        data: getConcertTickets(venueConcert, 600, concertPriceZone) || []
+    })
 }
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    // process.exit(1)
-  })
+    .then(async () => {
+        await prisma.$disconnect()
+    })
+    .catch(async (e) => {
+        console.error(e)
+        await prisma.$disconnect()
+        // process.exit(1)
+    })
