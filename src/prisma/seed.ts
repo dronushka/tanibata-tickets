@@ -85,6 +85,7 @@ async function main() {
         data: {
             name: "Нянфест. Косплей-шоу.",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
+            description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
             active: true,
             noPlaces: false
@@ -95,6 +96,7 @@ async function main() {
         data: {
             name: "Нянфест. Концерт.",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
+            description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
             noPlaces: true
@@ -162,7 +164,7 @@ async function main() {
     })
 
     await prisma.ticket.createMany({
-        data: getConcertTickets(venueConcert, 6, concertPriceZone) || []
+        data: getConcertTickets(venueConcert, 600, concertPriceZone) || []
     })
 }
 main()
