@@ -5,20 +5,9 @@ import { IconUpload } from "@tabler/icons-react"
 import { ClientOrder } from "./useOrder"
 
 export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void}) {
-    // const { order, nextStage } = useOrder()
-
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
 
     const [chequeError, setChequeError] = useState<string>("")
-
-    // const chequeValidator = z
-    //     .custom<File>(file => {
-    //         console.log('file', file) 
-    //         return file instanceof File
-    //     }
-    //         , "Приложите файл")
-    //     .refine(file => file?.size < 2 * 1024 * 1024, "Размер файл не должен превышать 2МБ")
-    //     .refine(file => ["image/png", "image/jpeg", "application/pdf"].find(f => f === file?.type), "Допустимые форматы файла: jpeg, png, pdf")
     
     const chequeValidator = z.custom<File>().superRefine((file, ctx) => {
         if (!(file instanceof File)) {

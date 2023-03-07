@@ -1,5 +1,5 @@
 import { createOrder, uploadCheque } from "@/lib/api-calls"
-import { PriceRange, Ticket } from "@prisma/client"
+import { Order, PriceRange, Ticket } from "@prisma/client"
 import { useState } from "react"
 import { z } from "zod"
 
@@ -7,7 +7,7 @@ export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation"
 
 export type TicketRow = {
     number: string,
-    tickets: (Ticket & { priceRange: PriceRange | null })[]
+    tickets: (Ticket & { priceRange: PriceRange | null, order: (Omit<Order, "createdAt"> & { createdAt: String }) | null })[]
 }
 
 export const paymentDataSchema = z.object({

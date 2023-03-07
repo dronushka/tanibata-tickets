@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
-import { User } from "@prisma/client"
+import { OrderStatus, User } from "@prisma/client"
 import { z } from "zod"
 import MakeOrder from "@/components/MakeOrder/MakeOrder"
 
@@ -32,7 +32,8 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
         include: {
             tickets: {
                 include: {
-                    priceRange: true
+                    priceRange: true,
+                    order: true
                 },
                 orderBy: [
                     { sortRowNumber: "asc" },
@@ -44,7 +45,7 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
 
     if (venue === null)
         notFound()
-        
+
     const ticketRowMap = new Map<string, TicketRow>()
 
     if (venue.tickets)
@@ -54,24 +55,29 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
             if (!ticketRowMap.has(rowNumber))
                 ticketRowMap.set(rowNumber, { number: rowNumber, tickets: [] })
 
-            ticketRowMap.get(rowNumber)?.tickets.push(ticket)
+            ticketRowMap.get(rowNumber)?.tickets.push({
+                ...ticket,
+                order: ticket.order && {
+                    ...ticket.order,
+                    createdAt: ticket.order.createdAt.toLocaleString('ru-RU')
+                }
+            })
         }
 
+    const { tickets: prismaTickets, ...restVenue } = venue
+    const clientVenue = {
+        ...restVenue,
+        start: restVenue.start.toLocaleString('ru-RU'),
+        rows: [...ticketRowMap.values()],
+        reservedTickets: prismaTickets
+            .filter(ticket =>
+                ticket.reserved
+                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
+            )
+            .map(ticket => ticket.id)
+    }
+
     return <MakeOrder
-        paymentData={
-            {
-                name: user?.name ?? "",
-                email: user?.email ?? "",
-                age: user?.age ? String(user.age) : "",
-                phone: user?.phone ?? "",
-                nickname: user?.nickname ?? "",
-                social: user?.social ?? "",
-            }
-        }
-        venue={venue && {
-            ...venue,
-            start: venue.start.toLocaleString("ru-RU"),
-            rows: [...ticketRowMap.values()]
-        }}
+        venue={clientVenue}
     />
 }

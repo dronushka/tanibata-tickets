@@ -21,17 +21,24 @@ export const getStepNumber = (step?: OrderStage) => {
 }
 
 export default function MakeOrder(
-    { paymentData, venue }:
-        { paymentData: PaymentData, venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[] })}
+    { venue }:
+        { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
 ) {
     const initialOrder: ClientOrder = {
-        paymentData: { ...paymentData },
+        paymentData: {
+            name: "",
+            email: "",
+            age: "",
+            phone: "",
+            nickname: "",
+            social: ""
+        },
         tickets: new Map(),
         cheque: undefined
     }
 
-
-    const  { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
+// console.log(venue)
+    const { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
 
     const { data: session, status } = useSession()
 
@@ -60,7 +67,7 @@ export default function MakeOrder(
     // console.log(order.stage, getStepNumber(order.stage))
     return (
         <Stack sx={{ height: "100%" }}>
-            
+
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
                 <Stepper.Step allowStepClick={false} label="Авторизация">
                     Введите email и одноразовый пароль
@@ -84,7 +91,7 @@ export default function MakeOrder(
 
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
-                {stage === "form" && <OrderForm order={order} onSubmit={nextStage}/>}
+                {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
                 {stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
                 {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} prevStage={prevStage} nextStage={nextStage} />}
                 {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
@@ -114,12 +121,14 @@ export default function MakeOrder(
                                 <OrderError text={error} />
                                 <Button
                                     variant="subtle"
-                                    onClick={() => setOrder && setOrder(prev => ({
-                                        ...prev,
-                                        stage: "tickets",
-                                        tickets: new Map,
-                                        error: undefined
-                                    }))
+                                    onClick={() => {
+                                        setStage("tickets")
+                                        setOrder(prev => ({
+                                            ...prev,
+                                            tickets: new Map,
+                                            error: undefined
+                                        }))
+                                    }
                                     }
                                 >
                                     Попробовать еще раз

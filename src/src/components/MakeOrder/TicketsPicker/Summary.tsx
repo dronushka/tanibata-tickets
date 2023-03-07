@@ -11,7 +11,7 @@ export default function Summary({ order, onSubmit }:
         onSubmit: (order: ClientOrder) => void
     }
 ) {
-    const { selectedTickets, setSelectedTickets } = useContext(TicketContext)
+    const { selectedTickets } = useContext(TicketContext)
 
     return (
         <Paper shadow="sm" radius="md" p="md">

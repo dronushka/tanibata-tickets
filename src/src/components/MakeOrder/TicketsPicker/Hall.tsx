@@ -1,6 +1,5 @@
 'use client'
 
-import { Ticket } from "@prisma/client"
 import { memo, useContext, useEffect, useState, useTransition } from "react"
 import { Flex, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { TicketContext } from "./TicketsPicker"
@@ -12,7 +11,7 @@ const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected && oldPros.reserved === newProps.reserved
 })
 
-export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
+export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[], reserved: number[] }) {
     const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexDirection: "row", flexWrap: "nowrap", flexGrow: 1, gap: 10 }
         if (rowIndex === 9)
@@ -26,8 +25,6 @@ export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
             return { ...defaultSx, marginRight: dimension }
         return defaultSx
     }
-
-    const [reservedTickets, setReservedTickets] = useState<Ticket[]>([])
 
     const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
     const router = useRouter()
@@ -63,7 +60,7 @@ export default function Hall({ rows = [] }: { rows?: TicketRow[] }) {
                                             key={ticket.id}
                                             sx={getTicketSx(i, j)}
                                             selected={!!selectedTickets.has(ticket.id)}
-                                            reserved={!!reservedTickets.find(rt => rt.id === ticket.id)}
+                                            reserved={!!reserved.find(id => id === ticket.id)}
                                             ticket={ticket}
                                             setSelectedTickets={setSelectedTickets}
                                         />
