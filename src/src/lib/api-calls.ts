@@ -1,40 +1,6 @@
-import { ClientOrder } from "@/components/order-make/use-order"
+import { ClientOrder } from "@/components/MakeOrder/useOrder"
 import { OrderStatus } from "@prisma/client"
 import { z } from "zod"
-
-export const getUser = async () => {
-    const res = await fetch("/api/getUser", {
-        method: "GET",
-        headers: new Headers({ 'content-type': 'application/json' })
-    })
-
-    if (res.ok) {
-        return ({ success: true, data: await res.json() })
-    } else {
-        const response = await res.json()
-        return {
-            success: false,
-            error: "Что-то пошло не так, попробуйте позже"
-        }
-    }
-}
-
-export const getReservedTickets = async () => {
-    const res = await fetch("/api/getReservedTickets", {
-        method: "GET",
-        headers: new Headers({ 'content-type': 'application/json' })
-    })
-
-    if (res.ok) {
-        return ({ success: true, data: (await res.json()).tickets })
-    } else {
-        // const response = await res.json()
-        return {
-            success: false,
-            error: "Что-то пошло не так, попробуйте позже"
-        }
-    }
-}
 
 export const sendTickets = async (orderId: Number) => {
     const res = await fetch("/api/sendTickets?orderId=" + orderId, {
@@ -90,16 +56,14 @@ export const sendPasswordEmail = async (email?: string) => {
 export const createOrder = async (order: ClientOrder) => {
     console.log('sending', order)
 
-    const formData = new FormData
-    formData.append('paymentInfo', JSON.stringify(order.paymentData))
-    formData.append('tickets', JSON.stringify(
-        [...order.tickets].map(([key, value]) => ({ ...value }))
-    ))
-    order.cheque && formData.append('cheque', order.cheque)
-
     const res = await fetch("/api/createOrder", {
         method: "POST",
-        body: formData
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({
+            venueId: order.venueId,
+            paymentData: order.paymentData,
+            tickets: [...order.tickets.values()].map(ticket => ticket.id)
+        })
     })
 
     if (res.ok) {
@@ -112,8 +76,19 @@ export const createOrder = async (order: ClientOrder) => {
     }
 }
 
-export const getOrder = async (orderId: number) => {
-    const res = await fetch("/api/getOrder?orderId=" + orderId)
+export const createNoSeatsOrder = async (order: ClientOrder) => {
+    console.log('sending', order)
+
+    const res = await fetch("/api/createNoSeatsOrder", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({
+            venueId: order.venueId,
+            paymentData: order.paymentData,
+            ticketCount: order.ticketCount 
+        })
+    })
+
     if (res.ok) {
         return ({ success: true, data: await res.json() })
     } else {

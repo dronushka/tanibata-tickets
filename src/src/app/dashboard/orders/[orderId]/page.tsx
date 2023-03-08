@@ -1,6 +1,7 @@
-import DashboardOrderForm from "@/components/dashboard/dashboard-order-form"
+import DashboardOrderForm from "@/components/dashboard/DashboardOrderForm"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { Role } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { z } from "zod"
@@ -8,7 +9,7 @@ import { z } from "zod"
 export default async function OrderPage({ params: { orderId } }: { params: { orderId: string } }) {
     const session = await getServerSession(authOptions)
 
-    if (session?.user.role !== 'admin')
+    if (session?.user.role !== Role.ADMIN)
         redirect('/dashboard/login')
 
     const validator = z.number()
@@ -26,11 +27,10 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
             sentTickets: true,
             tickets: {
                 include: {
-                    row: true,
                     priceRange: true
                 },
                 orderBy: [
-                    { row: { number: "asc" } },
+                    { sortRowNumber: "asc" },
                     { sortNumber: "asc" }
                 ]
             }

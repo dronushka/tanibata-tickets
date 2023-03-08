@@ -1,5 +1,4 @@
-import { AppShell, Header, Navbar } from '@mantine/core'
-import ClientLayout from './client-layout'
+import ClientLayout from './ClientLayout'
 import RootStyleRegistry from './emotion'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

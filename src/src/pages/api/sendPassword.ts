@@ -7,53 +7,42 @@ import { Role, User } from '@prisma/client'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method != "POST")
         res.status(405).end()
-    
+
     const emailValidator = z.string().email()
 
     try {
         const validatedEmail = emailValidator.parse(req.body.email)
-        
+
         let user = await prisma.user.findFirst({
             where: {
                 email: validatedEmail
             }
         })
 
-        if (user) {
-            const userRole = await prisma.role.findUnique({
-                where: {
-                    id: user?.roleId
-                }
-            })
-            if (userRole?.name === 'admin') {
-                res.status(422).end()
-                return 
-            }
+        if (user && user.role === Role.ADMIN) {
+            res.status(422).end()
+            return
         }
+
 
         if (!user) {
             user = await prisma.user.create({
                 data: {
                     email: validatedEmail,
-                    role: {
-                        connect: { name: "customer" }
-                    }
+                    role: Role.CUSTOMER
                 }
             })
         }
-        
+
         if (!user) {
-            res.status(422).json({error: "cannot_create_user"})
+            res.status(422).json({ error: "cannot_create_user" })
             return
         }
-        
 
-
-        // if (userRole?.name === "customer") 
         const password = await createPassword(user)
-       
+
         if (!password) {
-            res.status(422).json({error: "cannot_create_password"})
+            res.status(422).json({ error: "cannot_create_password" })
             return
         }
 
@@ -71,5 +60,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(422).json({
             error: message
         })
-    } 
+    }
 }

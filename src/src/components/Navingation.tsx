@@ -8,13 +8,14 @@ import {
 } from "@tabler/icons-react"
 import { usePathname  } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { Role } from "@prisma/client"
 
 export default function Navigation() {
     const pathname = usePathname()
 
     const { data: session, status } = useSession()
 
-    if (session?.user.role === "admin")
+    if (session?.user.role === Role.ADMIN)
         return <>
         <Link href="/dashboard" passHref legacyBehavior>
             <NavLink 
