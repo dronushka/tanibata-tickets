@@ -31,6 +31,7 @@ export default function MakeOrder(
 ) {
     const initialOrder: ClientOrder = {
         venueId: venue.id,
+        noSeats: venue.noSeats,
         paymentData: {
             name: "",
             email: "",
@@ -91,7 +92,7 @@ export default function MakeOrder(
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
-                {stage === "tickets" && venue.ticketCount === null && (
+                {stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
                         venue={venue}
                         rows={rows}
@@ -101,7 +102,7 @@ export default function MakeOrder(
                         nextStage={nextStage}
                     />
                 )}
-                {stage === "tickets" && venue.ticketCount !== null && (
+                {stage === "tickets" && venue.noSeats === true && (
                     <TicketsForm
                         venue={venue}
                         reservedTicketCount={reservedTicketCount}

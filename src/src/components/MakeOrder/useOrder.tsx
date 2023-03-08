@@ -36,6 +36,7 @@ export type PaymentData = z.infer<typeof paymentDataSchema>
 export type ClientOrder = {
     orderId?: number,
     venueId: number,
+    noSeats: boolean,
     paymentData: PaymentData,
     ticketCount: number,
     tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
@@ -63,7 +64,7 @@ export const useOrder = (initialOrder: ClientOrder) => {
             case "tickets":
                 if (newOrder) {
                     setStage("makeReservation")
-                    const result = newOrder.ticketCount !== undefined ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
+                    const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
                     if (result.success) {
                         setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
                         setStage("payment")

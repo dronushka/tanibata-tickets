@@ -66,10 +66,16 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
 
     const reservedTicketCount = (await prisma.order.aggregate({
         where: {
-            OR: [
-                { NOT: { status: OrderStatus.CANCELLED } },
-                { NOT: { status: OrderStatus.RETURNED } }
-            ]
+            AND: [
+                { venueId: venue.id },
+                {
+                    OR: [
+                        { NOT: { status: OrderStatus.CANCELLED } },
+                        { NOT: { status: OrderStatus.RETURNED } }
+                    ]
+                }
+            ],
+
         },
         _sum: {
             ticketCount: true

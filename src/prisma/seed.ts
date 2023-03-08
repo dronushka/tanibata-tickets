@@ -1,4 +1,4 @@
-import { PriceRange, Prisma, PrismaClient, Role, Venue } from '@prisma/client'
+import { Prisma, PrismaClient, Role, Venue } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -99,7 +99,7 @@ async function main() {
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            ticketCount: 600,
+            ticketCount: 10,
             noSeats: true
         }
     })

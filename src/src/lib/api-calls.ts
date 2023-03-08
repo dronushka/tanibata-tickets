@@ -62,7 +62,7 @@ export const createOrder = async (order: ClientOrder) => {
         body: JSON.stringify({
             venueId: order.venueId,
             paymentData: order.paymentData,
-            tickets: order.tickets
+            tickets: [...order.tickets.values()].map(ticket => ticket.id)
         })
     })
 
