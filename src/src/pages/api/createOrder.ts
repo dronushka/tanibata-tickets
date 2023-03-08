@@ -5,6 +5,8 @@ import { prisma } from "@/db"
 import { OrderStatus } from "@prisma/client"
 import { ClientTicket } from "@/components/MakeOrder/TicketsPicker/TicketsPicker"
 import formidable, { Fields, File, Files } from 'formidable'
+import { array } from "zod"
+import { timeStamp } from "console"
 
 export const config = {
     api: {
@@ -51,33 +53,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         )
 
-        if (!tickets || !tickets.length)
-            throw "no tickets specified"
-        // console.log('createOrder', paymentData, tickets, cheque)
-
-        const dbTickets = await prisma.ticket.findMany({
-            where: {
-                id: { in: tickets.map(ticket => ticket.id) }
-            },
-            include: {
-                priceRange: true,
-                order: true
-            }
-        })
-
-        let price = 0
-        for (let ticket of dbTickets) {
-            if (
-                ticket.reserved
-                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)) {
-                res.status(422).json({ error: "some_tickets_are_bought" })
-                return
-            }
-            else {
-                price += ticket.priceRange?.price ?? 0
-            }
-        }
-
         await prisma.user.update({
             where: {
                 email: session?.user.email
@@ -91,22 +66,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        const order = await prisma.order.create({
-            data: {
-                paymentData,
-                price,
-                user: {
-                    connect: {
-                        email: session?.user.email
-                    }
-                },
-                tickets: {
-                    connect: tickets.map(ticket => ({ id: ticket.id }))
-                }
+        if (!tickets || !tickets.length)
+            throw "no_tickets_specified"
+
+        const dbTickets = await prisma.ticket.findMany({
+            where: {
+                id: { in: tickets.map(ticket => ticket.id) }
+            },
+            include: {
+                priceRange: true
             }
         })
 
-        res.status(200).json({ orderId: order.id })
+        const price = dbTickets.reduce((sum, ticket) => sum += ticket.priceRange?.price ?? 0, 0)
+
+        let orderId = 0
+
+
+        await prisma.$transaction(async (tx) => {
+            const order = await tx.order.create({
+                data: {
+                    paymentData,
+                    price,
+                    user: {
+                        connect: {
+                            email: session?.user.email
+                        }
+                    }
+                }
+            })
+
+            orderId = order.id
+
+            const updatedTickets = await tx.ticket.updateMany({
+                where: {
+                    AND: [
+                        { id: { in: dbTickets.map(ticket => ticket.id) } },
+                        {
+                            OR: [
+                                { orderId: null },
+                                { order: { status: OrderStatus.CANCELLED } },
+                                { order: { status: OrderStatus.RETURNED } },
+                            ]
+                        }
+
+                    ]
+                },
+
+                data: {
+                    orderId: order.id,
+                }
+            })
+
+            if (updatedTickets.count !== tickets.length) {
+                throw new Error("tickets_pending")
+            }
+        })
+
+        res.status(200).json({ orderId })
 
     } catch (e: any) {
         console.error(e)
