@@ -57,6 +57,7 @@ export const createOrder = async (order: ClientOrder) => {
     console.log('sending', order)
 
     const formData = new FormData
+    formData.append('venueId', String(order.venueId))
     formData.append('paymentInfo', JSON.stringify(order.paymentData))
     formData.append('tickets', JSON.stringify(
         [...order.tickets].map(([key, value]) => ({ ...value }))
@@ -82,6 +83,7 @@ export const createNoSeatsOrder = async (order: ClientOrder) => {
     console.log('sending', order)
 
     const formData = new FormData
+    formData.append('venueId', String(order.venueId))
     formData.append('paymentInfo', JSON.stringify(order.paymentData))
     formData.append('ticketCount', JSON.stringify(order.ticketsCount ?? 1))
     order.cheque && formData.append('cheque', order.cheque)

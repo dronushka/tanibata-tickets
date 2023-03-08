@@ -33,8 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(401).end()
 
     try {
-        const { paymentData, tickets, cheque } = await new Promise<
+        const { venueId, paymentData, tickets, cheque } = await new Promise<
             {
+                venueId: number,
                 paymentData: OrderData,
                 tickets: ClientTicket[],
                 cheque: File
@@ -45,6 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 form.parse(req, function (err, fields: Fields, files: Files) {
                     if (err) return reject(err)
                     resolve({
+                        venueId: Number(fields.venueId),
                         paymentData: JSON.parse(fields.paymentInfo as string),
                         tickets: JSON.parse(fields.tickets as string),
                         cheque: files.cheque as File
@@ -66,6 +68,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
+        const venueExists = await prisma.venue.count({ where: { id: venueId }})
+        if (!venueExists)
+            throw "no_venue_specified"
+            
         if (!tickets || !tickets.length)
             throw "no_tickets_specified"
 
@@ -82,17 +88,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         let orderId = 0
 
-
         await prisma.$transaction(async (tx) => {
             const order = await tx.order.create({
                 data: {
                     paymentData,
                     price,
-                    user: {
-                        connect: {
-                            email: session?.user.email
-                        }
-                    }
+                    venue: { connect: { id: venueId } },
+                    user: { connect: { email: session?.user.email } }
                 }
             })
 

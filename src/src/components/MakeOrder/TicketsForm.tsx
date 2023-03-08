@@ -13,10 +13,8 @@ export default function TicketsForm(
             nextStage: (order: ClientOrder) => void 
         }
 ) {
-    // const { prevStage, nextStage } = useOrder()
     const totalTickets = venue.rows.reduce((sum, row) => sum += row.tickets.length, 0)
-    // console.log({totalTickets, reserved: venue.reservedTickets.length})
-    const [ticketCount, setTicketCount] = useState(1)
+    const [ ticketCount, setTicketCount ] = useState(1)
 
     const setCount = (count: number) => {
         let newTicketCount = ticketCount + count

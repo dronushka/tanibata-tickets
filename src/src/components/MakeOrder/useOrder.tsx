@@ -35,6 +35,7 @@ export type PaymentData = z.infer<typeof paymentDataSchema>
 
 export type ClientOrder = {
     orderId?: number,
+    venueId: number,
     paymentData: PaymentData,
     ticketsCount?: number,
     tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
@@ -43,18 +44,10 @@ export type ClientOrder = {
 
 export const useOrder = (initialOrder: ClientOrder) => {
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder })
-
-    // useEffect(() => {
-    //     setOrder(initialOrder)
-    // }, [initialOrder])
-
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
 
-
-
     const nextStage = async (newOrder?: ClientOrder) => {
-        // console.log(order.stage)
         if (!order)
             return
 
@@ -63,17 +56,6 @@ export const useOrder = (initialOrder: ClientOrder) => {
 
         switch (stage) {
             case "authenticate":
-                // const { data: user } = await getUser()
-                // setOrder(prev => ({
-                //     ...prev,
-                //     paymentData: {
-                //         name: user.name ?? "",
-                //         email: user.email,
-                //         phone: user.phone ?? "",
-                //         age: String(user.age) ?? "",
-                //         social: user.social ?? ""
-                //     }
-                // }))
                 break
             case "form":
                 setStage("tickets")

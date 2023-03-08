@@ -25,6 +25,7 @@ export default function MakeOrder(
         { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
 ) {
     const initialOrder: ClientOrder = {
+        venueId: venue.id,
         paymentData: {
             name: "",
             email: "",
@@ -37,12 +38,9 @@ export default function MakeOrder(
         cheque: undefined
     }
 
-// console.log(venue)
     const { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
 
     const { data: session, status } = useSession()
-
-    // const router = useRouter()
 
     useEffect(() => {
         if (!setStage || !setOrder)
@@ -60,11 +58,6 @@ export default function MakeOrder(
         }
     }, [status, session, stage, setStage, setOrder])
 
-    // console.log({ user })
-    // console.log({ order })
-
-
-    // console.log(order.stage, getStepNumber(order.stage))
     return (
         <Stack sx={{ height: "100%" }}>
 
@@ -92,8 +85,8 @@ export default function MakeOrder(
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
-                {stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
-                {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.ticketCount === null && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.ticketCount !== null && <TicketsForm venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
                 {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
                 {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
                     <FullAreaMessage>
