@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
 model User {
   id        Int        @id @default(autoincrement())
   email     String     @unique
@@ -23,31 +28,25 @@ model User {
 
 model Password {
   id         Int      @id @default(autoincrement())
-  userId     Int
   hash       String   @unique
   created_at DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id])
-
-  // @@index([userId], map: "Password_userId_fkey")
+  userId     Int
 }
 
 model Ticket {
   id            Int         @id @default(autoincrement())
   number        String
-  orderId       Int?
-  priceRangeId  Int?
   reserved      Boolean     @default(false)
   sortNumber    Int         @default(0)
   rowNumber     String?
   sortRowNumber Int?        @default(0)
-  venueId       Int
   order         Order?      @relation(fields: [orderId], references: [id])
+  orderId       Int?
   priceRange    PriceRange? @relation(fields: [priceRangeId], references: [id])
+  priceRangeId  Int?
   venue         Venue?      @relation(fields: [venueId], references: [id])
-
-  // @@index([orderId], map: "Ticket_orderId_fkey")
-  // @@index([priceRangeId], map: "Ticket_priceRangeId_fkey")
-  // @@index([venueId], map: "Ticket_venueId_fkey")
+  venueId       Int
 }
 
 model Venue {
@@ -56,52 +55,20 @@ model Venue {
   description String       @default("")
   active      Boolean      @default(false)
   address     String       @default("")
-  noPlaces    Boolean      @default(false)
+  ticketCount Int?
   start       DateTime     @default(now())
   priceRange  PriceRange[]
   tickets     Ticket[]
+  order       Order[]
 }
 
 model PriceRange {
   id      Int      @id @default(autoincrement())
   price   Float    @default(0)
   name    String
-  venueId Int?
   venue   Venue?   @relation(fields: [venueId], references: [id])
-  tickets  Ticket[]
-
-  // @@index([venueId], map: "PriceRange_venueId_fkey")
-}
-
-model Order {
-  id          Int          @id @default(autoincrement())
-  price       Float
-  userId      Int
-  paymentData Json
-  createdAt   DateTime     @default(now())
-  status      OrderStatus  @default(UNPAID)
-  fileId      Int?         @unique
-  cheque      File?        @relation(fields: [fileId], references: [id])
-  user        User         @relation(fields: [userId], references: [id])
-  sentTickets SentTicket[]
-  tickets     Ticket[]
-
-  // @@index([userId], map: "Order_userId_fkey")
-}
-
-model File {
-  id    Int    @id @default(autoincrement())
-  path  String
-  order Order?
-}
-
-model SentTicket {
-  id      Int      @id @default(autoincrement())
-  sentAt  DateTime @default(now())
-  orderId Int
-  order   Order    @relation(fields: [orderId], references: [id])
-
-  // @@index([orderId], map: "SentTicket_orderId_fkey")
+  venueId Int?
+  tickets Ticket[]
 }
 
 enum OrderStatus {
@@ -114,7 +81,35 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum Role {
-  CUSTOMER
-  ADMIN
+model Order {
+  id          Int          @id @default(autoincrement())
+  price       Float
+  userId      Int
+  paymentData Json
+  createdAt   DateTime     @default(now())
+  status      OrderStatus  @default(UNPAID)
+  cheque      File?        @relation(fields: [fileId], references: [id])
+  fileId      Int?         @unique
+  venue       Venue?       @relation(fields: [venueId], references: [id])
+  venueId     Int?
+  user        User         @relation(fields: [userId], references: [id])
+  sentTickets SentTicket[]
+  tickets     Ticket[]
 }
+
+model File {
+  id    Int    @id @default(autoincrement())
+  path  String
+  order Order?
+}
+
+model SentTicket {
+  id      Int      @id @default(autoincrement())
+  sentAt  DateTime @default(now())
+  order   Order    @relation(fields: [orderId], references: [id])
+  orderId Int
+}
+
+
+
+
