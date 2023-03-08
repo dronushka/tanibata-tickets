@@ -11,10 +11,11 @@ import { useRouter } from "next/navigation"
 type HydratedOrder = Omit<Order, "createdAt"> & (
     {
         createdAt: string,
+        venue: Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] } | null
         cheque: DBFile | null,
         tickets: (Ticket & (
             {
-                venue: Omit<Venue, "start"> & { start: string} | null
+                venue: Omit<Venue, "start"> & { start: string } | null
                 priceRange: PriceRange | null
             }
         ))[]
@@ -110,18 +111,24 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                             </Group>
                         </Group>
                         <Text>{order.createdAt}</Text>
-                        <Text>Места:</Text>
-                        <List type="ordered">
-                            {order.tickets.map(ticket => (
-                                <List.Item key={ticket.id} >
-                                    <Group>
-                                        <Text>{ticket.venue?.name}</Text>
-                                        <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                        <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
-                                    </Group>
-                                </List.Item>
-                            ))}
-                        </List>
+                        <Text fw="bold">{order.venue?.name}</Text>
+                        {order.venue?.noSeats === false && <>
+                            <Text>Места:</Text>
+                            <List type="ordered">
+                                {order.tickets.map(ticket => (
+                                    <List.Item key={ticket.id} >
+                                        <Group>
+                                            {/* <Text>{ticket.venue?.name}</Text> */}
+                                            <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
+                                            <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
+                                        </Group>
+                                    </List.Item>
+                                ))}
+                            </List>
+                        </>}
+                        {order.venue?.noSeats === true && <>
+                            <Text>Количество билетов: {order.ticketCount}</Text>
+                        </>}
                         <Group>
                             {
                                 order.status !== OrderStatus.UNPAID && !order.cheque &&
