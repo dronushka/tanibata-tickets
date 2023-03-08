@@ -43,6 +43,7 @@ export default function DashboardOrderForm({ order }: {
         const res = await apiSetOrderStatus(order.id, orderStatus)
         if (res.success) {
             setEditOrderStatus(false)
+            setSetStatusError("")
         } else if (res.error) {
             setSetStatusError(res.error)
         }
@@ -81,8 +82,7 @@ export default function DashboardOrderForm({ order }: {
                 </Group>
 
                 {!editOrderStatus && <Group>
-                    {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                    {order.cheque && <OrderStatusText status={orderStatus} />}
+                    <OrderStatusText status={orderStatus} />
                     <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
                 </Group>}
                 {editOrderStatus && <Group>
@@ -142,7 +142,7 @@ export default function DashboardOrderForm({ order }: {
                     {(order.paymentData as PaymentData).social && <Link target="_blank" href={(order.paymentData as PaymentData).social}>{(order.paymentData as PaymentData).social}</Link>}
                     {!(order.paymentData as PaymentData).social && <Text>Нет</Text>}
                 </Group>
-                <Group sx={{alignItems: "flex-start"}}>
+                <Group sx={{ alignItems: "flex-start" }}>
                     <Text className={classes.header}>Места:</Text>
                     <List type="ordered">
                         {order.tickets.map(ticket => (
