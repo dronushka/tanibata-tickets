@@ -55,8 +55,9 @@ model Venue {
   description String       @default("")
   active      Boolean      @default(false)
   address     String       @default("")
-  ticketCount Int?
+  ticketCount Int
   start       DateTime     @default(now())
+  noSeats     Boolean      @default(false)
   priceRange  PriceRange[]
   tickets     Ticket[]
   order       Order[]
@@ -84,7 +85,6 @@ enum OrderStatus {
 model Order {
   id          Int          @id @default(autoincrement())
   price       Float
-  userId      Int
   paymentData Json
   createdAt   DateTime     @default(now())
   status      OrderStatus  @default(UNPAID)
@@ -93,7 +93,8 @@ model Order {
   venue       Venue?       @relation(fields: [venueId], references: [id])
   venueId     Int?
   user        User         @relation(fields: [userId], references: [id])
-  ticketCount Int?
+  userId      Int
+  ticketCount Int
   sentTickets SentTicket[]
   tickets     Ticket[]
 }
@@ -110,7 +111,3 @@ model SentTicket {
   order   Order    @relation(fields: [orderId], references: [id])
   orderId Int
 }
-
-
-
-

@@ -21,8 +21,13 @@ export const getStepNumber = (step?: OrderStage) => {
 }
 
 export default function MakeOrder(
-    { venue }:
-        { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
+    { venue, rows, reservedTickets, reservedTicketCount }:
+        {
+            venue: (Omit<Venue, "start"> & { start: string }),
+            rows: TicketRow[],
+            reservedTickets: number[],
+            reservedTicketCount: number
+        }
 ) {
     const initialOrder: ClientOrder = {
         venueId: venue.id,
@@ -34,6 +39,7 @@ export default function MakeOrder(
             nickname: "",
             social: ""
         },
+        ticketCount: 0,
         tickets: new Map(),
         cheque: undefined
     }
@@ -85,8 +91,25 @@ export default function MakeOrder(
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
-                {stage === "tickets" && venue.ticketCount === null && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
-                {stage === "tickets" && venue.ticketCount !== null && <TicketsForm venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.ticketCount === null && (
+                    <TicketsPicker
+                        venue={venue}
+                        rows={rows}
+                        reservedTickets={reservedTickets}
+                        order={order}
+                        prevStage={prevStage}
+                        nextStage={nextStage}
+                    />
+                )}
+                {stage === "tickets" && venue.ticketCount !== null && (
+                    <TicketsForm
+                        venue={venue}
+                        reservedTicketCount={reservedTicketCount}
+                        order={order}
+                        prevStage={prevStage}
+                        nextStage={nextStage}
+                    />
+                )}
                 {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
                 {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
                     <FullAreaMessage>

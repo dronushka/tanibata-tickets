@@ -21,16 +21,18 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue, order, prevStage, nextStage }: 
+export default function TicketsPicker({ venue, rows, reservedTickets, order, prevStage, nextStage }: 
     { 
-        venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }),
+        venue: (Omit<Venue, "start"> & { start: string }),
+        rows: TicketRow[], 
+        reservedTickets: number[],
         order: ClientOrder,
         prevStage: () => void,
         nextStage: (order: ClientOrder) => void
     }
     ) {
 
-    const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
+    const [ selectedTickets, setSelectedTickets ] = useState<Map<number, ClientTicket>>(new Map)
     
     return (
         <TicketContext.Provider value={{ selectedTickets, setSelectedTickets }}>
@@ -40,7 +42,7 @@ export default function TicketsPicker({ venue, order, prevStage, nextStage }:
                 }}>
                     <Box>
                         <Stage />
-                        <Hall rows={venue.rows} reserved={venue.reservedTickets} />
+                        <Hall rows={rows} reserved={reservedTickets} />
                     </Box>
 
                     <Flex sx={{

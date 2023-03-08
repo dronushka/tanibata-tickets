@@ -56,17 +56,14 @@ export const sendPasswordEmail = async (email?: string) => {
 export const createOrder = async (order: ClientOrder) => {
     console.log('sending', order)
 
-    const formData = new FormData
-    formData.append('venueId', String(order.venueId))
-    formData.append('paymentInfo', JSON.stringify(order.paymentData))
-    formData.append('tickets', JSON.stringify(
-        [...order.tickets].map(([key, value]) => ({ ...value }))
-    ))
-    order.cheque && formData.append('cheque', order.cheque)
-
     const res = await fetch("/api/createOrder", {
         method: "POST",
-        body: formData
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({
+            venueId: order.venueId,
+            paymentData: order.paymentData,
+            tickets: order.tickets
+        })
     })
 
     if (res.ok) {
@@ -82,15 +79,14 @@ export const createOrder = async (order: ClientOrder) => {
 export const createNoSeatsOrder = async (order: ClientOrder) => {
     console.log('sending', order)
 
-    const formData = new FormData
-    formData.append('venueId', String(order.venueId))
-    formData.append('paymentInfo', JSON.stringify(order.paymentData))
-    formData.append('ticketCount', JSON.stringify(order.ticketsCount ?? 1))
-    order.cheque && formData.append('cheque', order.cheque)
-
     const res = await fetch("/api/createNoSeatsOrder", {
         method: "POST",
-        body: formData
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({
+            venueId: order.venueId,
+            paymentData: order.paymentData,
+            ticketCount: order.ticketCount 
+        })
     })
 
     if (res.ok) {

@@ -37,7 +37,7 @@ export type ClientOrder = {
     orderId?: number,
     venueId: number,
     paymentData: PaymentData,
-    ticketsCount?: number,
+    ticketCount: number,
     tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
     cheque?: File
 }
@@ -63,7 +63,7 @@ export const useOrder = (initialOrder: ClientOrder) => {
             case "tickets":
                 if (newOrder) {
                     setStage("makeReservation")
-                    const result = newOrder.ticketsCount !== undefined ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
+                    const result = newOrder.ticketCount !== undefined ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
                     if (result.success) {
                         setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
                         setStage("payment")

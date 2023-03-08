@@ -88,6 +88,7 @@ async function main() {
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
             active: true,
+            ticketCount: 676
         }
     })
 
@@ -98,7 +99,8 @@ async function main() {
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            ticketCount: 600
+            ticketCount: 600,
+            noSeats: true
         }
     })
 

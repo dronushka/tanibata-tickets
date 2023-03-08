@@ -3,57 +3,32 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { OrderStatus } from "@prisma/client"
-import { ClientTicket } from "@/components/MakeOrder/TicketsPicker/TicketsPicker"
-import formidable, { Fields, File, Files } from 'formidable'
-import { array } from "zod"
-import { timeStamp } from "console"
-
-export const config = {
-    api: {
-        bodyParser: false
-    }
-}
-
-type OrderData = {
-    name: string,
-    phone: string,
-    email: string,
-    age: string,
-    nickname: string,
-    social: string
-}
+import { z } from "zod"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
         res.status(405).end()
 
     const session = await getServerSession(req, res, authOptions)
-    // console.log('session', session)
+
     if (!session)
         res.status(401).end()
 
+    const validator = z.object({
+        venueId: z.number(),
+        paymentData: z.object({
+            name: z.string(),
+            phone: z.string(),
+            email: z.string(),
+            age: z.string(),
+            nickname: z.string(),
+            social: z.string()
+        }),
+        tickets: z.array(z.number()).min(1)
+    })
+
     try {
-        const { venueId, paymentData, tickets, cheque } = await new Promise<
-            {
-                venueId: number,
-                paymentData: OrderData,
-                tickets: ClientTicket[],
-                cheque: File
-            }
-        >(
-            function (resolve, reject) {
-                const form = new formidable.IncomingForm({ keepExtensions: true })
-                form.parse(req, function (err, fields: Fields, files: Files) {
-                    if (err) return reject(err)
-                    resolve({
-                        venueId: Number(fields.venueId),
-                        paymentData: JSON.parse(fields.paymentInfo as string),
-                        tickets: JSON.parse(fields.tickets as string),
-                        cheque: files.cheque as File
-                    })
-                })
-            }
-        )
+        const { venueId, paymentData, tickets } = validator.parse(req.body)
 
         await prisma.user.update({
             where: {
@@ -72,12 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!venueExists)
             throw "no_venue_specified"
             
-        if (!tickets || !tickets.length)
-            throw "no_tickets_specified"
+        // if (!tickets || !tickets.length)
+        //     throw "no_tickets_specified"
 
         const dbTickets = await prisma.ticket.findMany({
             where: {
-                id: { in: tickets.map(ticket => ticket.id) }
+                id: { in: tickets }
             },
             include: {
                 priceRange: true
@@ -85,7 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
 
         const price = dbTickets.reduce((sum, ticket) => sum += ticket.priceRange?.price ?? 0, 0)
-
+        const ticketCount = dbTickets.length
+        
         let orderId = 0
 
         await prisma.$transaction(async (tx) => {
@@ -93,6 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 data: {
                     paymentData,
                     price,
+                    ticketCount,
                     venue: { connect: { id: venueId } },
                     user: { connect: { email: session?.user.email } }
                 }
