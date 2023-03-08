@@ -6,8 +6,12 @@ import Stage from "../MakeOrder/TicketsPicker/Stage"
 import { TicketRow } from "../MakeOrder/useOrder"
 import DashboardTicketButton from "./DashboardTicketButton"
 
-export default function DashboardHall({ venue }:
-    { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
+export default function DashboardHall({ venue, rows, reservedTickets }:
+    {
+        venue: (Omit<Venue, "start"> & { start: string })
+        rows: TicketRow[],
+        reservedTickets: number[]
+    }
 ) {
     const dimension = 17
 
@@ -25,8 +29,8 @@ export default function DashboardHall({ venue }:
         return defaultSx
     }
 
-    const reserved = venue.reservedTickets.length
-    const total = venue.rows.reduce((sum, row) => sum += row.tickets.length, 0)
+    const reserved = reservedTickets.length
+    const total = rows.reduce((sum, row) => sum += row.tickets.length, 0)
     // console.log(venue)
     return (
         <Stack>
@@ -38,7 +42,7 @@ export default function DashboardHall({ venue }:
                     marginBottom: dimension,
                 }
             }}>
-                {venue.rows && venue.rows.map((row, i) => (
+                {rows && rows.map((row, i) => (
                     <Flex key={i} sx={getRowSx(i)}>
                         <Text fz="xs" sx={{ flexBasis: 40, whiteSpace: "nowrap" }}>{`Ряд ${row.number}`}</Text>
                         <Flex

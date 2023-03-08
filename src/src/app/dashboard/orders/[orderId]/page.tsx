@@ -23,6 +23,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
             id: res.data
         },
         include: {
+            venue: true,
             cheque: true,
             sentTickets: true,
             tickets: {
@@ -44,6 +45,7 @@ export default async function OrderPage({ params: { orderId } }: { params: { ord
 
     return <DashboardOrderForm order={{
         ...order,
+        venue: order.venue && {...order.venue, start: order.venue.start.toLocaleString('ru-RU')},
         createdAt: order.createdAt.toLocaleString('ru-RU'),
         sentTickets: !!order.sentTickets.length
     }}/>

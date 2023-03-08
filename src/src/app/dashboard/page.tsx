@@ -19,6 +19,7 @@ export default async function DashboardPage() {
             active: true
         },
         include: {
+            order: true,
             tickets: {
                 include: {
                     priceRange: true,
@@ -32,52 +33,21 @@ export default async function DashboardPage() {
         }
     })
 
-    // const total = await prisma.ticket.count({
-    //     where: { venueId: venue.id }
-    // })
-
-    // const reserved = await prisma.ticket.count({
-    //     where: {
-    //         AND: [
-    //             { venueId: venue.id },
-    //             { orderId: { gt: 0 } },
-    //             {
-    //                 order: {
-    //                     AND: [
-    //                         { NOT: { status: OrderStatus.CANCELLED } },
-    //                         { NOT: { status: OrderStatus.RETURNED } }
-    //                     ]
-    //                 }
-    //             },
-    //             { reserved: true }
-    //         ]
-    //     }
-    // })
-
-
     if (!venues)
         return <DashboardLoader />
-
 
     return (
         <>
             {venues.map(venue => {
-
-
-                if (venue.noPlaces) {
-                    const reservedTickets = venue.tickets
-                        .filter(ticket =>
-                            ticket.reserved
-                            || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
-                        )
-                        // .map(ticket => ticket.id)
-                    const totalTickets = venue.tickets.length
+                if (venue.noSeats) {
+                    const reservedTicketCount = venue.order.reduce((sum, order) => sum += order.ticketCount, 0)
+                    
                     return <DashboardHallNoSeats
                         key={venue.id}
                         name={venue.name}
                         start={venue.start.toLocaleString('ru-RU')}
-                        reserved={reservedTickets.length}
-                        total={totalTickets}
+                        reserved={reservedTicketCount}
+                        total={venue.ticketCount}
                     />
                 } else {
                     const ticketRowMap = new Map<string, TicketRow>()
@@ -102,18 +72,20 @@ export default async function DashboardPage() {
                     const clientVenue = {
                         ...restVenue,
                         start: restVenue.start.toLocaleString('ru-RU'),
-                        rows: [...ticketRowMap.values()],
-                        reservedTickets: prismaTickets
-                            .filter(ticket =>
-                                ticket.reserved
-                                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
-                            )
-                            .map(ticket => ticket.id)
+                        order: restVenue.order.map(order => ({ ...order, createdAt: order.createdAt.toLocaleString('ru-RU')}))
                     }
 
                     return <DashboardHall
                         key={venue.id}
                         venue={clientVenue}
+                        rows={[...ticketRowMap.values()]}
+                        reservedTickets={prismaTickets
+                            .filter(ticket =>
+                                ticket.reserved
+                                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
+                            )
+                            .map(ticket => ticket.id)
+                        }
                     />
                 }
             })}

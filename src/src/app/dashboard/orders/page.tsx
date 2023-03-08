@@ -57,6 +57,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     const orders = await prisma.order.findMany({
         where: {AND: ordersAndWhere},
         include: {
+            venue: true,
             cheque: true,
             sentTickets: true,
             tickets: {
@@ -83,6 +84,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             orders.map(
                 order => ({
                     ...order,
+                    venue: order.venue && {...order.venue, start: order.venue?.start.toLocaleString('ru-RU')},
                     createdAt: order.createdAt.toLocaleString('ru-RU'),
                     sentTickets: !!order.sentTickets.length
                 }))
