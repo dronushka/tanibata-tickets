@@ -93,6 +93,7 @@ model Order {
   venue       Venue?       @relation(fields: [venueId], references: [id])
   venueId     Int?
   user        User         @relation(fields: [userId], references: [id])
+  ticketCount Int?
   sentTickets SentTicket[]
   tickets     Ticket[]
 }
