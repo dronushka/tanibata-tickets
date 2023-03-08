@@ -64,6 +64,24 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
             })
         }
 
+    const reservedTicketCount = (await prisma.order.aggregate({
+        where: {
+            AND: [
+                { venueId: venue.id },
+                {
+                    OR: [
+                        { NOT: { status: OrderStatus.CANCELLED } },
+                        { NOT: { status: OrderStatus.RETURNED } }
+                    ]
+                }
+            ],
+
+        },
+        _sum: {
+            ticketCount: true
+        }
+    }))._sum.ticketCount ?? 0
+
     const { tickets: prismaTickets, ...restVenue } = venue
     const clientVenue = {
         ...restVenue,
@@ -74,10 +92,20 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
                 ticket.reserved
                 || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
             )
-            .map(ticket => ticket.id)
+            .map(ticket => ticket.id),
+        reservedTicketCount
     }
 
     return <MakeOrder
         venue={clientVenue}
+        rows={[...ticketRowMap.values()]}
+        reservedTickets={prismaTickets
+            .filter(ticket =>
+                ticket.reserved
+                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
+            )
+            .map(ticket => ticket.id)
+        }
+        reservedTicketCount={reservedTicketCount}
     />
 }

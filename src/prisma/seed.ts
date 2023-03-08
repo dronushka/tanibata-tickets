@@ -1,4 +1,4 @@
-import { PriceRange, Prisma, PrismaClient, Role, Venue } from '@prisma/client'
+import { Prisma, PrismaClient, Role, Venue } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -30,21 +30,21 @@ const getShowTickets = (venue: Venue, rows: Array<any>) => {
 
 }
 
-const getConcertTickets = (venue: Venue, count: number, priceRange: PriceRange) => {
-    const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
-    for (let i = 0; i < count - 1; i++) {
-        const ticket: any = {
-            number: String(i),
-            sortNumber: i,
-            venueId: venue.id,
-            priceRangeId: priceRange.id
-        }
+// const getConcertTickets = (venue: Venue, count: number, priceRange: PriceRange) => {
+//     const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
+//     for (let i = 0; i < count - 1; i++) {
+//         const ticket: any = {
+//             number: String(i),
+//             sortNumber: i,
+//             venueId: venue.id,
+//             priceRangeId: priceRange.id
+//         }
 
-        tickets.push(ticket)
-    }
+//         tickets.push(ticket)
+//     }
 
-    return tickets
-}
+//     return tickets
+// }
 
 async function main() {
     console.log("Creating users")
@@ -88,7 +88,7 @@ async function main() {
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
             active: true,
-            noPlaces: false
+            ticketCount: 676
         }
     })
 
@@ -99,7 +99,8 @@ async function main() {
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            noPlaces: true
+            ticketCount: 10,
+            noSeats: true
         }
     })
 
@@ -163,9 +164,9 @@ async function main() {
         data: getShowTickets(venueShow, rows) || []
     })
 
-    await prisma.ticket.createMany({
-        data: getConcertTickets(venueConcert, 600, concertPriceZone) || []
-    })
+    // await prisma.ticket.createMany({
+    //     data: getConcertTickets(venueConcert, 600, concertPriceZone) || []
+    // })
 }
 main()
     .then(async () => {

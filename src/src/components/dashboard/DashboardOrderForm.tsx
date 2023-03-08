@@ -1,6 +1,6 @@
 "use client"
 
-import { File as DBFile, Order, OrderStatus, PriceRange, Ticket } from "@prisma/client"
+import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 import { useState } from "react"
 import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
 import { Button, createStyles, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
@@ -20,6 +20,7 @@ const useStyles = createStyles((theme) => ({
 
 export default function DashboardOrderForm({ order }: {
     order: (Omit<Order, "createdAt"> & {
+        venue: Omit<Venue, "start"> & { start: string } | null,
         cheque: DBFile | null,
         createdAt: string,
         tickets: (Ticket & { priceRange: PriceRange | null })[],
@@ -43,6 +44,7 @@ export default function DashboardOrderForm({ order }: {
         const res = await apiSetOrderStatus(order.id, orderStatus)
         if (res.success) {
             setEditOrderStatus(false)
+            setSetStatusError("")
         } else if (res.error) {
             setSetStatusError(res.error)
         }
@@ -67,6 +69,7 @@ export default function DashboardOrderForm({ order }: {
     return (
         <Paper p="sm" shadow="xs">
             <Stack>
+                <Text fw="bold">{order.venue?.name}</Text>
                 <Group>
                     <Text className={classes.header}>Номер заказа:</Text>
                     <Text>{order.id}</Text>
@@ -81,8 +84,7 @@ export default function DashboardOrderForm({ order }: {
                 </Group>
 
                 {!editOrderStatus && <Group>
-                    {!order.cheque && <Text color="red">Заказ не оплачен</Text>}
-                    {order.cheque && <OrderStatusText status={orderStatus} />}
+                    <OrderStatusText status={orderStatus} />
                     <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
                 </Group>}
                 {editOrderStatus && <Group>
@@ -142,7 +144,7 @@ export default function DashboardOrderForm({ order }: {
                     {(order.paymentData as PaymentData).social && <Link target="_blank" href={(order.paymentData as PaymentData).social}>{(order.paymentData as PaymentData).social}</Link>}
                     {!(order.paymentData as PaymentData).social && <Text>Нет</Text>}
                 </Group>
-                <Group sx={{alignItems: "flex-start"}}>
+                {order.venue?.noSeats === false && <Group sx={{ alignItems: "flex-start" }}>
                     <Text className={classes.header}>Места:</Text>
                     <List type="ordered">
                         {order.tickets.map(ticket => (
@@ -154,7 +156,8 @@ export default function DashboardOrderForm({ order }: {
                             </List.Item>
                         ))}
                     </List>
-                </Group>
+                </Group>}
+                {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>} 
                 <Group>
                     {!order.cheque && <Text color="red">Чек не найден</Text>}
                     <Button

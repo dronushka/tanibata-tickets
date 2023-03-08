@@ -16,6 +16,11 @@ export default async function OrdersPage() {
             userId: session.user.id
         },
         include: {
+            venue: {
+                include: {
+                    priceRange: true
+                }
+            },
             cheque: true,
             tickets: {
                 include: {
@@ -34,6 +39,7 @@ export default async function OrdersPage() {
     // console.log(orders)
     return <OrdersForm orders={orders.map(order => ({
         ...order,
+        venue: order.venue && { ...order.venue, start: order.venue.start.toLocaleString('ru-RU') },
         createdAt: order.createdAt.toLocaleString('ru-RU'),
         tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
     }))}/>

@@ -21,10 +21,17 @@ export const getStepNumber = (step?: OrderStage) => {
 }
 
 export default function MakeOrder(
-    { venue }:
-        { venue: (Omit<Venue, "start"> & { start: string, rows: TicketRow[], reservedTickets: number[] }) }
+    { venue, rows, reservedTickets, reservedTicketCount }:
+        {
+            venue: (Omit<Venue, "start"> & { start: string }),
+            rows: TicketRow[],
+            reservedTickets: number[],
+            reservedTicketCount: number
+        }
 ) {
     const initialOrder: ClientOrder = {
+        venueId: venue.id,
+        noSeats: venue.noSeats,
         paymentData: {
             name: "",
             email: "",
@@ -33,16 +40,14 @@ export default function MakeOrder(
             nickname: "",
             social: ""
         },
+        ticketCount: 0,
         tickets: new Map(),
         cheque: undefined
     }
 
-// console.log(venue)
     const { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
 
     const { data: session, status } = useSession()
-
-    // const router = useRouter()
 
     useEffect(() => {
         if (!setStage || !setOrder)
@@ -60,11 +65,6 @@ export default function MakeOrder(
         }
     }, [status, session, stage, setStage, setOrder])
 
-    // console.log({ user })
-    // console.log({ order })
-
-
-    // console.log(order.stage, getStepNumber(order.stage))
     return (
         <Stack sx={{ height: "100%" }}>
 
@@ -92,8 +92,25 @@ export default function MakeOrder(
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {stage === "authenticate" && <LoginForm callback={nextStage} />}
                 {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
-                {stage === "tickets" && venue.noPlaces === false && <TicketsPicker venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
-                {stage === "tickets" && venue.noPlaces === true && <TicketsForm venue={venue} order={order} prevStage={prevStage} nextStage={nextStage} />}
+                {stage === "tickets" && venue.noSeats === false && (
+                    <TicketsPicker
+                        venue={venue}
+                        rows={rows}
+                        reservedTickets={reservedTickets}
+                        order={order}
+                        prevStage={prevStage}
+                        nextStage={nextStage}
+                    />
+                )}
+                {stage === "tickets" && venue.noSeats === true && (
+                    <TicketsForm
+                        venue={venue}
+                        reservedTicketCount={reservedTicketCount}
+                        order={order}
+                        prevStage={prevStage}
+                        nextStage={nextStage}
+                    />
+                )}
                 {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
                 {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
                     <FullAreaMessage>

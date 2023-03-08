@@ -3,7 +3,7 @@ import { prisma } from "@/db"
 import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
-import { OrderStatus } from '@prisma/client'
+import { OrderStatus, Role } from '@prisma/client'
 import { emailTransporter } from '@/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        if (session?.user.role !== "admin" && order?.userId !== session?.user.id) {
+        if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }

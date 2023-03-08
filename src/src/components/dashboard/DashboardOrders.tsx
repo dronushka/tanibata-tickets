@@ -6,7 +6,7 @@ import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./OrdersStatusFilter"
-import { File as DBFile, Order, OrderStatus, SentTicket, Ticket } from "@prisma/client"
+import { File as DBFile, Order, OrderStatus, SentTicket, Ticket, Venue } from "@prisma/client"
 import { PaymentData } from "../MakeOrder/useOrder"
 import OrderStatusText from "../orders/client/OrderStatusText"
 
@@ -17,6 +17,7 @@ export default function DashboardOrders(
     { orders, pagination, filter, status }:
         {
             orders: (Omit<Order, "createdAt"> & { 
+                venue: Omit<Venue, "start"> & { start: string } | null,
                 cheque: DBFile | null,
                 createdAt: string,
                 tickets: Ticket[],
@@ -124,6 +125,7 @@ export default function DashboardOrders(
                 {orders.map(order => <Paper key={order.id} p="sm" shadow="xs">
                     <Group sx={{ alignItems: "flex-start", justifyContent: "space-between", width: "100%" }}>
                         <Stack sx={{ flexGrow: 1 }}>
+                            <Text fw="bold">{order.venue?.name}</Text>
                             <Group spacing={5}>
                                 <Text>Заказ № {order.id}</Text>
                                 <Text>от {order.createdAt},</Text>

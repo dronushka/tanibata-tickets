@@ -2,79 +2,43 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
+import { z } from "zod"
 import { OrderStatus } from "@prisma/client"
-import { ClientTicket } from "@/components/MakeOrder/TicketsPicker/TicketsPicker"
-import formidable, { Fields, File, Files } from 'formidable'
-
-export const config = {
-    api: {
-        bodyParser: false
-    }
-}
-
-type OrderData = {
-    name: string,
-    phone: string,
-    email: string,
-    age: string,
-    nickname: string,
-    social: string
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
         res.status(405).end()
 
     const session = await getServerSession(req, res, authOptions)
-    // console.log('session', session)
+
     if (!session)
         res.status(401).end()
 
+    const validator = z.object({
+        venueId: z.number(),
+        paymentData: z.object({
+            name: z.string(),
+            phone: z.string(),
+            email: z.string(),
+            age: z.string(),
+            nickname: z.string(),
+            social: z.string()
+        }),
+        ticketCount: z.number().min(1)
+    })
+
     try {
-        const { paymentData, ticketsCount, cheque } = await new Promise<
-            {
-                paymentData: OrderData,
-                ticketsCount: number,
-                cheque: File
-            }
-        >(
-            function (resolve, reject) {
-                const form = new formidable.IncomingForm({ keepExtensions: true })
-                form.parse(req, function (err, fields: Fields, files: Files) {
-                    if (err) return reject(err)
-                    resolve({
-                        paymentData: JSON.parse(fields.paymentInfo as string),
-                        ticketsCount: Number(fields.ticketCount as string),
-                        cheque: files.cheque as File
-                    })
-                })
-            }
-        )
+        const { venueId, paymentData, ticketCount } = validator.parse(req.body)
 
-        if (!ticketsCount)
-            throw "no tickets specified"
-        // console.log('createOrder', paymentData, tickets, cheque)
-
-        const dbTickets = await prisma.ticket.findMany({
-            where: {
-                orderId: null,
-                venueId: 2
-            },
+        const venue = await prisma.venue.findUnique({ 
+            where: { id: venueId },
             include: {
                 priceRange: true
-            },
-            take: ticketsCount
+            } 
         })
 
-        if (dbTickets.length < ticketsCount) {
-            res.status(422).json({ error: "some_tickets_are_bought" })
-            return
-        }
-
-        let price = 0
-        for (let ticket of dbTickets) {
-           price += ticket.priceRange?.price ?? 0    
-        }
+        if (!venue)
+            throw new Error("venue_not_found")
 
         await prisma.user.update({
             where: {
@@ -89,22 +53,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        const order = await prisma.order.create({
-            data: {
-                paymentData,
-                price,
-                user: {
-                    connect: {
-                        email: session?.user.email
-                    }
-                },
-                tickets: {
-                    connect: dbTickets.map(ticket => ({ id: ticket.id }))
+        const price = ticketCount * ( venue.priceRange.length && venue.priceRange[0].price )
+
+        let orderId = 0
+
+        await prisma.$transaction(async (tx) => {
+            const order = await tx.order.create({
+                data: {
+                    paymentData,
+                    price,
+                    ticketCount,
+                    venue: { connect: { id: venueId } },
+                    user: { connect: { email: session?.user.email } }
                 }
-            }
+            })
+
+            orderId = order.id
+
+            const reservedTicketCount = (await prisma.order.aggregate({
+                where: {
+                    OR: [
+                        { NOT: { status: OrderStatus.CANCELLED } },
+                        { NOT: { status: OrderStatus.RETURNED } }
+                    ]
+                },
+                _sum: {
+                    ticketCount: true
+                }
+            }))._sum.ticketCount ?? 0
+
+            if (reservedTicketCount > venue.ticketCount)
+                throw new Error("overbooking")
         })
 
-        res.status(200).json({ orderId: order.id })
+        res.status(200).json({ orderId })
 
     } catch (e: any) {
         console.error(e)
