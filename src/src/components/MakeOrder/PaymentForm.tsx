@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { z } from "zod"
-import { Avatar, Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Tooltip } from "@mantine/core"
+import { Avatar, Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { IconInfoCircle, IconUpload } from "@tabler/icons-react"
 import { ClientOrder } from "./useOrder"
 
 export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void }) {
     const [goodness, setGoodness] = useState(order.isGoodness)
+    const [comment, setComment] = useState(order.comment)
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
 
     const [chequeError, setChequeError] = useState<string>("")
@@ -57,7 +58,7 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
     const send = () => {
         const res = chequeValidator.safeParse(cheque)
         if (res.success)
-            onSubmit({ ...order, isGoodness: goodness, cheque })
+            onSubmit({ ...order, isGoodness: goodness, comment, cheque })
         else
             setChequeError(res.error.flatten().formErrors.join(', '))
     }
@@ -97,6 +98,11 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
                         {/* </Avatar> */}
                     </Tooltip>
                 </Group>
+                <Textarea 
+                    label="Вы можете оставить комментарий к заказу"
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                />
                 <Text>Для завершения, оплатите заказ на сумму {goodness ? (Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount).toFixed(2) : sum.toFixed(2)} р. и приложите чек ниже.</Text>
                 <Text>Реквизиты для перевода оплаты за билеты</Text>
 

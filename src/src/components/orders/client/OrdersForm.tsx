@@ -139,6 +139,10 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                         {order.venue?.noSeats === true && <>
                             <Text>Количество билетов: {order.ticketCount}</Text>
                         </>}
+                        {!!order.comment.length && <>
+                            <Text>Комментарий:</Text>
+                            <Text>{order.comment}</Text>
+                        </>}
                         <Group>
                             {
                                 order.status !== OrderStatus.UNPAID && !order.cheque &&

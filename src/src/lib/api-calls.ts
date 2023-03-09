@@ -119,10 +119,11 @@ export const uploadCheque = async (orderId: number, cheque: File) => {
     }
 }
 
-export const setPaymentInfo = async (orderId: number, goodness: boolean, cheque: File) => {
+export const setPaymentInfo = async (orderId: number, goodness: boolean, comment: string, cheque: File) => {
     const formData = new FormData
     formData.append("orderId", String(orderId))
     formData.append("goodness", goodness ? "1" : "0")
+    formData.append("comment", comment)
     formData.append("cheque", cheque)
 
     const res = await fetch("/api/setPaymentInfo", {
