@@ -159,6 +159,10 @@ export default function DashboardOrderForm({ order }: {
                     </List>
                 </Group>}
                 {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>} 
+                {!!order.comment.length && <Group>
+                    <Text>Комментарий пользователя:</Text>
+                    <Text>{order.comment}</Text>
+                </Group>}
                 <Group>
                     {!order.cheque && <Text color="red">Чек не найден</Text>}
                     <Button
