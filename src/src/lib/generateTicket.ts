@@ -1,5 +1,7 @@
 import { Template, BLANK_PDF, generate, TextSchema } from '@pdfme/generator'
 import { Order, Ticket, User, Venue } from '@prisma/client'
+import { getQRString } from './OrderQR'
+
 // import { Template, BLANK_PDF } from '@pdfme/ui'; <- Template types and BLANK_PDF can also be imported from @pdfme/ui.
 // import QRCode from 'qrcode'
 
@@ -15,7 +17,7 @@ export default async function generateTicket(order: Order & { user: User, ticket
             width: 100,
             height: 10
         }
-        ticketValues[ticket.id] = `${key + 1}. ${ticket.venue?.name} Ряд: ${ticket.rowNumber}, место ${ticket.number}`
+        ticketValues[ticket.id] = `${key + 1}. Ряд: ${ticket.rowNumber}, место ${ticket.number}`
     })
 
     const template: Template = {
@@ -47,7 +49,7 @@ export default async function generateTicket(order: Order & { user: User, ticket
 
     const inputs = [{
         header: "Билеты на фестиваль:",
-        qrcode: String(order.id),
+        qrcode: getQRString(order, order.user),
         ...ticketValues
     }]
 
