@@ -2,12 +2,10 @@
 
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 import { useState } from "react"
-import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets } from "@/lib/api-calls"
-import { Button, createStyles, Group, Input, List, Paper, Select, Stack, Text } from "@mantine/core"
+import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets, setOrderNotes } from "@/lib/api-calls"
+import { Button, createStyles, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
-
 import { useRouter } from "next/navigation"
-
 import Link from "next/link"
 import OrderStatusText from "../orders/client/OrderStatusText"
 import { PaymentData } from "../MakeOrder/useOrder"
@@ -32,8 +30,9 @@ export default function DashboardOrderForm({ order }: {
     const [editOrderStatus, setEditOrderStatus] = useState(false)
     const [editSendTicketError, setEditSendTicketError] = useState("")
     const [setStatusError, setSetStatusError] = useState("")
+    const [notesError, setNotesError] = useState("")
 
-    // const [ticketsIsSent, setTicketsIsSent] = useState(!!order.sentTickets)
+    const [notes, setNotes] = useState(order.notes)
 
     const [loading, setLoading] = useState(false)
 
@@ -64,6 +63,18 @@ export default function DashboardOrderForm({ order }: {
         setLoading(false)
     }
 
+    const sendOrderNotes = async () => {
+        setLoading(true)
+        const res = await setOrderNotes(order.id, notes)
+        if (res.success) {
+            setNotesError("")
+        } else if (res.error) {
+            setNotesError(res.error)
+        }
+
+        setLoading(false)
+    }
+
     const { classes } = useStyles()
 
     return (
@@ -81,6 +92,7 @@ export default function DashboardOrderForm({ order }: {
                 <Group>
                     <Text className={classes.header}>Сумма заказа:</Text>
                     <Text>{order.price.toFixed(2)} р.</Text>
+                    {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
                 </Group>
 
                 {!editOrderStatus && <Group>
@@ -151,13 +163,30 @@ export default function DashboardOrderForm({ order }: {
                             <List.Item key={ticket.id}>
                                 <Group>
                                     <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                    <Text>{ticket.priceRange?.price.toFixed(2) ?? 0} р.</Text>
+                                    <Text>{order.isGoodness ? `${ticket.priceRange?.price.toFixed(2)} (${Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0).toFixed(2)})` : ticket.priceRange?.price.toFixed(2)} р.</Text>
                                 </Group>
                             </List.Item>
                         ))}
                     </List>
                 </Group>}
-                {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>} 
+                {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>}
+                {!!order.comment.length && <Group>
+                    <Text>Комментарий пользователя:</Text>
+                    <Text>{order.comment}</Text>
+                </Group>}
+                <Stack>
+                    <Textarea
+                        // sx={{ flexGrow: 1 }}
+                        label="Заметки"
+                        value={notes}
+                        onChange={e => {
+                            setNotesError("")
+                            setNotes(e.target.value)
+                        }}
+                    />
+                    <Button sx={{maxWidth: 200}} variant="default" loading={loading} onClick={sendOrderNotes}>Сохранить</Button>
+                    <Input.Error>{notesError}</Input.Error>
+                </Stack>
                 <Group>
                     {!order.cheque && <Text color="red">Чек не найден</Text>}
                     <Button

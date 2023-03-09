@@ -1,46 +1,48 @@
 import { useState } from "react"
 import { z } from "zod"
-import { Box, Button, FileButton, Flex, Group, Input, List, Paper, Stack, Text } from "@mantine/core"
-import { IconUpload } from "@tabler/icons-react"
+import { Avatar, Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
+import { IconInfoCircle, IconUpload } from "@tabler/icons-react"
 import { ClientOrder } from "./useOrder"
 
-export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void}) {
+export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void }) {
+    const [goodness, setGoodness] = useState(order.isGoodness)
+    const [comment, setComment] = useState(order.comment)
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
 
     const [chequeError, setChequeError] = useState<string>("")
-    
+
     const chequeValidator = z.custom<File>().superRefine((file, ctx) => {
         if (!(file instanceof File)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Приложите файл",
-            fatal: true,
-          })
-      
-          return z.NEVER
-        }
-      
-        if (file.size > 2 * 1024 * 1024) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Размер файл не должен превышать 2МБ",
-            fatal: true
-          })
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Приложите файл",
+                fatal: true,
+            })
 
-          return z.NEVER
+            return z.NEVER
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Размер файл не должен превышать 2МБ",
+                fatal: true
+            })
+
+            return z.NEVER
         }
 
         if (!(["image/png", "image/jpeg", "application/pdf"].find(f => f === file.type))) {
             ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Допустимые форматы файла: jpeg, png, pdf",
-              fatal: true
+                code: z.ZodIssueCode.custom,
+                message: "Допустимые форматы файла: jpeg, png, pdf",
+                fatal: true
             })
-  
+
             return z.NEVER
-          }
-        
-      })
+        }
+
+    })
 
     const changeCheque = (value: File) => {
         const res = chequeValidator.safeParse(value)
@@ -56,8 +58,8 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
     const send = () => {
         const res = chequeValidator.safeParse(cheque)
         if (res.success)
-            onSubmit({ ...order, cheque })
-        else 
+            onSubmit({ ...order, isGoodness: goodness, comment, cheque })
+        else
             setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
@@ -72,13 +74,36 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
                         <List.Item key={ticket.id} >
                             <Group>
                                 <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
+                                <Text>{goodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0).toFixed(2) : ticket.priceRange?.price.toFixed(2)} р.</Text>
                             </Group>
                         </List.Item>
                     ))}
                 </List>
-
-                <Text>Для завершения, оплатите заказ на сумму {sum.toFixed(2)} р. и приложите чек ниже.</Text>
+                <Group>
+                    <Checkbox
+                        label="Активировать Добро!"
+                        checked={goodness}
+                        onChange={(event) => setGoodness(event.currentTarget.checked)}
+                    />
+                    <Tooltip
+                        label='Билеты "Добро" - это способ дополнительно поддержать фестиваль! 
+                    Стоимость такого билета составляет 2500 вне зависимости от места. 
+                    В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!'
+                        multiline
+                        width={300}
+                        events={{ hover: true, focus: true, touch: true }}
+                    >
+                        {/* <Avatar radius="sm"> */}
+                        <IconInfoCircle />
+                        {/* </Avatar> */}
+                    </Tooltip>
+                </Group>
+                <Textarea 
+                    label="Вы можете оставить комментарий к заказу"
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                />
+                <Text>Для завершения, оплатите заказ на сумму {goodness ? (Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount).toFixed(2) : sum.toFixed(2)} р. и приложите чек ниже.</Text>
                 <Text>Реквизиты для перевода оплаты за билеты</Text>
 
                 <Text weight={700}>1234 5678 9012 3456, Сбербанк.</Text>

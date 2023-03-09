@@ -6,7 +6,7 @@ import { IconEdit, IconSearch, IconX } from "@tabler/icons-react"
 import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./OrdersStatusFilter"
-import { File as DBFile, Order, OrderStatus, SentTicket, Ticket, Venue } from "@prisma/client"
+import { File as DBFile, Order, OrderStatus, SentTicket, Ticket, User, Venue } from "@prisma/client"
 import { PaymentData } from "../MakeOrder/useOrder"
 import OrderStatusText from "../orders/client/OrderStatusText"
 
@@ -17,6 +17,8 @@ export default function DashboardOrders(
     { orders, pagination, filter, status }:
         {
             orders: (Omit<Order, "createdAt"> & { 
+                qrString: string,
+                user: Omit<User, "createdAt"> & { createdAt: string},
                 venue: Omit<Venue, "start"> & { start: string } | null,
                 cheque: DBFile | null,
                 createdAt: string,
@@ -130,13 +132,14 @@ export default function DashboardOrders(
                                 <Text>Заказ № {order.id}</Text>
                                 <Text>от {order.createdAt},</Text>
                                 <Text>на сумму {order.price.toFixed(2)} р.</Text>
-
+                                {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
                             </Group>
-
+                            {/* <Text>{order.qrString}</Text> */}
                             <Group>
                                 <Text>{(order.paymentData as PaymentData).name}</Text>
                                 <Text>{(order.paymentData as PaymentData).email}</Text>
                             </Group>
+                            {!!order.notes.length && <Text>Заметки: {order.notes}</Text>}
                         </Stack>
                         <Stack sx={{ alignItems: "center" }}>
                             {/* {!order.cheque && <Text color="red">Заказ не оплачен</Text>} */}
