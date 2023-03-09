@@ -30,11 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { venueId, paymentData, ticketCount } = validator.parse(req.body)
 
-        const venue = await prisma.venue.findUnique({ 
+        const venue = await prisma.venue.findUnique({
             where: { id: venueId },
             include: {
                 priceRange: true
-            } 
+            }
         })
 
         if (!venue)
@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        const price = ticketCount * ( venue.priceRange.length && venue.priceRange[0].price )
+        const price = ticketCount * (venue.priceRange.length && venue.priceRange[0].price)
 
         let orderId = 0
 
@@ -72,9 +72,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const reservedTicketCount = (await prisma.order.aggregate({
                 where: {
-                    OR: [
-                        { NOT: { status: OrderStatus.CANCELLED } },
-                        { NOT: { status: OrderStatus.RETURNED } }
+                    AND: [
+                        { venueId: venue.id },
+                        {
+                            OR: [
+                                { NOT: { status: OrderStatus.CANCELLED } },
+                                { NOT: { status: OrderStatus.RETURNED } }
+                            ]
+                        },
                     ]
                 },
                 _sum: {
