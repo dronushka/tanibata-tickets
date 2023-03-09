@@ -53,7 +53,8 @@ export default function DashboardTicketButton({ ticket, sx }:
                 <Stack spacing="xs">
                     <Text size="xs">Ряд: {ticket.rowNumber}</Text>
                     <Text size="xs">Место: {ticket.number}</Text>
-                    <Text size="xs">Цена: {ticket.priceRange?.price ?? 0}</Text>
+                    {/* <Text size="xs">Цена: {ticket.priceRange?.price ?? 0}</Text> */}
+                    <Text size="xs">Цена: {ticket.order?.isGoodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0): (ticket.priceRange?.price ?? 0)}</Text>
                     {ticket.orderId && <Text size="xs">Заказ №{ticket.orderId}</Text>}
                 </Stack>
             </Popover.Dropdown>

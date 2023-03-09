@@ -112,6 +112,16 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                         </Group>
                         <Text>{order.createdAt}</Text>
                         <Text fw="bold">{order.venue?.name}</Text>
+                        {order.isGoodness && <Text
+                            fw="bold"
+                            sx={{
+                                backgroundClip: "text",
+                                backgroundImage: "linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red)",
+                                color: "transparent"
+                            }}
+                        >
+                            Добро активировано!
+                        </Text>}
                         {order.venue?.noSeats === false && <>
                             <Text>Места:</Text>
                             <List type="ordered">
@@ -120,7 +130,7 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                                         <Group>
                                             {/* <Text>{ticket.venue?.name}</Text> */}
                                             <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                            <Text>{ticket.priceRange?.price.toFixed(2)} р.</Text>
+                                            <Text>{order.isGoodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0).toFixed(2) : ticket.priceRange?.price.toFixed(2)} р.</Text>
                                         </Group>
                                     </List.Item>
                                 ))}

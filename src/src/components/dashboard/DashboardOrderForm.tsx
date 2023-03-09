@@ -81,6 +81,7 @@ export default function DashboardOrderForm({ order }: {
                 <Group>
                     <Text className={classes.header}>Сумма заказа:</Text>
                     <Text>{order.price.toFixed(2)} р.</Text>
+                    {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
                 </Group>
 
                 {!editOrderStatus && <Group>
@@ -151,7 +152,7 @@ export default function DashboardOrderForm({ order }: {
                             <List.Item key={ticket.id}>
                                 <Group>
                                     <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                    <Text>{ticket.priceRange?.price.toFixed(2) ?? 0} р.</Text>
+                                    <Text>{order.isGoodness ? `${ticket.priceRange?.price.toFixed(2)} (${Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0).toFixed(2)})` : ticket.priceRange?.price.toFixed(2)} р.</Text>
                                 </Group>
                             </List.Item>
                         ))}
