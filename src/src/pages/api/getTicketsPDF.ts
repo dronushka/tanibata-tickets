@@ -6,6 +6,7 @@ import { z } from "zod"
 import contentDisposition from "content-disposition"
 import generateTicket from "@/lib/generateTicket"
 import { Buffer } from "buffer"
+import { Role } from "@prisma/client"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET")
@@ -35,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        if (session?.user.role !== "admin" && order?.userId !== session?.user.id) {
+        if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }

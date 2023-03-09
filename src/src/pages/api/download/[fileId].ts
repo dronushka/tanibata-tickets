@@ -7,6 +7,7 @@ import { z } from "zod"
 import path from "path"
 import fs from 'fs'
 import contentDisposition from 'content-disposition'
+import { Role } from "@prisma/client"
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -34,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // console.log('1- ', session?.user.role !== "admin")
         // console.log('1- ', file?.order?.userId !== session?.user.id)
         console.log(file)
-        if (session?.user.role !== "admin" && file?.order?.userId !== session?.user.id) {
+        if (session?.user.role !== Role.ADMIN && file?.order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }
