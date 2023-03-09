@@ -89,6 +89,7 @@ model Order {
   createdAt   DateTime     @default(now())
   isGoodness  Boolean      @default(false)
   comment     String       @default("")
+  notes       String       @default("")
   status      OrderStatus  @default(UNPAID)
   cheque      File?        @relation(fields: [fileId], references: [id])
   fileId      Int?         @unique

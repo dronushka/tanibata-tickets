@@ -158,6 +158,23 @@ export const setOrderStatus = async (orderId: number, status: OrderStatus) => {
     }
 }
 
+export const setOrderNotes = async (id: number, notes: string) => {
+    const res = await fetch("/api/setOrderNotes", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({ id, notes })
+    })
+
+    if (res.ok) {
+        return ({ success: true })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так попробуйте позже"
+        }
+    }
+}
+
 export const requestReturn = async (orderId: number) => {
     const res = await fetch("/api/requestReturn", {
         method: "POST",
