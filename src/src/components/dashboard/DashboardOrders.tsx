@@ -132,9 +132,9 @@ export default function DashboardOrders(
                                 <Text>Заказ № {order.id}</Text>
                                 <Text>от {order.createdAt},</Text>
                                 <Text>на сумму {order.price.toFixed(2)} р.</Text>
-
+                                {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
                             </Group>
-                            <Text>{order.qrString}</Text>
+                            {/* <Text>{order.qrString}</Text> */}
                             <Group>
                                 <Text>{(order.paymentData as PaymentData).name}</Text>
                                 <Text>{(order.paymentData as PaymentData).email}</Text>

@@ -69,6 +69,8 @@ export default function TicketScanner() {
                         >
                             <Text>{order.venue.name} Заказ №{order.id}</Text>
                         </Link>
+                        {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
+
                         <Text>{order.user.name}</Text>
                         <Text>{order.user.email}</Text>
                         {order.venue?.noSeats === false && <Group sx={{ alignItems: "flex-start" }}>

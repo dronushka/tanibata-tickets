@@ -32,6 +32,7 @@ export default function MakeOrder(
     const initialOrder: ClientOrder = {
         venueId: venue.id,
         noSeats: venue.noSeats,
+        isGoodness: false,
         paymentData: {
             name: "",
             email: "",
