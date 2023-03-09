@@ -24,10 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(401).end()
 
     try {
-        const { orderId, goodness, cheque } = await new Promise<
+        const { orderId, goodness, comment, cheque } = await new Promise<
             {
                 orderId: number,
                 goodness: boolean,
+                comment: string,
                 cheque: any
             }
         >(
@@ -39,6 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     resolve({
                         orderId: parseInt(String(fields.orderId)),
                         goodness: fields.goodness === "1",
+                        comment: fields.comment as string,
                         cheque: files.cheque
                     })
                 })
@@ -48,12 +50,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const validator = z.object({
             orderId: z.number().gt(0, "invalid_order_id"),
             goodness: z.boolean(),
+            comment: z.string(),
             cheque: z.custom<File>(val => val instanceof File, "no_file") //TODO validate mime and size
         })
 
         const validated = validator.parse({
             orderId,
             goodness,
+            comment,
             cheque
         })
 
@@ -85,6 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             data: {
                 status: orderStatus,
                 isGoodness: goodness,
+                comment,
                 price: goodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount : order.price,
                 cheque: {
                     create: {

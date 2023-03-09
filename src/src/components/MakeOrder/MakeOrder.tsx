@@ -33,6 +33,7 @@ export default function MakeOrder(
         venueId: venue.id,
         noSeats: venue.noSeats,
         isGoodness: false,
+        comment: "",
         paymentData: {
             name: "",
             email: "",
@@ -68,7 +69,6 @@ export default function MakeOrder(
 
     return (
         <Stack sx={{ height: "100%" }}>
-
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
                 <Stepper.Step allowStepClick={false} label="Авторизация">
                     Введите email и одноразовый пароль

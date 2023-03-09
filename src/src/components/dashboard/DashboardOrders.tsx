@@ -139,6 +139,7 @@ export default function DashboardOrders(
                                 <Text>{(order.paymentData as PaymentData).name}</Text>
                                 <Text>{(order.paymentData as PaymentData).email}</Text>
                             </Group>
+                            {!!order.notes.length && <Text>Заметки: {order.notes}</Text>}
                         </Stack>
                         <Stack sx={{ alignItems: "center" }}>
                             {/* {!order.cheque && <Text color="red">Заказ не оплачен</Text>} */}
