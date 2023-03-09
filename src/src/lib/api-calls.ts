@@ -119,6 +119,27 @@ export const uploadCheque = async (orderId: number, cheque: File) => {
     }
 }
 
+export const setPaymentInfo = async (orderId: number, goodness: boolean, cheque: File) => {
+    const formData = new FormData
+    formData.append("orderId", String(orderId))
+    formData.append("goodness", goodness ? "1" : "0")
+    formData.append("cheque", cheque)
+
+    const res = await fetch("/api/setPaymentInfo", {
+        method: "POST",
+        body: formData
+    })
+
+    if (res.ok) {
+        return ({ success: true })
+    } else {
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
+    }
+}
+
 export const setOrderStatus = async (orderId: number, status: OrderStatus) => {
     const res = await fetch("/api/setOrderStatus", {
         method: "POST",

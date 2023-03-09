@@ -30,7 +30,7 @@ export default function Summary({ order, onSubmit }:
                 </Group>
                 <Button 
                     disabled={!selectedTickets.size}
-                    onClick={() => order && onSubmit({...order, tickets: selectedTickets})}
+                    onClick={() => order && onSubmit({...order, tickets: selectedTickets, ticketCount: selectedTickets.size})}
                 >
                     Перейти к оплате
                 </Button>
