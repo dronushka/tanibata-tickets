@@ -152,3 +152,23 @@ export const requestReturn = async (orderId: number) => {
         }
     }
 }
+
+export const getQROrder = async (id: number, hash: string) => {
+    const res = await fetch("/api/getQROrder", {
+        method: "POST",
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body: JSON.stringify({
+            id,
+            hash
+        })
+    })
+
+    if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return ({
+            success: false,
+            error: (await res.json()).error
+        })
+    }
+}

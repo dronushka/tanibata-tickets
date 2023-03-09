@@ -5,6 +5,7 @@ import { prisma } from "@/db"
 import { z } from "zod"
 import DashboardOrders from "@/components/dashboard/DashboardOrders"
 import { OrderStatus, Prisma, Role } from "@prisma/client"
+import { getQRString } from "@/lib/OrderQR"
 
 const perPage = 20
 
@@ -57,6 +58,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     const orders = await prisma.order.findMany({
         where: {AND: ordersAndWhere},
         include: {
+            user: true,
             venue: true,
             cheque: true,
             sentTickets: true,
@@ -84,6 +86,8 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             orders.map(
                 order => ({
                     ...order,
+                    qrString: getQRString(order, order.user),
+                    user: { ...order.user, createdAt: order.user.createdAt.toLocaleString('ru-RU')},
                     venue: order.venue && {...order.venue, start: order.venue?.start.toLocaleString('ru-RU')},
                     createdAt: order.createdAt.toLocaleString('ru-RU'),
                     sentTickets: !!order.sentTickets.length
