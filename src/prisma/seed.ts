@@ -115,8 +115,8 @@ async function main() {
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            ticketCount: 5,
-            availableTickets: 5,
+            ticketCount: 50,
+            availableTickets: 50,
             noSeats: true
         }
     })

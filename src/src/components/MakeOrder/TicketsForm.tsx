@@ -15,7 +15,7 @@ export default function TicketsForm(
             nextStage: (order: ClientOrder) => void
         }
 ) {
-    console.log(venue.ticketCount, reservedTicketCount)
+    // console.log(venue.ticketCount, reservedTicketCount)
 
     const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
     const router = useRouter()
