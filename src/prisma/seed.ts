@@ -79,6 +79,21 @@ async function main() {
         }
     })
 
+    await prisma.user.create({
+        data: {
+            email: "g-worlds@ya.ru",
+            name: "Константиновский Константин Константинович",
+            nickname: "tester",
+            age: 99,
+            role: Role.CUSTOMER,
+            passwords: {
+                create: {
+                    hash: bcrypt.hashSync("secret", 10)
+                }
+            }
+        }
+    })
+
     console.log("Creating venues")
 
     const venueShow = await prisma.venue.create({
@@ -88,7 +103,8 @@ async function main() {
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
             active: true,
-            ticketCount: 676
+            ticketCount: 676,
+            availableTickets: 676
         }
     })
 
@@ -99,7 +115,8 @@ async function main() {
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            ticketCount: 10,
+            ticketCount: 5,
+            availableTickets: 5,
             noSeats: true
         }
     })

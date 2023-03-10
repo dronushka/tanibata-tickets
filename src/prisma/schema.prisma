@@ -50,17 +50,18 @@ model Ticket {
 }
 
 model Venue {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String       @default("")
-  active      Boolean      @default(false)
-  address     String       @default("")
-  ticketCount Int
-  start       DateTime     @default(now())
-  noSeats     Boolean      @default(false)
-  priceRange  PriceRange[]
-  tickets     Ticket[]
-  order       Order[]
+  id               Int          @id @default(autoincrement())
+  name             String
+  description      String       @default("")
+  active           Boolean      @default(false)
+  address          String       @default("")
+  ticketCount      Int
+  availableTickets Int
+  start            DateTime     @default(now())
+  noSeats          Boolean      @default(false)
+  priceRange       PriceRange[]
+  tickets          Ticket[]
+  order            Order[]
 }
 
 model PriceRange {
