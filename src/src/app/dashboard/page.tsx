@@ -8,6 +8,10 @@ import { OrderStatus, Role } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Админка'].join(" | ")
+}
+
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions)
 
@@ -16,7 +20,7 @@ export default async function DashboardPage() {
 
     const venues = await prisma.venue.findMany({
         where: {
-            active: true
+            active: true,
         },
         include: {
             order: true,
@@ -40,7 +44,13 @@ export default async function DashboardPage() {
         <>
             {venues.map(venue => {
                 if (venue.noSeats) {
-                    const reservedTicketCount = venue.order.reduce((sum, order) => sum += order.ticketCount, 0)
+                    const reservedTicketCount = venue.order.reduce(
+                        (sum, order) => (
+                            order.status !== OrderStatus.CANCELLED
+                            && order.status !== OrderStatus.RETURNED
+                        ) ? sum += order.ticketCount : sum
+                        , 0)
+                    // const reservedTicketCount = venue.order.reduce((sum, order) => sum += order.ticketCount, 0)
                     
                     return <DashboardHallNoSeats
                         key={venue.id}

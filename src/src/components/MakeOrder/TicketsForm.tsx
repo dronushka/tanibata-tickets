@@ -15,7 +15,7 @@ export default function TicketsForm(
             nextStage: (order: ClientOrder) => void
         }
 ) {
-    console.log(venue.ticketCount, reservedTicketCount)
+    // console.log(venue.ticketCount, reservedTicketCount)
 
     const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
     const router = useRouter()
@@ -46,7 +46,8 @@ export default function TicketsForm(
         }}>
             <div style={{ position: 'relative' }}>
                 <LoadingOverlay visible={initialUpdate || isPending} overlayBlur={2} />
-                <Stack>
+                {reservedTicketCount >= venue.ticketCount && <Text>К сожалению все билеты распроданы...</Text>}
+                {(reservedTicketCount < venue.ticketCount) && <Stack>
                     <Paper shadow="md" p="md">
                         <Stack>
                             <Text>Укажите количество билетов</Text>
@@ -64,7 +65,7 @@ export default function TicketsForm(
                         <Button variant="default" onClick={prevStage}>Назад</Button>
                         <Button onClick={() => nextStage({ ...order, ticketCount })}>Далее</Button>
                     </Group>
-                </Stack>
+                </Stack>}
             </div>
         </Flex>
     )

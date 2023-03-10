@@ -29,6 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const order = await prisma.order.findUnique({
             where: {
                 id: validated.id
+            },
+            include: {
+                venue: true
             }
         })
 
@@ -37,18 +40,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return
         }
 
+        if (!order) {
+            res.status(422).json({ error: "order_not_found"})
+            return
+        }
+
+        if (order.status === OrderStatus.CANCELLED || order.status === OrderStatus.RETURNED) {
+            res.status(422).json({ error: "cancelled_or_returned_cannot_be_changed"})
+            return
+        }
+
         await prisma.order.update({
             where: {
-                id: order?.id,
+                id: order.id,
             },
             data: {
                 status: validated.status
             }
         })
 
+        if (
+            order.venue?.noSeats
+            && (validated.status === OrderStatus.CANCELLED || validated.status === OrderStatus.RETURNED)
+        ) {
+            await prisma.venue.update({
+                where: { id: order.venue.id },
+                data: { availableTickets: Math.min(order.venue.availableTickets + order.ticketCount, order.venue.ticketCount) }
+            })
+        }
+
         if (validated.status === OrderStatus.RETURNED) {
             const user = await prisma.user.findUnique({
-                where: { id: order?.userId}
+                where: { id: order.userId }
             })
 
             emailTransporter.sendMail({

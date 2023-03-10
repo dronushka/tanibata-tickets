@@ -7,6 +7,11 @@ import { OrderStatus, User } from "@prisma/client"
 import { z } from "zod"
 import MakeOrder from "@/components/MakeOrder/MakeOrder"
 
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Заказ билетов'].join(" | "),
+}
+
+
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
     const session = await getServerSession(authOptions)
 
@@ -68,12 +73,8 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
         where: {
             AND: [
                 { venueId: venue.id },
-                {
-                    OR: [
-                        { NOT: { status: OrderStatus.CANCELLED } },
-                        { NOT: { status: OrderStatus.RETURNED } }
-                    ]
-                }
+                { NOT: { status: OrderStatus.CANCELLED } },
+                { NOT: { status: OrderStatus.RETURNED } }
             ],
 
         },

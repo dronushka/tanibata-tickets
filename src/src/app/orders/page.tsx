@@ -4,6 +4,10 @@ import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import OrdersForm from "../../components/orders/client/OrdersForm"
 
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Мои заказы'].join(" | ")
+}
+
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)
     if (!session)
