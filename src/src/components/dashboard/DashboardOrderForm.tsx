@@ -97,7 +97,11 @@ export default function DashboardOrderForm({ order }: {
 
                 {!editOrderStatus && <Group>
                     <OrderStatusText status={orderStatus} />
-                    <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
+                    {
+                        orderStatus !== OrderStatus.CANCELLED
+                        && orderStatus !== OrderStatus.RETURNED
+                        && <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
+                    }
                 </Group>}
                 {editOrderStatus && <Group>
                     <Select
@@ -184,7 +188,7 @@ export default function DashboardOrderForm({ order }: {
                             setNotes(e.target.value)
                         }}
                     />
-                    <Button sx={{maxWidth: 200}} variant="default" loading={loading} onClick={sendOrderNotes}>Сохранить</Button>
+                    <Button sx={{ maxWidth: 200 }} variant="default" loading={loading} onClick={sendOrderNotes}>Сохранить</Button>
                     <Input.Error>{notesError}</Input.Error>
                 </Stack>
                 <Group>
