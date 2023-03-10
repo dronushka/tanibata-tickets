@@ -152,7 +152,7 @@ export default function ClientConcurrencyTest() {
     }
 
     return <div>
-        <button onClick={startTest}>Start test</button>
-        <button onClick={startTestNoSeats}>Start no seats test</button>
+        {/* <button onClick={startTest}>Start test</button>
+        <button onClick={startTestNoSeats}>Start no seats test</button> */}
     </div>
 }
