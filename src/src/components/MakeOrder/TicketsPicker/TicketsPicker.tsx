@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Loader, Stack } from "@mantine/core"
+import { Box, Button, Flex, Loader, Stack, Text } from "@mantine/core"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ClientOrder, TicketRow } from "../useOrder"
@@ -21,19 +21,29 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue, rows, reservedTickets, order, prevStage, nextStage }: 
-    { 
+export default function TicketsPicker({ venue, rows, reservedTickets, order, prevStage, nextStage }:
+    {
         venue: (Omit<Venue, "start"> & { start: string }),
-        rows: TicketRow[], 
+        rows: TicketRow[],
         reservedTickets: number[],
         order: ClientOrder,
         prevStage: () => void,
         nextStage: (order: ClientOrder) => void
     }
-    ) {
+) {
 
-    const [ selectedTickets, setSelectedTickets ] = useState<Map<number, ClientTicket>>(new Map)
-    
+    const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
+    if (reservedTickets.length >= venue.ticketCount)
+        return (
+            <Flex sx={{
+                width: "100%",
+                height: "100%",
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
+                <Text>К сожалению все билеты распроданы...</Text>
+            </Flex>
+        )
     return (
         <TicketContext.Provider value={{ selectedTickets, setSelectedTickets }}>
             <Stack>
