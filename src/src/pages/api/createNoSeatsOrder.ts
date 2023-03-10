@@ -3,7 +3,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
 import { z } from "zod"
-import { OrderStatus } from "@prisma/client"
+import { OrderStatus, Prisma } from "@prisma/client"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -58,6 +58,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let orderId = 0
 
         await prisma.$transaction(async (tx) => {
+            const venues = await prisma.venue.updateMany({
+                where: {
+                    id: venue.id,
+                    availableTickets: { gte: ticketCount }
+                },
+                data: {
+                    availableTickets: {
+                        decrement: ticketCount
+                    }
+                }
+            })
+            // console.log({ticketCount, reservedTicketCount, totalTicketCount: venue.ticketCount})
+            if (venues.count !== 1)
+                throw new Error("overbooking")
+
             const order = await tx.order.create({
                 data: {
                     paymentData,
@@ -67,28 +82,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     user: { connect: { email: session?.user.email } }
                 }
             })
-
-            orderId = order.id
-
-            const reservedTicketCount = (await prisma.order.aggregate({
-                where: {
-                    AND: [
-                        { venueId: venue.id },
-                        {
-                            OR: [
-                                { NOT: { status: OrderStatus.CANCELLED } },
-                                { NOT: { status: OrderStatus.RETURNED } }
-                            ]
-                        },
-                    ]
-                },
-                _sum: {
-                    ticketCount: true
-                }
-            }))._sum.ticketCount ?? 0
-
-            if (reservedTicketCount > venue.ticketCount)
-                throw new Error("overbooking")
         })
 
         res.status(200).json({ orderId })
