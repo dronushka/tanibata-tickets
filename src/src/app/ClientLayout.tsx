@@ -30,9 +30,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             navbarOffsetBreakpoint="sm"
             asideOffsetBreakpoint="sm"
             navbar={
-                <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
+                <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened}  width={{ sm: 200, lg: 300 }}>
                     <Navbar.Section grow mt="md">
-                        <Navigation />
+                        <Navigation onClick={ () => setOpened(false) }/>
                     </Navbar.Section>
                     <Navbar.Section>
                         <User />
