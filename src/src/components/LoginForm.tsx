@@ -72,6 +72,8 @@ export default function LoginForm(
     const router = useRouter()
 
     const { status } = useSession()
+    if (status === "authenticated")
+        !callback && router.push("/orders")
     if (status === "loading")
         return <FullAreaLoading />
     return (
