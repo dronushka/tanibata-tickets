@@ -7,6 +7,7 @@ import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icon
 import { useState } from "react"
 import OrderStatusText from "./OrderStatusText"
 import { useRouter } from "next/navigation"
+import OrderStatusTooltip from "./OrderStatusTooltip"
 
 type HydratedOrder = Omit<Order, "createdAt"> & (
     {
@@ -108,17 +109,18 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
                             <Group>
                                 <Text>Статус:</Text>
                                 <OrderStatusText status={order.status} />
+                                <OrderStatusTooltip status={order.status} />
                             </Group>
                         </Group>
                         <Text>{order.createdAt}</Text>
                         <Text fw="bold">{order.venue?.name}</Text>
                         {order.isGoodness && <Text
                             fw="bold"
-                            sx={{
-                                backgroundClip: "text",
-                                backgroundImage: "linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red)",
-                                color: "transparent"
-                            }}
+                            // sx={{
+                            //     backgroundClip: "text",
+                            //     backgroundImage: "linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red)",
+                            //     color: "transparent"
+                            // }}
                         >
                             Добро активировано!
                         </Text>}
