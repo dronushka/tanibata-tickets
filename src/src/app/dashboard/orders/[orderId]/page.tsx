@@ -1,3 +1,4 @@
+// import type { Metadata } from 'next'
 import DashboardOrderForm from "@/components/dashboard/DashboardOrderForm"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
@@ -5,6 +6,10 @@ import { Role } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { z } from "zod"
+
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Админка', 'Детали заказа'].join(" | ")
+}
 
 export default async function OrderPage({ params: { orderId } }: { params: { orderId: string } }) {
     const session = await getServerSession(authOptions)

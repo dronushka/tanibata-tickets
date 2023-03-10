@@ -1,6 +1,7 @@
-'use client'
-import { Text } from "@mantine/core"
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Помощь'].join(" | ")
+}
 
 export default function HelpPage () {
-    return <Text>Помощь</Text>
+    return <p>Помощь</p>
 }

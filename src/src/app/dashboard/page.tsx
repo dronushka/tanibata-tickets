@@ -8,6 +8,10 @@ import { OrderStatus, Role } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Админка'].join(" | ")
+}
+
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions)
 

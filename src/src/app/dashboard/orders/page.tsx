@@ -7,6 +7,10 @@ import DashboardOrders from "@/components/dashboard/DashboardOrders"
 import { OrderStatus, Prisma, Role } from "@prisma/client"
 import { getQRString } from "@/lib/OrderQR"
 
+export const metadata = {
+    title: [process.env.FEST_TITLE, 'Админка', 'Заказы'].join(" | ")
+}
+
 const perPage = 20
 
 export default async function DashboardOrdersPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
