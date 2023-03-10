@@ -68,12 +68,8 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
         where: {
             AND: [
                 { venueId: venue.id },
-                {
-                    OR: [
-                        { NOT: { status: OrderStatus.CANCELLED } },
-                        { NOT: { status: OrderStatus.RETURNED } }
-                    ]
-                }
+                { NOT: { status: OrderStatus.CANCELLED } },
+                { NOT: { status: OrderStatus.RETURNED } }
             ],
 
         },
