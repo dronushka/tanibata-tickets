@@ -5,10 +5,9 @@ import { useContext } from "react"
 import { ClientOrder } from "../useOrder"
 import { ClientTicket, TicketContext } from "./TicketsPicker"
 
-export default function Summary({ order, onSubmit }:
+export default function Summary({ onSubmit }:
     {
-        order: ClientOrder,
-        onSubmit: (order: ClientOrder) => void
+        onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void
     }
 ) {
     const { selectedTickets } = useContext(TicketContext)
@@ -30,7 +29,7 @@ export default function Summary({ order, onSubmit }:
                 </Group>
                 <Button 
                     disabled={!selectedTickets.size}
-                    onClick={() => order && onSubmit({...order, tickets: selectedTickets, ticketCount: selectedTickets.size})}
+                    onClick={() => onSubmit(order => ({...order, tickets: selectedTickets, ticketCount: selectedTickets.size}))}
                 >
                     Перейти к оплате
                 </Button>

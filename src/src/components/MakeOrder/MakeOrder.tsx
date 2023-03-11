@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { Venue } from "@prisma/client"
+import { PriceRange, Ticket, Venue } from "@prisma/client"
 import Link from "next/link"
 import { Button, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
@@ -21,12 +21,10 @@ export const getStepNumber = (step?: OrderStage) => {
 }
 
 export default function MakeOrder(
-    { venue, rows, reservedTickets, reservedTicketCount }:
+    { venue, rows }:
         {
             venue: (Omit<Venue, "start"> & { start: string }),
-            rows: TicketRow[],
-            reservedTickets: number[],
-            reservedTicketCount: number
+            rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
         }
 ) {
     const initialOrder: ClientOrder = {
@@ -60,10 +58,10 @@ export default function MakeOrder(
 
         if (status === "authenticated" && stage === "authenticate") {
             setStage("form")
-            setOrder(prev => ({
-                ...prev,
-                paymentData: session.user.paymentData
-            }))
+            // setOrder(prev => ({
+            //     ...prev,
+            //     paymentData: session.user.paymentData
+            // }))
         }
     }, [status, session, stage, setStage, setOrder])
 
@@ -91,14 +89,12 @@ export default function MakeOrder(
             </Stepper>
 
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
-                {stage === "authenticate" && <LoginForm callback={nextStage} />}
-                {stage === "form" && <OrderForm order={order} onSubmit={nextStage} />}
+                {stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
+                {stage === "form" && <OrderForm onSubmit={nextStage} />}
                 {stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
                         venue={venue}
                         rows={rows}
-                        reservedTickets={reservedTickets}
-                        order={order}
                         prevStage={prevStage}
                         nextStage={nextStage}
                     />
@@ -106,8 +102,8 @@ export default function MakeOrder(
                 {stage === "tickets" && venue.noSeats === true && (
                     <TicketsForm
                         venue={venue}
-                        reservedTicketCount={reservedTicketCount}
-                        order={order}
+                        // reservedTicketCount={reservedTicketCount}
+                        // order={order}
                         prevStage={prevStage}
                         nextStage={nextStage}
                     />

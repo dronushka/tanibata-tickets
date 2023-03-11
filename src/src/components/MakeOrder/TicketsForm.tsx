@@ -1,3 +1,4 @@
+import { getReservedTickets } from "@/lib/api-calls"
 import { Button, Flex, Group, LoadingOverlay, Paper, Stack, Text } from "@mantine/core"
 import { Venue } from "@prisma/client"
 import { IconMinus, IconPlus } from "@tabler/icons-react"
@@ -6,25 +7,33 @@ import { useEffect, useState, useTransition } from "react"
 import { ClientOrder, TicketRow } from "./useOrder"
 
 export default function TicketsForm(
-    { venue, reservedTicketCount, order, prevStage, nextStage }:
+    { venue, prevStage, nextStage }:
         {
             venue: (Omit<Venue, "start"> & { start: string }),
-            reservedTicketCount: number,
-            order: ClientOrder,
             prevStage: () => void,
-            nextStage: (order: ClientOrder) => void
+            nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
         }
 ) {
-    // console.log(venue.ticketCount, reservedTicketCount)
 
-    const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
-    const router = useRouter()
-    const [ isPending, startTransition ] = useTransition()
+    const [reservedTicketCount, setReservedTicketsCount] = useState<number>(0)
+    const [loading, setLoading] = useState(true)
+    const [networkError, setNetworkError] = useState("")
 
     useEffect(() => {
-        router && startTransition(() => router.refresh())
-        setInitialUpdate(false)
-    }, [router])
+        const fetch = async () => {
+            setLoading(true)
+
+            const res = await getReservedTickets(venue.id)
+
+            if (res.success)
+                setReservedTicketsCount(res.data.reservedTicketCount)
+            else
+                setNetworkError(res.error ?? "")
+
+            setLoading(false)
+        }
+        fetch()
+    }, [venue.id])
 
     const [ticketCount, setTicketCount] = useState(1)
 
@@ -45,7 +54,7 @@ export default function TicketsForm(
             alignItems: "center"
         }}>
             <div style={{ position: 'relative' }}>
-                <LoadingOverlay visible={initialUpdate || isPending} overlayBlur={2} />
+                <LoadingOverlay visible={loading} overlayBlur={2} />
                 {reservedTicketCount >= venue.ticketCount && <Text>К сожалению все билеты распроданы...</Text>}
                 {(reservedTicketCount < venue.ticketCount) && <Stack>
                     <Paper shadow="md" p="md">
@@ -63,7 +72,7 @@ export default function TicketsForm(
                     </Paper>
                     <Group position="center">
                         <Button variant="default" onClick={prevStage}>Назад</Button>
-                        <Button onClick={() => nextStage({ ...order, ticketCount })}>Далее</Button>
+                        <Button onClick={() => nextStage(order => ({ ...order, ticketCount }))}>Далее</Button>
                     </Group>
                 </Stack>}
             </div>

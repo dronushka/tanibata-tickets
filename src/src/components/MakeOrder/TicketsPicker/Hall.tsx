@@ -26,51 +26,41 @@ export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[],
         return defaultSx
     }
 
-    const [ initialUpdate, setInitialUpdate ] = useState<boolean>(true)
-    const router = useRouter()
-    const [ isPending, startTransition ] = useTransition()
-    
-    useEffect(() => {
-        router && startTransition(() => router.refresh())
-        setInitialUpdate(false)
-    }, [ router ])
-        
     const { selectedTickets, setSelectedTickets } = useContext(TicketContext)
 
     const dimension = 17
 
+    console.log({reserved})
     return (
-        <div style={{ position: 'relative' }}>
-            <LoadingOverlay visible={initialUpdate || isPending} overlayBlur={2} />
-            <Stack spacing={2} sx={{
-                "& > :nth-child(10)": {
-                    marginBottom: dimension,
-                }
-            }}>
-                {
-                    rows && rows.map((row, i) => (
-                        <Flex key={i} sx={getRowSx(i)}>
-                            <Text fz="xs" sx={{ flexBasis: 40, whiteSpace: "nowrap" }}>{`Ряд ${row.number}`}</Text>
-                            <Flex
-                                sx={{flexGrow: 1, justifyContent: "center", flexWrap: "nowrap", gap: 2 }}
-                            >
-                                {
-                                    row.tickets.map((ticket, j) => (
-                                        <MemoizedTicketButton
-                                            key={ticket.id}
-                                            sx={getTicketSx(i, j)}
-                                            selected={!!selectedTickets.has(ticket.id)}
-                                            reserved={!!reserved.find(id => id === ticket.id)}
-                                            ticket={ticket}
-                                            setSelectedTickets={setSelectedTickets}
-                                        />
-                                    ))
-                                }
-                            </Flex>
+
+        <Stack spacing={2} sx={{
+            "& > :nth-child(10)": {
+                marginBottom: dimension,
+            }
+        }}>
+            {
+                rows && rows.map((row, i) => (
+                    <Flex key={i} sx={getRowSx(i)}>
+                        <Text fz="xs" sx={{ flexBasis: 40, whiteSpace: "nowrap" }}>{`Ряд ${row.number}`}</Text>
+                        <Flex
+                            sx={{ flexGrow: 1, justifyContent: "center", flexWrap: "nowrap", gap: 2 }}
+                        >
+                            {
+                                row.tickets.map((ticket, j) => (
+                                    <MemoizedTicketButton
+                                        key={ticket.id}
+                                        sx={getTicketSx(i, j)}
+                                        selected={!!selectedTickets.has(ticket.id)}
+                                        reserved={!!reserved.find(id => id === ticket.id)}
+                                        ticket={ticket}
+                                        setSelectedTickets={setSelectedTickets}
+                                    />
+                                ))
+                            }
                         </Flex>
-                    ))
-                }
-            </Stack>
-        </div>
+                    </Flex>
+                ))
+            }
+        </Stack>
     )
 }

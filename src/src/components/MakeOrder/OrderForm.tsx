@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 import MaskInput from "../MaskInput"
 import { signOut } from "next-auth/react"
 import { ClientOrder, PaymentData, paymentDataSchema } from "./useOrder"
+import { getPaymentData } from "@/lib/api-calls"
+import FullAreaMessage from "../FullAreaMessage"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -13,18 +15,32 @@ type PaymentFormErrors = {
     email?: string[]
     age?: string[],
     nickname?: string[],
-    social?: string[]
+    social?: string[],
+    network?: string
 } | null
 
-export default function OrderForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void}) {
+export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void }) {
     // const { order, nextStage } = useOrder()
 
-    const [paymentData, setPaymentData] = useState<PaymentData>(order.paymentData)
+    const [paymentData, setPaymentData] = useState<PaymentData>({
+        name: "",
+        phone: "",
+        email: "",
+        age: "",
+        nickname: "",
+        social: ""
+    })
 
     useEffect(() => {
-        if (order)
-            setPaymentData(order.paymentData)
-    }, [order])
+        const fetch = async () => {
+            const res = await getPaymentData()
+            if (res.success)
+                setPaymentData(res.data)
+            else
+                setPaymentFormErrors({ network: res.error })
+        }
+        fetch()
+    }, [])
 
     const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
 
@@ -45,8 +61,7 @@ export default function OrderForm({ order, onSubmit }: { order: ClientOrder, onS
             return
         }
 
-        if (order)
-            onSubmit({ ...order, paymentData: validated.data })
+        onSubmit(order => ({ ...order, paymentData: validated.data }))
     }
 
     return (

@@ -1,4 +1,5 @@
-import { Box, Button, Flex, Loader, Stack, Text } from "@mantine/core"
+import { getReservedTickets } from "@/lib/api-calls"
+import { Box, Button, Flex, Loader, LoadingOverlay, Stack, Text } from "@mantine/core"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ClientOrder, TicketRow } from "../useOrder"
@@ -21,18 +22,36 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue, rows, reservedTickets, order, prevStage, nextStage }:
+export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
     {
         venue: (Omit<Venue, "start"> & { start: string }),
-        rows: TicketRow[],
-        reservedTickets: number[],
-        order: ClientOrder,
+        rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>,
         prevStage: () => void,
-        nextStage: (order: ClientOrder) => void
+        nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
     }
 ) {
+    const [reservedTickets, setReservedTickets] = useState<number[]>([])
+    const [loading, setLoading] = useState(true)
+    const [networkError, setNetworkError] = useState("")
+
+    useEffect(() => {
+        const fetch = async () => {
+            setLoading(true)
+
+            const res = await getReservedTickets(venue.id)
+            
+            if (res.success)
+                setReservedTickets(res.data)
+            else
+                setNetworkError(res.error ?? "")
+            
+                setLoading(false)
+        }
+        fetch()
+    }, [venue.id])
 
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
+
     if (reservedTickets.length >= venue.ticketCount)
         return (
             <Flex sx={{
@@ -52,14 +71,20 @@ export default function TicketsPicker({ venue, rows, reservedTickets, order, pre
                 }}>
                     <Box>
                         <Stage />
-                        <Hall rows={rows} reserved={reservedTickets} />
+                        <div style={{ position: 'relative' }}>
+                            <LoadingOverlay visible={loading} overlayBlur={2} />
+                            <Hall
+                                rows={Object.entries(rows).map(([rowNumber, tickets]) => ({ number: rowNumber, tickets }))}
+                                reserved={reservedTickets}
+                            />
+                        </div>
                     </Box>
 
                     <Flex sx={{
                         alignItems: "center",
                         padding: 20
                     }}>
-                        <Summary order={order} onSubmit={nextStage} />
+                        <Summary onSubmit={nextStage} />
                     </Flex>
                 </Flex>
                 <Flex>
