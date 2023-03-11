@@ -40,7 +40,7 @@ export default function TicketButton(
     let colorCode: MantineColor = "green"
 
     if (selected)
-        colorCode = "#da7855"
+        colorCode = "#daca55" //"#da7855"
     else if (ticket.priceRange?.color)
         colorCode = ticket.priceRange.color
 
