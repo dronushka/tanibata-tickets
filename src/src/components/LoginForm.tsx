@@ -2,14 +2,14 @@
 
 import { signIn, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import {  Button, Flex, Loader, Paper, Stack, TextInput } from "@mantine/core"
+import { Button, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { sendPasswordEmail } from "@/lib/api-calls"
 import { useRouter } from "next/navigation"
 import FullAreaLoading from "./FullAreaLoading"
 
 export default function LoginForm(
-    { clientEmail, callback, rollback }: 
-    { clientEmail?: string, callback?: () => void, rollback?: () => void }
+    { clientEmail, callback, rollback }:
+        { clientEmail?: string, callback?: () => void, rollback?: () => void }
 ) {
     const [email, setEmail] = useState<string>(String(clientEmail))
     const [emailError, setEmailError] = useState<string>("")
@@ -30,7 +30,7 @@ export default function LoginForm(
         if (counter <= 0) {
             setCounter(10)
         }
-    }, [ clientEmail ])
+    }, [clientEmail])
 
     const sendEmail = async () => {
         setLoading(true)
@@ -83,7 +83,7 @@ export default function LoginForm(
             justifyContent: "center",
             alignItems: "center"
         }}>
-            <Paper shadow="xs" p="md"  sx={{ maxWidth: 400 }}>
+            <Paper shadow="xs" p="md" sx={{ maxWidth: 400 }}>
                 {!emailIsSent && (
                     <Stack>
                         <TextInput
@@ -108,7 +108,6 @@ export default function LoginForm(
                 )}
                 {emailIsSent && (
                     <Stack>
-                        {/* {aquiredPassword && <Text>{aquiredPassword}</Text>} */}
                         <TextInput
                             type="password"
                             label="Одноразовый пароль"
@@ -124,6 +123,7 @@ export default function LoginForm(
                         >
                             Войти
                         </Button>
+                        <Text fz="sm">Если пароль не пришёл проверьте раздел спам</Text>
                         <Button
                             variant="subtle"
                             disabled={counter > 0}
