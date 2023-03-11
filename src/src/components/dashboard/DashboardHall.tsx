@@ -9,7 +9,10 @@ import DashboardTicketButton from "./DashboardTicketButton"
 export default function DashboardHall({ venue, rows, reservedTickets }:
     {
         venue: (Omit<Venue, "start"> & { start: string })
-        rows: TicketRow[],
+        rows: {
+            number: string,
+            tickets: (Ticket & { priceRange: PriceRange | null, order: Omit<Order,"createdAt"> & { createdAt: string } })[]
+        }[],
         reservedTickets: number[]
     }
 ) {
