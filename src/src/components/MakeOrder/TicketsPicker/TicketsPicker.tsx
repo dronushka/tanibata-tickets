@@ -1,5 +1,5 @@
 import { getReservedTickets } from "@/lib/api-calls"
-import { Box, Button, Flex, Loader, LoadingOverlay, Stack, Text } from "@mantine/core"
+import { Box, Button, Flex, Group, Loader, LoadingOverlay, Paper, Stack, Text } from "@mantine/core"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
 import { ClientOrder, TicketRow } from "../useOrder"
@@ -24,7 +24,7 @@ export const TicketContext = createContext<
 
 export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
     {
-        venue: (Omit<Venue, "start"> & { start: string }),
+        venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }),
         rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>,
         prevStage: () => void,
         nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
@@ -39,13 +39,13 @@ export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
             setLoading(true)
 
             const res = await getReservedTickets(venue.id)
-            
+
             if (res.success)
                 setReservedTickets(res.data)
             else
                 setNetworkError(res.error ?? "")
-            
-                setLoading(false)
+
+            setLoading(false)
         }
         fetch()
     }, [venue.id])
@@ -81,9 +81,23 @@ export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
                     </Box>
 
                     <Flex sx={{
-                        alignItems: "center",
-                        padding: 20
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        paddingLeft: 20
                     }}>
+                        <Paper shadow="sm" radius="md" p="md" mb="sm"  sx={{width: 215}}>
+                            <Stack spacing="sm">
+                                {venue.priceRange.map(priceRange => <Group key={priceRange.id}>
+                                    <Box sx={{ width: 17, height: 17, borderRadius: 4, backgroundColor: priceRange.color ?? "green" }} />
+                                    <Text fz="sm">{priceRange.name} {priceRange.price.toFixed(2)} р.</Text>
+                                </Group>)}
+                                <Group>
+                                    <Box sx={{ width: 17, height: 17, borderRadius: 4, backgroundColor: "#d4d4d4" }} />
+                                    <Text fz="sm">Место занято</Text>
+                                </Group>
+                            </Stack>
+                        </Paper>
+
                         <Summary onSubmit={nextStage} />
                     </Flex>
                 </Flex>

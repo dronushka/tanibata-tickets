@@ -23,7 +23,7 @@ export const getStepNumber = (step?: OrderStage) => {
 export default function MakeOrder(
     { venue, rows }:
         {
-            venue: (Omit<Venue, "start"> & { start: string }),
+            venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }),
             rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
         }
 ) {

@@ -68,6 +68,7 @@ model PriceRange {
   id      Int      @id @default(autoincrement())
   price   Float    @default(0)
   name    String
+  color   String?  
   venue   Venue?   @relation(fields: [venueId], references: [id])
   venueId Int?
   tickets Ticket[]

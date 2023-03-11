@@ -19,16 +19,12 @@ export default function DashboardTicketButton({ ticket, sx }:
 
     const [opened, { close, open }] = useDisclosure(false)
 
-    let colorCode: MantineColor = "gray"
+    let colorCode: MantineColor = "#4eadbb"
 
     if (ticket.orderId)
         colorCode = "gray"
-    else if (ticket.priceRange?.id === 1)
-        colorCode = "green"
-    else if (ticket.priceRange?.id === 2)
-        colorCode = "violet"
-    else if (ticket.priceRange?.id === 3)
-        colorCode = "pink"
+    else if (ticket.priceRange?.color)
+        colorCode = ticket.priceRange.color
 
     return (
         <Popover width={100} position="bottom" withArrow shadow="md" opened={opened}>
@@ -38,7 +34,10 @@ export default function DashboardTicketButton({ ticket, sx }:
                     compact
                     sx={{
                         ...sx,
-                        backgroundColor: colorCode
+                        backgroundColor: colorCode,
+                        "&:disabled": {
+                            backgroundColor: "#d4d4d4"
+                        }
                     }}
                     onMouseEnter={open}
                     onMouseLeave={close}
@@ -54,7 +53,7 @@ export default function DashboardTicketButton({ ticket, sx }:
                     <Text size="xs">Ряд: {ticket.rowNumber}</Text>
                     <Text size="xs">Место: {ticket.number}</Text>
                     {/* <Text size="xs">Цена: {ticket.priceRange?.price ?? 0}</Text> */}
-                    <Text size="xs">Цена: {ticket.order?.isGoodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0): (ticket.priceRange?.price ?? 0)}</Text>
+                    <Text size="xs">Цена: {ticket.order?.isGoodness ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) : (ticket.priceRange?.price ?? 0)}</Text>
                     {ticket.orderId && <Text size="xs">Заказ №{ticket.orderId}</Text>}
                 </Stack>
             </Popover.Dropdown>

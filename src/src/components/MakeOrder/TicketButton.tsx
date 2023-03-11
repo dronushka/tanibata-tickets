@@ -37,16 +37,12 @@ export default function TicketButton(
         })
     }
 
-    let colorCode: MantineColor = "gray"
+    let colorCode: MantineColor = "green"
 
     if (selected)
-        colorCode = "yellow"
-    else if (ticket.priceRange?.id === 1)
-        colorCode = "green"
-    else if (ticket.priceRange?.id === 2)
-        colorCode = "violet"
-    else if (ticket.priceRange?.id === 3)
-        colorCode = "pink"
+        colorCode = "#da7855"
+    else if (ticket.priceRange?.color)
+        colorCode = ticket.priceRange.color
 
     return (
         <Popover width={100} position="bottom" withArrow shadow="md" opened={opened}>
@@ -56,7 +52,10 @@ export default function TicketButton(
                     compact
                     sx={{
                         ...sx,
-                        backgroundColor: colorCode
+                        backgroundColor: colorCode,
+                        "&:disabled": {
+                            backgroundColor: "#d4d4d4"
+                        }
                     }}
                     onMouseEnter={open}
                     onMouseLeave={close}
