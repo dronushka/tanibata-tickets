@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
-import { OrderStatus, Ticket, User } from "@prisma/client"
+import { OrderStatus, PriceRange, Ticket, User } from "@prisma/client"
 import { z } from "zod"
 import MakeOrder from "@/components/MakeOrder/MakeOrder"
 
@@ -50,7 +50,7 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
     if (venue === null)
         notFound()
 
-    const ticketRowMap: Record<string, Ticket[]> = {}
+    const ticketRowMap: Record<string, (Ticket & { priceRange: PriceRange | null})[]> = {}
 
     if (venue.tickets)
         for (let ticket of venue.tickets) {
