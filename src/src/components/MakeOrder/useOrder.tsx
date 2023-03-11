@@ -7,7 +7,7 @@ export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation"
 
 export type TicketRow = {
     number: string,
-    tickets: (Ticket & { priceRange: PriceRange | null, order: (Omit<Order, "createdAt"> & { createdAt: string }) | null })[]
+    tickets: (Ticket & { priceRange: PriceRange | null })[]
 }
 
 export const paymentDataSchema = z.object({
@@ -45,12 +45,14 @@ export type ClientOrder = {
     cheque?: File
 }
 
+// export type OrderSetter = ClientOrder | ((newOrder: ClientOrder) => ClientOrder) | undefined
 export const useOrder = (initialOrder: ClientOrder) => {
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder })
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
 
-    const nextStage = async (newOrder?: ClientOrder) => {
+    // const f = (n: string) => (f: string) => 
+    const doNextStage = async (newOrder?: ClientOrder) => {
         if (!order)
             return
 
@@ -83,6 +85,16 @@ export const useOrder = (initialOrder: ClientOrder) => {
                 setStage("complete")
                 break
         }
+    }
+
+    const nextStage = (orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)) => {
+        let newOrder: ClientOrder | undefined = undefined
+        if (typeof orderSetter === "function")
+            newOrder = orderSetter(order)
+        else if (typeof orderSetter === "object")
+            newOrder = orderSetter
+
+        doNextStage(newOrder)
     }
 
     const prevStage = () => {

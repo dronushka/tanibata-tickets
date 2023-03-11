@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Flex, MantineTheme, Stack, Sx, Text } from "@mantine/core"
+import { Box, Flex, Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { Order, PriceRange, Ticket, Venue } from "@prisma/client"
 import Stage from "../MakeOrder/TicketsPicker/Stage"
 import { TicketRow } from "../MakeOrder/useOrder"
@@ -8,8 +8,11 @@ import DashboardTicketButton from "./DashboardTicketButton"
 
 export default function DashboardHall({ venue, rows, reservedTickets }:
     {
-        venue: (Omit<Venue, "start"> & { start: string })
-        rows: TicketRow[],
+        venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] })
+        rows: {
+            number: string,
+            tickets: (Ticket & { priceRange: PriceRange | null, order: (Omit<Order, "createdAt"> & { createdAt: string }) | null })[]
+        }[],
         reservedTickets: number[]
     }
 ) {
@@ -36,6 +39,20 @@ export default function DashboardHall({ venue, rows, reservedTickets }:
         <Stack>
             <Text fw="bold">{venue.name} {venue.start}</Text>
             <Text>Заполненность зала: {reserved}/{total} ({((reserved / total) * 100).toFixed(2)}%)</Text>
+            <Group>
+                {venue.priceRange.map(priceRange => <Group key={priceRange.id}>
+                    <Box sx={{ width: 17, height: 17, borderRadius: 4, backgroundColor: priceRange.color ?? "green" }} />
+                    <Text fz="sm">{priceRange.name} {priceRange.price.toFixed(2)} р.</Text>
+                </Group>)}
+                <Group>
+                    <Box sx={{ width: 17, height: 17, borderRadius: 4, backgroundColor: "#d4d4d4" }} />
+                    <Text fz="sm">Место занято</Text>
+                </Group>
+                <Group>
+                    <Box sx={{ width: 17, height: 17, borderRadius: 4, backgroundColor: "#4eadbb" }} />
+                    <Text fz="sm">Не для продажи</Text>
+                </Group>
+            </Group>
             <Stage />
             <Stack spacing={2} sx={{
                 "& > :nth-child(10)": {

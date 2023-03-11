@@ -5,16 +5,15 @@ import { useContext } from "react"
 import { ClientOrder } from "../useOrder"
 import { ClientTicket, TicketContext } from "./TicketsPicker"
 
-export default function Summary({ order, onSubmit }:
+export default function Summary({ onSubmit }:
     {
-        order: ClientOrder,
-        onSubmit: (order: ClientOrder) => void
+        onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void
     }
 ) {
     const { selectedTickets } = useContext(TicketContext)
 
     return (
-        <Paper shadow="sm" radius="md" p="md">
+        <Paper shadow="sm" radius="md" p="md" sx={{width: 215}}>
             <Stack>
                 <Text size="sm" fw={700}>Выбрано {selectedTickets.size ? `(${selectedTickets.size})` : ""}:</Text>
                 {[...selectedTickets.values()].map(ticket => (
@@ -30,7 +29,7 @@ export default function Summary({ order, onSubmit }:
                 </Group>
                 <Button 
                     disabled={!selectedTickets.size}
-                    onClick={() => order && onSubmit({...order, tickets: selectedTickets, ticketCount: selectedTickets.size})}
+                    onClick={() => onSubmit(order => ({...order, tickets: selectedTickets, ticketCount: selectedTickets.size}))}
                 >
                     Перейти к оплате
                 </Button>

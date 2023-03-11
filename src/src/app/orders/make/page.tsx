@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/db"
-import { OrderStatus, User } from "@prisma/client"
+import { OrderStatus, PriceRange, Ticket, User } from "@prisma/client"
 import { z } from "zod"
 import MakeOrder from "@/components/MakeOrder/MakeOrder"
 
@@ -35,10 +35,10 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
             id: Number(venueIdValidated.data)
         },
         include: {
+            priceRange: true,
             tickets: {
                 include: {
-                    priceRange: true,
-                    order: true
+                    priceRange: true
                 },
                 orderBy: [
                     { sortRowNumber: "asc" },
@@ -51,62 +51,20 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
     if (venue === null)
         notFound()
 
-    const ticketRowMap = new Map<string, TicketRow>()
+    const ticketRowMap: Record<string, (Ticket & { priceRange: PriceRange | null})[]> = {}
 
     if (venue.tickets)
         for (let ticket of venue.tickets) {
             const rowNumber = ticket.rowNumber ?? "default"
 
-            if (!ticketRowMap.has(rowNumber))
-                ticketRowMap.set(rowNumber, { number: rowNumber, tickets: [] })
+            if (!ticketRowMap[rowNumber])
+                ticketRowMap[rowNumber] = []
 
-            ticketRowMap.get(rowNumber)?.tickets.push({
-                ...ticket,
-                order: ticket.order && {
-                    ...ticket.order,
-                    createdAt: ticket.order.createdAt.toLocaleString('ru-RU')
-                }
-            })
+            ticketRowMap[rowNumber].push(ticket)
         }
-
-    const reservedTicketCount = (await prisma.order.aggregate({
-        where: {
-            AND: [
-                { venueId: venue.id },
-                { NOT: { status: OrderStatus.CANCELLED } },
-                { NOT: { status: OrderStatus.RETURNED } }
-            ],
-
-        },
-        _sum: {
-            ticketCount: true
-        }
-    }))._sum.ticketCount ?? 0
-
-    const { tickets: prismaTickets, ...restVenue } = venue
-    const clientVenue = {
-        ...restVenue,
-        start: restVenue.start.toLocaleString('ru-RU'),
-        rows: [...ticketRowMap.values()],
-        reservedTickets: prismaTickets
-            .filter(ticket =>
-                ticket.reserved
-                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
-            )
-            .map(ticket => ticket.id),
-        reservedTicketCount
-    }
 
     return <MakeOrder
-        venue={clientVenue}
-        rows={[...ticketRowMap.values()]}
-        reservedTickets={prismaTickets
-            .filter(ticket =>
-                ticket.reserved
-                || ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED)
-            )
-            .map(ticket => ticket.id)
-        }
-        reservedTicketCount={reservedTicketCount}
+        venue={{...venue, start: venue.start.toLocaleString('ru-RU')}}
+        rows={ticketRowMap}
     />
 }
