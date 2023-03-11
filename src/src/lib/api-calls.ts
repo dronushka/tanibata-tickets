@@ -2,6 +2,36 @@ import { ClientOrder } from "@/components/MakeOrder/useOrder"
 import { OrderStatus } from "@prisma/client"
 import { z } from "zod"
 
+export const getPaymentData = async () => {
+    const res = await fetch("/api/getPaymentData", {
+        method: "GET",
+    })
+
+    if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так, обновите страницу и попробуйте позже"
+        }
+    }
+}
+
+export const getReservedTickets = async (venueId: number) => {
+    const res = await fetch("/api/getReservedTickets?venueId=" + venueId, {
+        method: "GET"
+    })
+    
+    if (res.ok) {
+        return ({ success: true, data: await res.json() })
+    } else {
+        return {
+            success: false,
+            error: "Что-то пошло не так, обновите страницу и попробуйте позже"
+        }
+    }
+}
+
 export const sendTickets = async (orderId: Number) => {
     const res = await fetch("/api/sendTickets?orderId=" + orderId, {
         method: "GET",

@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 select: { id: true }
             })
 
-            res.status(200).json({ reservedTickets })
+            res.status(200).json(reservedTickets.map(ticket => ticket.id))
         }
     } catch (e: any) {
         if (typeof e === 'string')
