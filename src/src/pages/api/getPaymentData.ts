@@ -2,11 +2,6 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/db"
-import { z, ZodError } from "zod"
-import { Role } from "@prisma/client"
-
-import bcrypt from 'bcryptjs'
-import { getSecuritySting } from "@/lib/OrderQR"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET")
@@ -20,7 +15,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-
         const user = await prisma.user.findUnique({
             where: { id: session.user.id }
         })
@@ -33,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             nickname: user?.nickname ?? "",
             social: user?.social ?? ""
         })
-        
+
     } catch (e: any) {
         res.status(500).json({ error: e?.message })
     }
