@@ -35,6 +35,7 @@ export default async function MakeOrderPage({ searchParams }: { searchParams?: {
             id: Number(venueIdValidated.data)
         },
         include: {
+            priceRange: true,
             tickets: {
                 include: {
                     priceRange: true
