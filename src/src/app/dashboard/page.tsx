@@ -4,7 +4,7 @@ import DashboardHallNoSeats from "@/components/dashboard/DashboardHallNoSeats"
 import { TicketRow } from "@/components/MakeOrder/useOrder"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import { OrderStatus, Role } from "@prisma/client"
+import { Order, OrderStatus, PriceRange, Role, Ticket } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 
@@ -23,6 +23,7 @@ export default async function DashboardPage() {
             active: true,
         },
         include: {
+            priceRange: true,
             order: true,
             tickets: {
                 include: {
@@ -60,7 +61,15 @@ export default async function DashboardPage() {
                         total={venue.ticketCount}
                     />
                 } else {
-                    const ticketRowMap = new Map<string, TicketRow>()
+                    const ticketRowMap = new Map<string, 
+                        {
+                            number: string,
+                            tickets: (Ticket & { 
+                                priceRange: PriceRange | null, 
+                                order: Omit<Order, "createdAt"> & { createdAt: string } | null
+                            })[]
+                        }
+                    >()
 
                     if (venue.tickets)
                         for (let ticket of venue.tickets) {
