@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Order` MODIFY `comment` VARCHAR(1000) NOT NULL DEFAULT '',
+    MODIFY `notes` VARCHAR(1000) NOT NULL DEFAULT '';

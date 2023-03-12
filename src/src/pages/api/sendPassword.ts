@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method != "POST")
         res.status(405).end()
 
-    const emailValidator = z.string().email()
+    const emailValidator = z.string().max(100).email()
 
     try {
         const validatedEmail = emailValidator.parse(req.body.email)

@@ -72,10 +72,13 @@ export default function LoginForm(
     const router = useRouter()
 
     const { status } = useSession()
+
     if (status === "authenticated")
         !callback && router.push("/orders")
+
     if (status === "loading")
         return <FullAreaLoading />
+
     return (
         <Flex sx={{
             width: "100%",
@@ -91,6 +94,7 @@ export default function LoginForm(
                             name="email"
                             withAsterisk
                             error={emailError}
+                            maxLength={100}
                             onChange={(e) => {
                                 setEmailError("")
                                 setEmail(e.target.value)
@@ -113,6 +117,7 @@ export default function LoginForm(
                             label="Одноразовый пароль"
                             withAsterisk
                             error={passwordError}
+                            maxLength={6}
                             onChange={(e) => setPassword(e.target.value)}
                             rightSection={loading && <Loader size="xs" />}
                             disabled={loading}

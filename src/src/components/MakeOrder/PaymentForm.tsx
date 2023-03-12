@@ -100,6 +100,7 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
                 </Group>
                 <Textarea 
                     label="Вы можете оставить комментарий к заказу"
+                    maxLength={1000}
                     value={comment}
                     onChange={e => setComment(e.target.value)}
                 />

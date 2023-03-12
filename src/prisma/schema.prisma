@@ -90,8 +90,8 @@ model Order {
   paymentData Json
   createdAt   DateTime     @default(now())
   isGoodness  Boolean      @default(false)
-  comment     String       @default("")
-  notes       String       @default("")
+  comment     String       @db.VarChar(1000) @default("")
+  notes       String       @db.VarChar(1000) @default("")
   status      OrderStatus  @default(UNPAID)
   cheque      File?        @relation(fields: [fileId], references: [id])
   fileId      Int?         @unique
