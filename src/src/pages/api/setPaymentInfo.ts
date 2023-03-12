@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const validator = z.object({
             orderId: z.number().gt(0, "invalid_order_id"),
             goodness: z.boolean(),
-            comment: z.string(),
+            comment: z.string().max(1000),
             cheque: z.custom<File>(val => val instanceof File, "no_file") //TODO validate mime and size
         })
 
