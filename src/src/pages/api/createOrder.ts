@@ -17,12 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const validator = z.object({
         venueId: z.number(),
         paymentData: z.object({
-            name: z.string(),
-            phone: z.string(),
-            email: z.string(),
-            age: z.string(),
-            nickname: z.string(),
-            social: z.string()
+            name: z.string().max(191),
+            phone: z.string().max(18),
+            email: z.string().max(100),
+            age: z.string().max(2),
+            nickname: z.string().max(191),
+            social: z.string().max(191)
         }),
         tickets: z.array(z.number()).min(1)
     })

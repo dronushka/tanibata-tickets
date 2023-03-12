@@ -3,8 +3,8 @@ import { useId } from "@mantine/hooks"
 import { MaskedInput, createDefaultMaskGenerator } from 'react-hook-mask'
 
 export default function MaskInput (
-    {label, name, value, mask, withAsterisk, error, onChange}: 
-    {label?: string, name?: string, value: string, mask: string, withAsterisk?: boolean, error?: string, onChange?: (value: string) => void  }
+    {label, name, maxLength, value, mask, withAsterisk, error, onChange}: 
+    {label?: string, name?: string, maxLength: number, value: string, mask: string, withAsterisk?: boolean, error?: string, onChange?: (value: string) => void  }
 ) {
     const id = useId()
     const maskGenerator = createDefaultMaskGenerator(mask)
@@ -17,6 +17,7 @@ export default function MaskInput (
                 name={name}
                 component={MaskedInput}
                 maskGenerator={maskGenerator}
+                maxLength={maxLength}
                 value={value}
                 onChange={onChange}
             />
