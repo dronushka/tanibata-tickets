@@ -13,7 +13,7 @@ export default function Summary({ onSubmit }:
     const { selectedTickets } = useContext(TicketContext)
 
     return (
-        <Paper shadow="sm" radius="md" p="md" sx={{width: 215}}>
+        <Paper shadow="sm" radius="md" p="md" sx={{width: 250}}>
             <Stack>
                 <Text size="sm" fw={700}>Выбрано {selectedTickets.size ? `(${selectedTickets.size})` : ""}:</Text>
                 {[...selectedTickets.values()].map(ticket => (
