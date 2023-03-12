@@ -24,21 +24,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <AppShell
             styles={{
                 main: {
-                    background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+                    background: theme.colors.gray[0],
                 },
             }}
             navbarOffsetBreakpoint="sm"
             asideOffsetBreakpoint="sm"
-            navbar={
-                <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened}  width={{ sm: 200, lg: 300 }}>
-                    <Navbar.Section grow mt="md">
-                        <Navigation onClick={ () => setOpened(false) }/>
-                    </Navbar.Section>
-                    <Navbar.Section>
-                        <User />
-                    </Navbar.Section>
-                </ Navbar>
-            }
+
             // aside={
             //     <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
             //         <Aside p="md" hiddenBreakpoint="sm" width={{ sm: 200, lg: 300 }}>
@@ -52,7 +43,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             //     </Footer>
             // }
             header={
-                <Header height={{ base: 50, md: 70 }} p="md">
+                <Header height={70} p="md">
                     <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                         <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                             <Burger
@@ -67,6 +58,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                         <Logo />
                     </div>
                 </Header>
+            }
+            navbar={
+                <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened}  width={{ sm: 200, lg: 300 }}>
+                    <Navbar.Section grow mt="md">
+                        <Navigation onClick={ () => setOpened(false) }/>
+                    </Navbar.Section>
+                    <Navbar.Section>
+                        <User />
+                    </Navbar.Section>
+                </ Navbar>
             }
         >
                 { children }

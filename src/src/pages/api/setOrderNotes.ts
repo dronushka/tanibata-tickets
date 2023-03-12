@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const validator = z.object({
         id: z.number(),
-        notes: z.string()
+        notes: z.string().max(1000)
     })
 
     try {

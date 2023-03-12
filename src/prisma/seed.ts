@@ -1,50 +1,60 @@
-import { Prisma, PrismaClient, Role, Venue } from '@prisma/client'
+import { Prisma, PrismaClient, Role, Ticket, Venue } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import getHall, { HallTicketRow } from './hall'
 
 const prisma = new PrismaClient()
 
-const getShowTickets = (venue: Venue, rows: Array<any>) => {
-    const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
+// const getShowTickets = (venue: Venue, rows: Array<any>) => {
+//     const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
     
-    for (let i = 0; i <= rows.length - 1; i++) {
-        for (let j = 1; j <= rows[i].ticketCount; j++) {
-            const ticket: any = {
-                number: String(j),
-                sortNumber: j,
-                rowNumber: String(rows[i].number),
-                sortRowNumber: i,
-                venueId: venue.id
-            }
+//     for (let i = 0; i <= rows.length - 1; i++) {
+//         for (let j = 1; j <= rows[i].ticketCount; j++) {
+//             const ticket: any = {
+//                 number: String(j),
+//                 sortNumber: j,
+//                 rowNumber: String(rows[i].number),
+//                 sortRowNumber: i,
+//                 venueId: venue.id
+//             }
 
-            if (rows[i].reserved)
-                ticket.reserved = true
+//             if (rows[i].reserved)
+//                 ticket.reserved = true
 
-            if (rows[i].priceRange)
-                ticket.priceRangeId = rows[i].priceRange.id
+//             if (rows[i].priceRange)
+//                 ticket.priceRangeId = rows[i].priceRange.id
                    
 
-            tickets.push(ticket)
+//             tickets.push(ticket)
+//         }
+//     }
+//     return tickets
+
+// }
+
+const getShowTickets = (venue: Venue, rows: HallTicketRow[]) => {
+    const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
+    
+    for (let row of rows) {
+        for (let ticket of row.tickets) {
+            const t: any = {
+                venueId: venue.id,
+                rowNumber: String(row.number),
+                sortRowNumber: row.number,
+                number: String(ticket.number),
+                sortNumber: ticket.number,
+            }
+            if (ticket.priceRange) {
+                t.reserved = false
+                t.priceRangeId = ticket.priceRange.id
+            } else {
+                t.reserved = true
+            }
+            tickets.push(t)
         }
-    }
+    } 
     return tickets
 
 }
-
-// const getConcertTickets = (venue: Venue, count: number, priceRange: PriceRange) => {
-//     const tickets: Prisma.Enumerable<Prisma.TicketCreateManyInput> = []
-//     for (let i = 0; i < count - 1; i++) {
-//         const ticket: any = {
-//             number: String(i),
-//             sortNumber: i,
-//             venueId: venue.id,
-//             priceRangeId: priceRange.id
-//         }
-
-//         tickets.push(ticket)
-//     }
-
-//     return tickets
-// }
 
 async function main() {
     console.log("Creating users")
@@ -151,36 +161,8 @@ async function main() {
 
     console.log("Creating tickets")
 
-    const rows = [
-        { number: 1, priceRange: showPriceZone2, ticketCount: 21 },
-        { number: 2, priceRange: showPriceZone2, ticketCount: 22 },
-        { number: 3, priceRange: showPriceZone2, ticketCount: 23 },
-        { number: 4, priceRange: showPriceZone2, ticketCount: 25 },
-        { number: 5, priceRange: showPriceZone2, ticketCount: 26 },
-        { number: 6, priceRange: showPriceZone2, ticketCount: 27 },
-        { number: 7, priceRange: showPriceZone2, ticketCount: 28 },
-        { number: 8, priceRange: showPriceZone2, ticketCount: 28 },
-        { number: 9, priceRange: showPriceZone2, ticketCount: 28 },
-        { number: 10, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 11, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 12, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 13, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 14, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 15, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 16, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 17, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 18, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 19, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 20, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 21, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 22, priceRange: showPriceZone1, ticketCount: 28 },
-        { number: 23, reserved: true, ticketCount: 28 },
-        { number: 24, reserved: true, ticketCount: 28 },
-        { number: 25, reserved: true, ticketCount: 28 },
-    ]
-
     await prisma.ticket.createMany({
-        data: getShowTickets(venueShow, rows) || []
+        data: getShowTickets(venueShow, getHall([showPriceZone1, showPriceZone2]))
     })
 
     // await prisma.ticket.createMany({

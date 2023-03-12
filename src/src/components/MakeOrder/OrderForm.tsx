@@ -77,6 +77,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         label="ФИО"
                         name="fullname"
                         withAsterisk
+                        maxLength={191}
                         value={paymentData.name}
                         onChange={e => setField("name", e.target.value)}
                         error={paymentFormErrors?.name?.join(', ')}
@@ -86,6 +87,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         name="phone"
                         withAsterisk
                         mask="+7 (999) 999-99-99"
+                        maxLength={18}
                         value={paymentData.phone}
                         onChange={value => setField("phone", value)}
                         error={paymentFormErrors?.phone?.join(', ')}
@@ -94,6 +96,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         label="Возраст"
                         name="age"
                         withAsterisk
+                        maxLength={2}
                         value={paymentData.age}
                         onChange={e => setField("age", e.target.value.replace(/\D/, ''))}
                         error={paymentFormErrors?.age?.join(', ')}
@@ -101,12 +104,14 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                     <TextInput
                         label="Никнейм"
                         name="nickname"
+                        maxLength={191}
                         value={paymentData.nickname}
                         onChange={(e) => setPaymentData(prev => ({ ...prev, nickname: e.target.value }))}
                     />
                     <TextInput
                         label="Адрес страницы VK (если есть, для оперативной связи)"
                         name="social"
+                        maxLength={191}
                         value={paymentData.social}
                         onChange={(e) => setField("social", e.target.value)}
                         error={paymentFormErrors?.social?.join(', ')}
