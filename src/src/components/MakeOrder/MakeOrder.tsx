@@ -130,7 +130,7 @@ export default function MakeOrder(
                         nextStage={nextStage}
                     />
                 )}
-                {stage === "payment" && <PaymentForm order={order} onSubmit={nextStage} />}
+                {stage === "payment" && <PaymentForm venue={venue} order={order} onSubmit={nextStage} />}
                 {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
                     <FullAreaMessage>
                         <Stack sx={{ minWidth: 250, maxWidth: 300, alignItems: "center" }}>
