@@ -4,8 +4,10 @@ import { Avatar, Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Pa
 import { IconInfoCircle, IconUpload } from "@tabler/icons-react"
 import { ClientOrder } from "./useOrder"
 import Link from "next/link"
+import { PriceRange, Venue } from "@prisma/client"
 
-export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, onSubmit: (order: ClientOrder) => void }) {
+export default function PaymentForm({ venue, order, onSubmit }: 
+    { venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }), order: ClientOrder, onSubmit: (order: ClientOrder) => void }) {
     const [goodness, setGoodness] = useState(order.isGoodness)
     const [comment, setComment] = useState(order.comment)
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
@@ -64,7 +66,9 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
             setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
-    const sum = [...order.tickets.values()].reduce((s, ticket) => (s += (ticket.priceRange?.price ?? 0)), 0)
+    const sum = venue.noSeats 
+    ? order.ticketCount * venue.priceRange[0].price 
+    : [...order.tickets.values()].reduce((s, ticket) => (s += (ticket.priceRange?.price ?? 0)), 0)
 
     return (
         <Paper shadow="sm" radius="md" p="md">
@@ -105,15 +109,6 @@ export default function PaymentForm({ order, onSubmit }: { order: ClientOrder, o
                     value={comment}
                     onChange={e => setComment(e.target.value)}
                 />
-
-
-
-
-
-
-
-
-
 
                 <Text>Для завершения, оплатите заказ на сумму {goodness ? (Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount).toFixed(2) : sum.toFixed(2)} р. и приложите чек ниже.</Text>
                 <Text>Реквизиты для перевода оплаты за билеты</Text>

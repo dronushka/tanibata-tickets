@@ -154,7 +154,7 @@ async function main() {
     const concertPriceZone = await prisma.priceRange.create({
         data: {
             name: "Стандарт",
-            price: 500,
+            price: 300,
             venueId: venueConcert.id
         }
     })
