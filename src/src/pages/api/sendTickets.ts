@@ -27,6 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 id: validatedId
             },
             include: {
+                venue: true,
                 tickets: {
                     include: {
                         venue: true,
