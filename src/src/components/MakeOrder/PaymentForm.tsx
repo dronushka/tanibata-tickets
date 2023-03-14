@@ -6,8 +6,9 @@ import { ClientOrder } from "./useOrder"
 import Link from "next/link"
 import { PriceRange, Venue } from "@prisma/client"
 
-export default function PaymentForm({ venue, order, onSubmit }: 
+export default function PaymentForm({ venue, order, onSubmit }:
     { venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }), order: ClientOrder, onSubmit: (order: ClientOrder) => void }) {
+
     const [goodness, setGoodness] = useState(order.isGoodness)
     const [comment, setComment] = useState(order.comment)
     const [cheque, setCheque] = useState<File | undefined>(order?.cheque)
@@ -66,9 +67,9 @@ export default function PaymentForm({ venue, order, onSubmit }:
             setChequeError(res.error.flatten().formErrors.join(', '))
     }
 
-    const sum = venue.noSeats 
-    ? order.ticketCount * venue.priceRange[0].price 
-    : [...order.tickets.values()].reduce((s, ticket) => (s += (ticket.priceRange?.price ?? 0)), 0)
+    const sum = venue.noSeats
+        ? order.ticketCount * venue.priceRange[0].price
+        : [...order.tickets.values()].reduce((s, ticket) => (s += (ticket.priceRange?.price ?? 0)), 0)
 
     return (
         <Paper shadow="sm" radius="md" p="md">
@@ -103,7 +104,7 @@ export default function PaymentForm({ venue, order, onSubmit }:
                         {/* </Avatar> */}
                     </Tooltip>
                 </Group>
-                <Textarea 
+                <Textarea
                     label="Вы можете оставить комментарий к заказу"
                     maxLength={1000}
                     value={comment}
@@ -118,18 +119,18 @@ export default function PaymentForm({ venue, order, onSubmit }:
 
                 <Text>
                     В поле &quot;Назначение платежа&quot; при оплате указывать ничего не требуется,
-                     данные о билете мы автоматически получаем из данной формы.
+                    данные о билете мы автоматически получаем из данной формы.
                 </Text>
                 <Text>
-                    Оплатить заказ и загрузить чек в систему бронирования билетов необходимо в течение суток 
+                    Оплатить заказ и загрузить чек в систему бронирования билетов необходимо в течение суток
                     с момента создания заказа, иначе заказ автоматически отменяется,
                     а выбранные вами места возвращаются в свободную продажу.
                 </Text>
                 <Text>
-                    Данные платежа будут нами обработаны в течение трех дней с момента оплаты. 
+                    Данные платежа будут нами обработаны в течение трех дней с момента оплаты.
                     Статус обработки заказа можно увидеть в разделе <Link href="/orders">Мои заказы</Link> системы бронирования,
-                    при возникновении вопросов по поводу покупки билетов можно связаться с билетером фестиваля 
-                    по адресу почты <Link href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</Link>, 
+                    при возникновении вопросов по поводу покупки билетов можно связаться с билетером фестиваля
+                    по адресу почты <Link href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</Link>,
                     по телефону <Link href="tel:79054536789">+7 (905) 4536789</Link>{" "}
                     или по адресу в <Link href="https://vk.com/cheshira_rnd">VK: Anna Kramarenko</Link>.
                 </Text>

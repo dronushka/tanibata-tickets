@@ -30,7 +30,7 @@ export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[],
 
     const dimension = 17
 
-    console.log({reserved})
+    // console.log({reserved})
     return (
 
         <Stack spacing={2} sx={{
