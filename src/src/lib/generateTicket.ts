@@ -1,11 +1,12 @@
 import { Template, BLANK_PDF, generate, TextSchema } from '@pdfme/generator'
 import { Order, Ticket, User, Venue } from '@prisma/client'
 import { getQRString } from './OrderQR'
+import fs from 'fs'
 
 // import { Template, BLANK_PDF } from '@pdfme/ui'; <- Template types and BLANK_PDF can also be imported from @pdfme/ui.
 // import QRCode from 'qrcode'
 
-export default async function generateTicket(order: Order & { user: User, tickets: (Ticket & {venue: Venue | null})[] }) {
+export default async function generateTicket(order: Order & { venue: Venue | null, user: User, tickets: (Ticket & {venue: Venue | null})[] }) {
     // const qrCode = await QRCode.toDataURL("1")
     const tickets: Record<string, TextSchema> = {}
     const ticketValues: Record<string, string> = {}
@@ -13,15 +14,18 @@ export default async function generateTicket(order: Order & { user: User, ticket
     order.tickets.forEach((ticket, key) => {
         tickets[ticket.id] = {
             type: "text",
-            position: { x: 15, y: 20 + 10 * (key + 1) },
-            width: 100,
-            height: 10
+            position: { x: 200, y: 40 + 15 * (key + 1) },
+            width: 200,
+            height: 15,
+            fontSize: 30
         }
         ticketValues[ticket.id] = `${key + 1}. Ряд: ${ticket.rowNumber}, место ${ticket.number}`
     })
 
+    const buffer = fs.readFileSync("/var/www/file_storage/ticket_template.pdf")
+
     const template: Template = {
-        basePdf: BLANK_PDF,
+        basePdf: buffer,
         schemas: [
             {
                 // logo: {
@@ -32,15 +36,17 @@ export default async function generateTicket(order: Order & { user: User, ticket
                 // },
                 header: {
                     type: "text",
-                    position: { x: 15, y: 15 },
-                    width: 100,
-                    height: 10
+                    position: { x: 200, y: 40 },
+                    width: 200,
+                    height: 20,
+                    fontSize: 30
+
                 },
                 qrcode: {
                     type: "qrcode",
-                    position: { x: 100, y: 15 },
-                    width: 50,
-                    height: 50
+                    position: { x: 440, y: 135 },
+                    width: 95,
+                    height: 95
                 },
                 ...tickets
             },
@@ -48,7 +54,7 @@ export default async function generateTicket(order: Order & { user: User, ticket
     }
 
     const inputs = [{
-        header: "Билеты на фестиваль:",
+        header: order.venue?.name ?? "Нян-Фест 2023",
         qrcode: getQRString(order, order.user),
         ...ticketValues
     }]

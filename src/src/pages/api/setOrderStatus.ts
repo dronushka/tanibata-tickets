@@ -77,8 +77,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             emailTransporter.sendMail({
                 from: `"Tanibata" <${process.env.MAIL_USER}>`,
                 to: user?.email,
-                subject: "Танибата. Возврат билетов. Номер заказа: " + order?.id, // Subject line
-                html: `<p>Запрос на возврат билетов принят. Деньги вернутся на использованную при покупки карту в ближайшее время.</p>`
+                subject: "Нян-Фест 2023 | Возврат билетов | Номер заказа: " + order?.id, // Subject line
+                html: `
+                    <p>Уважаемый зритель!</p>
+                    <p>Сожалеем, что досадные обстоятельства помешали Вашему посещению Нян-Феста 2023.</p>
+                    <p>
+                        Теперь хорошие новости: отмена Вашего заказа билетов успешно произведена. 
+                        Стоимость билетов будет возвращена Вам на банковскую карту, с которой производилась оплата, 
+                        в течение 3 рабочих дней от даты отмены заказа.
+                    </p>
+                    <p>Будем рады видеть Вас на наших других мероприятиях! :)</p>
+                    <p>По любым вопросам, связанным с покупкой или возвратом билета вы можете связаться с билетёром фестиваля Чеширой:</p>
+                    <p><a href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</a></p>
+                    <p><a href="tel:79054536789">+7 (905) 4536789</a></p>
+                    <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>
+                    <p><a href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</a><p>
+                `
             })
         }
 

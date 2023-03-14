@@ -14,14 +14,14 @@ const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
 export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[], reserved: number[] }) {
     const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexDirection: "row", flexWrap: "nowrap", flexGrow: 1, gap: 10 }
-        if (rowIndex === 9)
+        if (rowIndex === 8)
             return { ...defaultSx, marginBottom: dimension }
         return defaultSx
     }
 
     const getTicketSx = (rowIndex: Number, ticketIndex: Number) => {
         const defaultSx: Sx = { height: dimension, width: dimension, padding: 0 }
-        if (rowIndex > 9 && (ticketIndex == 6 || ticketIndex == 20))
+        if (rowIndex > 8 && (ticketIndex == 6 || ticketIndex == 20))
             return { ...defaultSx, marginRight: dimension }
         return defaultSx
     }
@@ -34,7 +34,7 @@ export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[],
     return (
 
         <Stack spacing={2} sx={{
-            "& > :nth-child(10)": {
+            "& > :nth-child(9)": {
                 marginBottom: dimension,
             }
         }}>
