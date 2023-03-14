@@ -7,6 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   CUSTOMER
   ADMIN
@@ -21,6 +48,8 @@ model User {
   phone     String?
   social    String?
   createdAt DateTime   @default(now())
+  accounts  Account[]
+  sessions  Session[]
   role      Role       @default(CUSTOMER)
   order     Order[]
   passwords Password[]
@@ -68,7 +97,7 @@ model PriceRange {
   id      Int      @id @default(autoincrement())
   price   Float    @default(0)
   name    String
-  color   String?  
+  color   String?
   venue   Venue?   @relation(fields: [venueId], references: [id])
   venueId Int?
   tickets Ticket[]
@@ -90,8 +119,8 @@ model Order {
   paymentData Json
   createdAt   DateTime     @default(now())
   isGoodness  Boolean      @default(false)
-  comment     String       @db.VarChar(1000) @default("")
-  notes       String       @db.VarChar(1000) @default("")
+  comment     String       @default("") @db.VarChar(1000)
+  notes       String       @default("") @db.VarChar(1000)
   status      OrderStatus  @default(UNPAID)
   cheque      File?        @relation(fields: [fileId], references: [id])
   fileId      Int?         @unique
