@@ -108,7 +108,7 @@ async function main() {
 
     const venueShow = await prisma.venue.create({
         data: {
-            name: "Нянфест. Косплей-шоу.",
+            name: "Нян-Фест. Косплей-шоу.",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
