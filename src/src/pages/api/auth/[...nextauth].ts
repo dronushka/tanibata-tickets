@@ -3,24 +3,20 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
 import { Role, User } from '@prisma/client'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 
 export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
+    adapter: PrismaAdapter(prisma),
     providers: [
         CredentialsProvider({
             credentials: {
                 email: {label: "E-mail", type: "text"},
                 password: {label: "Пароль", type: "password"}
             },
-            async authorize(credentials, req) {
-                // const user = await prisma.user.findFirst({
-                //     where: {
-                //         username: credentials.username
-                //     }
-                // })
-                
+            async authorize(credentials, req) {              
                 const password = await prisma.password.findFirst({
                     where: {
                         user: {
@@ -32,9 +28,7 @@ export const authOptions: NextAuthOptions = {
                     },
                     take: 1
                 })
-
-                // console.log(password)
-
+                
                 if (!password)
                     return null
 
