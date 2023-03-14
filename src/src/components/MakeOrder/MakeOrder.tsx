@@ -15,6 +15,7 @@ import TicketsPicker from "./TicketsPicker/TicketsPicker"
 import TicketsForm from "./TicketsForm"
 import { ClientOrder, OrderStage, PaymentData, TicketRow, useOrder } from "./useOrder"
 import FullAreaLoading from "../FullAreaLoading"
+import { getPaymentData } from "@/lib/api-calls"
 
 export const getStepNumber = (step?: OrderStage) => {
     const stages = ["authenticate", "form", "tickets", "payment", "complete"]
@@ -51,20 +52,23 @@ export default function MakeOrder(
     const { data: session, status } = useSession()
 
     useEffect(() => {
-        if (!setStage || !setOrder)
+        if (!setStage || !nextStage)
             return
 
-        if (status === "unauthenticated")
+        if (status === "unauthenticated" && stage !== "authenticate")
             setStage("authenticate")
 
         if (status === "authenticated" && stage === "authenticate") {
-            setStage("form")
-            // setOrder(prev => ({
-            //     ...prev,
-            //     paymentData: session.user.paymentData
-            // }))
+            getPaymentData().then(res => {
+                if (res.success) {
+                    nextStage(prev => ({ ...prev, paymentData: res.data}))
+                }
+                else
+                    nextStage()
+            })
         }
-    }, [status, session, stage, setStage, setOrder])
+    }, [status, stage, setStage, nextStage])
+
     console.log(transition, stage)
     return (
         <Stack sx={{ height: "100%" }}>
@@ -116,7 +120,7 @@ export default function MakeOrder(
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {transition && <FullAreaLoading />}
                 {!transition && stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
-                {!transition && stage === "form" && <OrderForm onSubmit={nextStage} />}
+                {!transition && stage === "form" && <OrderForm data={order.paymentData} onSubmit={nextStage} />}
                 {!transition && stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
                         venue={venue}

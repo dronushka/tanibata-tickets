@@ -9,8 +9,8 @@ export default function MaskInput (
 ) {
     const id = useId()
     const maskGenerator = createDefaultMaskGenerator(mask)
-    if (!value || !onChange)
-        return <></>
+    // if (!value || !onChange)
+    //     return <></>
         
     return (
         <Input.Wrapper id={id} label={label} withAsterisk={withAsterisk} error={error}>

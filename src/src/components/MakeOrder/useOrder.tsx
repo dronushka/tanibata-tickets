@@ -39,7 +39,7 @@ export type ClientOrder = {
     noSeats: boolean,
     isGoodness: boolean,
     comment: string,
-    paymentData: PaymentData | null,
+    paymentData: PaymentData,
     ticketCount: number,
     tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
     cheque?: File
@@ -47,7 +47,7 @@ export type ClientOrder = {
 
 // export type OrderSetter = ClientOrder | ((newOrder: ClientOrder) => ClientOrder) | undefined
 export const useOrder = (initialOrder: ClientOrder) => {
-    const [transition, transtionTo] = useState<OrderStage | null>(null)
+    const [transition, transitionTo] = useState<OrderStage | null>(null)
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder })
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
@@ -55,7 +55,7 @@ export const useOrder = (initialOrder: ClientOrder) => {
     useEffect(() => {
         if (transition) {
             setStage(transition)
-            transtionTo(null)
+            transitionTo(null)
         }
     }, [transition])
     // const f = (n: string) => (f: string) => 
@@ -68,19 +68,20 @@ export const useOrder = (initialOrder: ClientOrder) => {
 
         switch (stage) {
             case "authenticate":
+                transitionTo("form")
                 break
             case "form":
-                transtionTo("tickets")
+                transitionTo("tickets")
                 break
             case "tickets":
                 if (newOrder) {
-                    transtionTo("makeReservation")
+                    transitionTo("makeReservation")
                     const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
                     if (result.success) {
                         setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
-                        transtionTo("payment")
+                        transitionTo("payment")
                     } else {
-                        transtionTo("error")
+                        transitionTo("error")
                         setError(result.error)
                     }
                     break
@@ -89,8 +90,10 @@ export const useOrder = (initialOrder: ClientOrder) => {
                 newOrder?.orderId 
                 && newOrder?.cheque
                 && await setPaymentInfo(newOrder.orderId, newOrder.isGoodness, newOrder.comment, newOrder.cheque)
-                transtionTo("complete")
+                transitionTo("complete")
                 break
+            default:
+                transitionTo("authenticate")
         }
     }
 
@@ -107,10 +110,10 @@ export const useOrder = (initialOrder: ClientOrder) => {
     const prevStage = () => {
         switch (stage) {
             case "tickets":
-                transtionTo("form")
+                transitionTo("form")
                 break
         }
     }
 
-    return { order, setOrder, stage, transition, setStage: transtionTo, nextStage, prevStage, error }
+    return { order, setOrder, stage, transition, setStage: transitionTo, nextStage, prevStage, error }
 }
