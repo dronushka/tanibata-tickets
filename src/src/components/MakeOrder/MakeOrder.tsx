@@ -106,8 +106,8 @@ export default function MakeOrder(
                         </Text>
                     </>}
                 </Stepper.Step>
-                <Stepper.Step allowStepClick={false} label="Выбор мест">
-                    Выбор мест
+                <Stepper.Step allowStepClick={false} label={venue.noSeats ? "Выбор количества билетов" : "Выбор мест"}>
+                    {venue.noSeats ? "Выбор количества билетов" : "Выбор мест"}
                 </Stepper.Step>
                 <Stepper.Step allowStepClick={false} label="Оплата">
                     Оплата
