@@ -14,6 +14,8 @@ import PaymentForm from "./PaymentForm"
 import TicketsPicker from "./TicketsPicker/TicketsPicker"
 import TicketsForm from "./TicketsForm"
 import { ClientOrder, OrderStage, PaymentData, TicketRow, useOrder } from "./useOrder"
+import FullAreaLoading from "../FullAreaLoading"
+import { getPaymentData } from "@/lib/api-calls"
 
 export const getStepNumber = (step?: OrderStage) => {
     const stages = ["authenticate", "form", "tickets", "payment", "complete"]
@@ -45,26 +47,29 @@ export default function MakeOrder(
         cheque: undefined
     }
 
-    const { order, setOrder, stage, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
+    const { order, setOrder, stage, transition, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
 
     const { data: session, status } = useSession()
 
     useEffect(() => {
-        if (!setStage || !setOrder)
+        if (!setStage || !nextStage)
             return
 
-        if (status === "unauthenticated")
+        if (status === "unauthenticated" && stage !== "authenticate")
             setStage("authenticate")
 
         if (status === "authenticated" && stage === "authenticate") {
-            setStage("form")
-            // setOrder(prev => ({
-            //     ...prev,
-            //     paymentData: session.user.paymentData
-            // }))
+            getPaymentData().then(res => {
+                if (res.success) {
+                    nextStage(prev => ({ ...prev, paymentData: res.data}))
+                }
+                else
+                    nextStage()
+            })
         }
-    }, [status, session, stage, setStage, setOrder])
+    }, [status, stage, setStage, nextStage])
 
+    console.log(transition, stage)
     return (
         <Stack sx={{ height: "100%" }}>
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
@@ -72,35 +77,37 @@ export default function MakeOrder(
                     Введите email и одноразовый пароль
                 </Stepper.Step>
                 <Stepper.Step allowStepClick={false} label="Персональная информация">
-                <Text>
-                    При оплате со своей банковской карты просим при авторизации вводить ваше реальное ФИО, 
-                    это необходимо для успешной идентификации платежа.
-                </Text>
-                <Text>
-                    Просим также указывать актуальный номер телефона - лучше, если он привязан к банковской карте, 
-                    с которой производится платеж.
-                </Text>
-                <Text>
-                    Также неплохо заполнить адрес страницы VK, если она есть. 
-                    Из опыта прошлых фестивалей - это самый оперативный способ связи со зрителями при необходимости {";)"}
-                </Text>
-                <Text>
-                    Если оплата производится с банковской карты, зарегистрированной на другого человека, 
-                    ФИО фактического посетителя можно сообщить 
-                    в поле &quot;ФИО&quot;. В поле &quot;Комментарий&quot; 
-                    в этом случае нужно вписывать ФИО владельца банковской карты.
-                </Text>
-                <Text>
-                    Вот еще одна причина указывать правильные данные - по правилам проведения мероприятий 
-                    на площадке Областного Дома Народного Творчества, нам нужно составить списки зрителей, 
-                    по которым они будут допускаться на территорию фестиваля. 
-                    Чтобы поход на Нян-Фест прошел успешно и не был омрачен досадными случайностями,
-                     просим следовать нашей инструкции и не забыть взять с собой на фестиваль оригинал паспорта 
-                     или свидетельства о рождении.
-                </Text>
+                    {!transition && <>
+                        <Text>
+                            При оплате со своей банковской карты просим при авторизации вводить ваше реальное ФИО,
+                            это необходимо для успешной идентификации платежа.
+                        </Text>
+                        <Text>
+                            Просим также указывать актуальный номер телефона - лучше, если он привязан к банковской карте,
+                            с которой производится платеж.
+                        </Text>
+                        <Text>
+                            Также неплохо заполнить адрес страницы VK, если она есть.
+                            Из опыта прошлых фестивалей - это самый оперативный способ связи со зрителями при необходимости {";)"}
+                        </Text>
+                        <Text>
+                            Если оплата производится с банковской карты, зарегистрированной на другого человека,
+                            ФИО фактического посетителя можно сообщить
+                            в поле &quot;ФИО&quot;. В поле &quot;Комментарий&quot;
+                            в этом случае нужно вписывать ФИО владельца банковской карты.
+                        </Text>
+                        <Text>
+                            Вот еще одна причина указывать правильные данные - по правилам проведения мероприятий
+                            на площадке Областного Дома Народного Творчества, нам нужно составить списки зрителей,
+                            по которым они будут допускаться на территорию фестиваля.
+                            Чтобы поход на Нян-Фест прошел успешно и не был омрачен досадными случайностями,
+                            просим следовать нашей инструкции и не забыть взять с собой на фестиваль оригинал паспорта
+                            или свидетельства о рождении.
+                        </Text>
+                    </>}
                 </Stepper.Step>
-                <Stepper.Step allowStepClick={false} label="Выбор мест">
-                    Выбор мест
+                <Stepper.Step allowStepClick={false} label={venue.noSeats ? "Выбор количества билетов" : "Выбор мест"}>
+                    {venue.noSeats ? "Выбор количества билетов" : "Выбор мест"}
                 </Stepper.Step>
                 <Stepper.Step allowStepClick={false} label="Оплата">
                     Оплата
@@ -111,9 +118,10 @@ export default function MakeOrder(
             </Stepper>
 
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
-                {stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
-                {stage === "form" && <OrderForm onSubmit={nextStage} />}
-                {stage === "tickets" && venue.noSeats === false && (
+                {transition && <FullAreaLoading />}
+                {!transition && stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
+                {!transition && stage === "form" && <OrderForm data={order.paymentData} onSubmit={nextStage} />}
+                {!transition && stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
                         venue={venue}
                         rows={rows}
@@ -121,7 +129,7 @@ export default function MakeOrder(
                         nextStage={nextStage}
                     />
                 )}
-                {stage === "tickets" && venue.noSeats === true && (
+                {!transition && stage === "tickets" && venue.noSeats === true && (
                     <TicketsForm
                         venue={venue}
                         // reservedTicketCount={reservedTicketCount}
@@ -130,15 +138,15 @@ export default function MakeOrder(
                         nextStage={nextStage}
                     />
                 )}
-                {stage === "payment" && <PaymentForm venue={venue} order={order} onSubmit={nextStage} />}
-                {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
+                {!transition && stage === "payment" && <PaymentForm venue={venue} order={order} onSubmit={nextStage} />}
+                {(!transition && stage === "makeReservation" || !transition && stage === "complete" || !transition && stage === "error") && (
                     <FullAreaMessage>
                         <Stack sx={{ minWidth: 250, maxWidth: 300, alignItems: "center" }}>
-                            {stage === "makeReservation" && <>
+                            {!transition && stage === "makeReservation" && <>
                                 <Loader size="lg" />
                                 <Text>Бронируем билеты</Text>
                             </>}
-                            {stage === "complete" && <>
+                            {!transition && stage === "complete" && <>
                                 <ThemeIcon variant="outline" color="green" size="xl" sx={{ border: 0 }}>
                                     <IconCheck size={40} />
                                 </ThemeIcon>
@@ -149,7 +157,7 @@ export default function MakeOrder(
                                     </Button>
                                 </Link>
                             </>}
-                            {stage === "error" && <>
+                            {!transition && stage === "error" && <>
                                 <ThemeIcon variant="outline" color="red" size="xl" sx={{ border: 0 }}>
                                     <IconAlertTriangle size={40} />
                                 </ThemeIcon>

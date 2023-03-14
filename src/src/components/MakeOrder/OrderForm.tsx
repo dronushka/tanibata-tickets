@@ -19,28 +19,12 @@ type PaymentFormErrors = {
     network?: string
 } | null
 
-export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void }) {
-    // const { order, nextStage } = useOrder()
-
-    const [paymentData, setPaymentData] = useState<PaymentData>({
-        name: "",
-        phone: "",
-        email: "",
-        age: "",
-        nickname: "",
-        social: ""
-    })
+export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void }) {
+    const [paymentData, setPaymentData] = useState<PaymentData>(data)
 
     useEffect(() => {
-        const fetch = async () => {
-            const res = await getPaymentData()
-            if (res.success)
-                setPaymentData(res.data)
-            else
-                setPaymentFormErrors({ network: res.error })
-        }
-        fetch()
-    }, [])
+        setPaymentData(data)
+    }, [data])
 
     const [paymentFormErrors, setPaymentFormErrors] = useState<PaymentFormErrors>(null)
 
@@ -60,7 +44,6 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
             setPaymentFormErrors(validated.error.flatten().fieldErrors)
             return
         }
-
         onSubmit(order => ({ ...order, paymentData: validated.data }))
     }
 
@@ -74,6 +57,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
             <Paper shadow="sm" radius="md" p="md">
                 <Stack>
                     <TextInput
+                        // disabled={loading}
                         label="ФИО"
                         name="fullname"
                         withAsterisk
@@ -83,6 +67,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         error={paymentFormErrors?.name?.join(', ')}
                     />
                     <MaskInput
+                        // disabled={loading}
                         label="Телефон"
                         name="phone"
                         withAsterisk
@@ -93,6 +78,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         error={paymentFormErrors?.phone?.join(', ')}
                     />
                     <TextInput
+                        // disabled={loading}
                         label="Возраст"
                         name="age"
                         withAsterisk
@@ -102,6 +88,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         error={paymentFormErrors?.age?.join(', ')}
                     />
                     <TextInput
+                        // disabled={loading}
                         label="Никнейм"
                         name="nickname"
                         maxLength={191}
@@ -109,6 +96,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                         onChange={(e) => setPaymentData(prev => ({ ...prev, nickname: e.target.value }))}
                     />
                     <TextInput
+                        // disabled={loading}
                         label="Адрес страницы VK (если есть, для оперативной связи)"
                         name="social"
                         maxLength={191}
@@ -119,6 +107,7 @@ export default function OrderForm({ onSubmit }: { onSubmit: (order: (prev: Clien
                     <Flex justify="flex-end">
                         <Group>
                             <Button
+                                // disabled={loading}
                                 leftIcon={<IconArrowLeft />}
                                 variant="default"
                                 onClick={() => signOut()}

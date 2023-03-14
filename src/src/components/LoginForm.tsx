@@ -51,13 +51,11 @@ export default function LoginForm(
                 email,
                 password
             })
-            // console.log('res', res)
 
             if (res?.ok) {
                 console.log("logged in as ", email)
                 callback && callback()
                 !callback && router.push("/orders")
-                // router.replace(callbackUrl ?? '/orders')
             }
             else
                 setPasswordError("Ошибка аутентификации. Проверьте email или пароль.")
@@ -106,7 +104,7 @@ export default function LoginForm(
                             loading={loading}
                             onClick={sendEmail}
                         >
-                            Отправить одноразовый пароль
+                            Получить одноразовый пароль
                         </Button>
                     </Stack>
                 )}

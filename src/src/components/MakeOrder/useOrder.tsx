@@ -1,6 +1,6 @@
 import { createNoSeatsOrder, createOrder, setPaymentInfo, uploadCheque } from "@/lib/api-calls"
 import { Order, PriceRange, Ticket } from "@prisma/client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { z } from "zod"
 
 export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
@@ -47,10 +47,17 @@ export type ClientOrder = {
 
 // export type OrderSetter = ClientOrder | ((newOrder: ClientOrder) => ClientOrder) | undefined
 export const useOrder = (initialOrder: ClientOrder) => {
+    const [transition, transitionTo] = useState<OrderStage | null>(null)
     const [order, setOrder] = useState<ClientOrder>({ ...initialOrder })
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
 
+    useEffect(() => {
+        if (transition) {
+            setStage(transition)
+            transitionTo(null)
+        }
+    }, [transition])
     // const f = (n: string) => (f: string) => 
     const doNextStage = async (newOrder?: ClientOrder) => {
         if (!order)
@@ -61,19 +68,20 @@ export const useOrder = (initialOrder: ClientOrder) => {
 
         switch (stage) {
             case "authenticate":
+                transitionTo("form")
                 break
             case "form":
-                setStage("tickets")
+                transitionTo("tickets")
                 break
             case "tickets":
                 if (newOrder) {
-                    setStage("makeReservation")
+                    transitionTo("makeReservation")
                     const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
                     if (result.success) {
                         setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
-                        setStage("payment")
+                        transitionTo("payment")
                     } else {
-                        setStage("error")
+                        transitionTo("error")
                         setError(result.error)
                     }
                     break
@@ -82,8 +90,10 @@ export const useOrder = (initialOrder: ClientOrder) => {
                 newOrder?.orderId 
                 && newOrder?.cheque
                 && await setPaymentInfo(newOrder.orderId, newOrder.isGoodness, newOrder.comment, newOrder.cheque)
-                setStage("complete")
+                transitionTo("complete")
                 break
+            default:
+                transitionTo("authenticate")
         }
     }
 
@@ -100,10 +110,10 @@ export const useOrder = (initialOrder: ClientOrder) => {
     const prevStage = () => {
         switch (stage) {
             case "tickets":
-                setStage("form")
+                transitionTo("form")
                 break
         }
     }
 
-    return { order, setOrder, stage, setStage, nextStage, prevStage, error }
+    return { order, setOrder, stage, transition, setStage: transitionTo, nextStage, prevStage, error }
 }
