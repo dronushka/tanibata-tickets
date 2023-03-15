@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Flex, Group, Paper, Stack, TextInput } from "@mantine/core"
+import { Button, Checkbox, Flex, Group, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 import MaskInput from "../MaskInput"
@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react"
 import { ClientOrder, PaymentData, paymentDataSchema } from "./useOrder"
 import { getPaymentData } from "@/lib/api-calls"
 import FullAreaMessage from "../FullAreaMessage"
+import Link from "next/link"
 
 type PaymentFormErrors = {
     name?: string[],
@@ -21,6 +22,8 @@ type PaymentFormErrors = {
 
 export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void }) {
     const [paymentData, setPaymentData] = useState<PaymentData>(data)
+
+    const [agreedToRules, setAgreedToRules] = useState(false)
 
     useEffect(() => {
         setPaymentData(data)
@@ -104,6 +107,14 @@ export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSub
                         onChange={(e) => setField("social", e.target.value)}
                         error={paymentFormErrors?.social?.join(', ')}
                     />
+                    <Checkbox
+                        label={<Text sx={{ maxWidth: 310 }}>
+                            Я согласен с <Link href="/rules" target="_blank">Правилами посещения фестиваля</Link>
+                            {" и "}<Link href="/privacy" target="_blank">Политикой конфиденциальности и обработки персональных данных</Link>
+                        </Text>}
+                        checked={agreedToRules}
+                        onChange={() => setAgreedToRules(prev => !prev)}
+                    />
                     <Flex justify="flex-end">
                         <Group>
                             <Button
@@ -114,7 +125,12 @@ export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSub
                             >
                                 Войти с другим e-mail
                             </Button>
-                            <Button onClick={sendPaymentOrder}>Далее</Button>
+                            <Button
+                                disabled={!agreedToRules}
+                                onClick={sendPaymentOrder}
+                            >
+                                Далее
+                            </Button>
                         </Group>
                     </Flex>
                 </Stack>
