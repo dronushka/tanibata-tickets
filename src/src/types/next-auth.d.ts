@@ -7,7 +7,7 @@ declare module "next-auth" {
     id: number,
     email: string,
     role: string,
-    paymentData: PaymentData
+    // paymentData: PaymentData
   }
   interface Session {
     user: User

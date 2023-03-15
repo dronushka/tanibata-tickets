@@ -1,3 +1,4 @@
+import LoginForm from "@/components/LoginForm"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
@@ -10,10 +11,10 @@ export const metadata = {
 
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)
-    if (!session)
-        redirect('/login')
+    if (!session?.user.id)
+        return <LoginForm />
 
-    // console.log(session)
+    // console.log('orders session', session)
 
     const orders = await prisma.order.findMany({
         where: {

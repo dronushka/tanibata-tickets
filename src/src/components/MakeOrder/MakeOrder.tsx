@@ -119,7 +119,7 @@ export default function MakeOrder(
 
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {transition && <FullAreaLoading />}
-                {!transition && stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
+                {!transition && stage === "authenticate" && <LoginForm />}
                 {!transition && stage === "form" && <OrderForm data={order.paymentData} onSubmit={nextStage} />}
                 {!transition && stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
