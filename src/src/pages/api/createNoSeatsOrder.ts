@@ -82,6 +82,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     user: { connect: { email: session?.user.email } }
                 }
             })
+
+            orderId = order.id
         })
 
         res.status(200).json({ orderId })
