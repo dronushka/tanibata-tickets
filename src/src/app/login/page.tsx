@@ -5,5 +5,5 @@ export const metadata = {
 }
 
 export default async function LoginPage ({ searchParams }: { searchParams?: { [key: string]: string | undefined }}) {
-    return <LoginForm />
+    return <LoginForm callbackUrl="/"/>
 }

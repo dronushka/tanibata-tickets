@@ -65,12 +65,7 @@ async function main() {
             name: "admin",
             nickname: "admin",
             age: 99,
-            role: Role.ADMIN,
-            passwords: {
-                create: {
-                    hash: bcrypt.hashSync(process.env.DEFAULT_ADMIN_PASSWORD ?? "secret", 10)
-                }
-            }
+            role: Role.ADMIN
         }
     })
 
@@ -80,12 +75,7 @@ async function main() {
             name: "admin",
             nickname: "admin",
             age: 99,
-            role: Role.ADMIN,
-            passwords: {
-                create: {
-                    hash: bcrypt.hashSync("secret", 10)
-                }
-            }
+            role: Role.ADMIN
         }
     })
 
@@ -95,12 +85,7 @@ async function main() {
             name: "Константиновский Константин Константинович",
             nickname: "tester",
             age: 99,
-            role: Role.CUSTOMER,
-            passwords: {
-                create: {
-                    hash: bcrypt.hashSync("secret", 10)
-                }
-            }
+            role: Role.CUSTOMER
         }
     })
 

@@ -1,79 +1,40 @@
 import NextAuth, { NextAuthOptions, SessionUser } from 'next-auth'
+import EmailProvider from "next-auth/providers/email"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/db"
 import bcrypt from 'bcryptjs'
 import { Role, User } from '@prisma/client'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import { sendVerificationRequest } from '@/mail'
 
 export const authOptions: NextAuthOptions = {
     session: {
-        strategy: "jwt",
+        strategy: "database",
     },
     adapter: PrismaAdapter(prisma),
     providers: [
-        CredentialsProvider({
-            credentials: {
-                email: {label: "E-mail", type: "text"},
-                password: {label: "Пароль", type: "password"}
-            },
-            async authorize(credentials, req) {              
-                const password = await prisma.password.findFirst({
-                    where: {
-                        user: {
-                            email: credentials?.email
-                        }
-                    },
-                    orderBy: {
-                        created_at: "desc"
-                    },
-                    take: 1
-                })
-                
-                if (!password)
-                    return null
-
-                if (credentials && bcrypt.compareSync(credentials.password, password.hash)) {
-                    const user = await prisma.user.findFirst({
-                        where: {
-                            email: credentials.email
-                        }
-                    })
-                    
-                    if (user) {
-                        if (user.role === Role.CUSTOMER)
-                            prisma.password.deleteMany({
-                                where: { userId: user.id }
-                            })
-                        return { 
-                            id: user.id,
-                            email: user.email,
-                            role: user.role,
-                            paymentData: {
-                                name: user?.name ?? "",
-                                email: user?.email ?? "",
-                                age: user?.age ? String(user.age) : "",
-                                phone: user?.phone ?? "",
-                                nickname: user?.nickname ?? "",
-                                social: user?.social ?? "",
-                            }
-                        }
-                    }
-                }
-                return null
-            }
-        })
+        EmailProvider({
+            sendVerificationRequest,
+          }),
     ],
     pages: {
         signIn: "/login"
     },
     callbacks: {
-        jwt: async ({ token, user }) => {
-            // console.log(p)
-            user && (token.user = user)
-            return token
-        },
-        session: async ({ session, token }) => {
-            session.user = token.user as SessionUser
+        session: async ({ session }) => {
+            const user = await prisma.user.findUnique({ 
+                where: { email: session.user.email }
+            })
+
+            if (!user)
+                throw new Error("user_not_found")
+
+            session.user = { 
+                id: user.id,
+                email: user.email,
+                role: user.role
+            }
+            
             return session
         }
     }

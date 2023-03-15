@@ -8,15 +8,12 @@ import { useRouter } from "next/navigation"
 import FullAreaLoading from "./FullAreaLoading"
 
 export default function LoginForm(
-    { clientEmail, callback, rollback }:
-        { clientEmail?: string, callback?: () => void, rollback?: () => void }
+    { clientEmail, callbackUrl }:
+        { clientEmail?: string, callbackUrl?: string }
 ) {
     const [email, setEmail] = useState<string>(String(clientEmail))
     const [emailError, setEmailError] = useState<string>("")
     const [emailIsSent, setEmailIsSet] = useState<boolean>(!!clientEmail)
-
-    const [password, setPassword] = useState<string>("")
-    const [passwordError, setPasswordError] = useState<string>("")
 
     const [loading, setLoading] = useState<boolean>(false)
 
@@ -34,35 +31,13 @@ export default function LoginForm(
 
     const sendEmail = async () => {
         setLoading(true)
-        const result = await sendPasswordEmail(email)
-        if (result.success)
-            setEmailIsSet(true)
-        else if (result.error) {
-            setEmailError(result.error)
-        }
-        setLoading(false)
-    }
-
-    const login = async () => {
-        setLoading(true)
         try {
-            const res = await signIn("credentials", {
-                redirect: false,
-                email,
-                password
-            })
-
-            if (res?.ok) {
-                console.log("logged in as ", email)
-                callback && callback()
-                !callback && router.push("/orders")
-            }
-            else
-                setPasswordError("Ошибка аутентификации. Проверьте email или пароль.")
-
-        } catch (e) {
+            const result = await signIn("email", { email, redirect: false })
+            setEmailIsSet(true)
+            console.log(result)
+        } catch (e: any) {
             console.error(e)
-            setPasswordError("Что-то пошло не так")
+            setEmailError(e?.message)
         }
         setLoading(false)
     }
@@ -72,9 +47,9 @@ export default function LoginForm(
     const { status } = useSession()
 
     if (status === "authenticated")
-        !callback && router.push("/orders")
+        callbackUrl && router.push(callbackUrl)
 
-    if (status === "loading")
+    if (status === "loading" || status === "authenticated")
         return <FullAreaLoading />
 
     return (
@@ -104,29 +79,14 @@ export default function LoginForm(
                             loading={loading}
                             onClick={sendEmail}
                         >
-                            Получить одноразовый пароль
+                            Получить ссылку для входа
                         </Button>
                     </Stack>
                 )}
                 {emailIsSent && (
                     <Stack>
-                        <TextInput
-                            type="password"
-                            label="Одноразовый пароль"
-                            withAsterisk
-                            error={passwordError}
-                            maxLength={6}
-                            onChange={(e) => setPassword(e.target.value)}
-                            rightSection={loading && <Loader size="xs" />}
-                            disabled={loading}
-                        />
-                        <Button
-                            loading={loading}
-                            onClick={login}
-                        >
-                            Войти
-                        </Button>
-                        <Text fz="sm">Если пароль не пришёл проверьте раздел спам</Text>
+                        <Text fz="lg">Ссылка отправлена на ваш email</Text>
+                        <Text fz="sm">Если email не пришёл проверьте раздел &quot;спам&quot;</Text>
                         <Button
                             variant="subtle"
                             disabled={counter > 0}
@@ -134,12 +94,9 @@ export default function LoginForm(
                                 setEmailIsSet(false)
                                 setEmail("")
                                 setEmailError("")
-                                setPassword("")
-                                setPasswordError("")
-                                rollback && rollback()
                             }}
                         >
-                            Отправить пароль на другой e-mail {counter > 0 && `(${counter})`}
+                            Отправить ссылку на другой e-mail {counter > 0 && `(${counter})`}
                         </Button>
                     </Stack>
                 )}

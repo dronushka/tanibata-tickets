@@ -74,7 +74,7 @@ export default function MakeOrder(
         <Stack sx={{ height: "100%" }}>
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
                 <Stepper.Step allowStepClick={false} label="Авторизация">
-                    Введите email и одноразовый пароль
+                    Введите email, на него будет отправлена ссылка для входа.
                 </Stepper.Step>
                 <Stepper.Step allowStepClick={false} label="Персональная информация">
                     {!transition && <>
@@ -119,7 +119,7 @@ export default function MakeOrder(
 
             <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
                 {transition && <FullAreaLoading />}
-                {!transition && stage === "authenticate" && <LoginForm callback={() => nextStage()} />}
+                {!transition && stage === "authenticate" && <LoginForm />}
                 {!transition && stage === "form" && <OrderForm data={order.paymentData} onSubmit={nextStage} />}
                 {!transition && stage === "tickets" && venue.noSeats === false && (
                     <TicketsPicker
