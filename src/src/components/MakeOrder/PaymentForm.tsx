@@ -85,16 +85,14 @@ export default function PaymentForm({ venue, order, onSubmit }:
                         </List.Item>
                     ))}
                 </List>
-                <Group>
-                    <Checkbox
-                        label="Активировать Добро!"
-                        checked={goodness}
-                        onChange={(event) => setGoodness(event.currentTarget.checked)}
-                    />
-                    <Text>Билеты &quot;Добро&quot; - это способ дополнительно поддержать фестиваль! </Text>
-                    <Text>Стоимость такого билета составляет 2500 вне зависимости от места. </Text>
-                    <Text>В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!</Text>
-                    {/* <Tooltip
+                {/* <Group> */}
+                <Checkbox
+                    label="Активировать Добро!"
+                    checked={goodness}
+                    onChange={(event) => setGoodness(event.currentTarget.checked)}
+                />
+
+                {/* <Tooltip
                         label='Билеты "Добро" - это способ дополнительно поддержать фестиваль! 
                     Стоимость такого билета составляет 2500 вне зависимости от места. 
                     В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!'
@@ -104,7 +102,12 @@ export default function PaymentForm({ venue, order, onSubmit }:
                     >
                         <IconInfoCircle />
                     </Tooltip> */}
-                </Group>
+                {/* </Group> */}
+                <Box>
+                    <Text>Билеты &quot;Добро&quot; - это способ дополнительно поддержать фестиваль! </Text>
+                    <Text>Стоимость такого билета составляет 2500 вне зависимости от места. </Text>
+                    <Text>В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!</Text>
+                </Box>
                 <Textarea
                     label="Вы можете оставить комментарий к заказу"
                     maxLength={1000}
