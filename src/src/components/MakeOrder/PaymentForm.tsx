@@ -91,7 +91,10 @@ export default function PaymentForm({ venue, order, onSubmit }:
                         checked={goodness}
                         onChange={(event) => setGoodness(event.currentTarget.checked)}
                     />
-                    <Tooltip
+                    <Text>Билеты &quot;Добро&quot; - это способ дополнительно поддержать фестиваль! </Text>
+                    <Text>Стоимость такого билета составляет 2500 вне зависимости от места. </Text>
+                    <Text>В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!</Text>
+                    {/* <Tooltip
                         label='Билеты "Добро" - это способ дополнительно поддержать фестиваль! 
                     Стоимость такого билета составляет 2500 вне зависимости от места. 
                     В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!'
@@ -99,10 +102,8 @@ export default function PaymentForm({ venue, order, onSubmit }:
                         width={300}
                         events={{ hover: true, focus: true, touch: true }}
                     >
-                        {/* <Avatar radius="sm"> */}
                         <IconInfoCircle />
-                        {/* </Avatar> */}
-                    </Tooltip>
+                    </Tooltip> */}
                 </Group>
                 <Textarea
                     label="Вы можете оставить комментарий к заказу"

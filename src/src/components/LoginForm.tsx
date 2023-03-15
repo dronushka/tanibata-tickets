@@ -85,6 +85,7 @@ export default function LoginForm(
                 )}
                 {emailIsSent && (
                     <Stack>
+                        <Text fz="lg">Ссылка отправлена на ваш email</Text>
                         <Text fz="sm">Если email не пришёл проверьте раздел &quot;спам&quot;</Text>
                         <Button
                             variant="subtle"

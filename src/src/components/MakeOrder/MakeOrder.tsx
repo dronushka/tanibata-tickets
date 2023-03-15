@@ -74,7 +74,7 @@ export default function MakeOrder(
         <Stack sx={{ height: "100%" }}>
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>
                 <Stepper.Step allowStepClick={false} label="Авторизация">
-                    Введите email и одноразовый пароль
+                    Введите email, на него будет отправлена ссылка для входа.
                 </Stepper.Step>
                 <Stepper.Step allowStepClick={false} label="Персональная информация">
                     {!transition && <>
