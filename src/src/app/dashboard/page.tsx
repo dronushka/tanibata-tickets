@@ -7,6 +7,8 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { Order, OrderStatus, PriceRange, Role, Ticket } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
+import LoginForm from "@/components/LoginForm"
+import Dashboard501 from "@/components/Dashboard501"
 
 export const metadata = {
     title: [process.env.FEST_TITLE, 'Админка'].join(" | ")
@@ -15,8 +17,11 @@ export const metadata = {
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions)
 
+    if (!session)
+        return <LoginForm />
+        
     if (session?.user.role !== Role.ADMIN)
-        redirect('/dashboard/login')
+        return <Dashboard501 />
 
     const venues = await prisma.venue.findMany({
         where: {

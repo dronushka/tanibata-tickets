@@ -1,5 +1,7 @@
 // import type { Metadata } from 'next'
 import DashboardOrderForm from "@/components/dashboard/DashboardOrderForm"
+import Dashboard501 from "@/components/Dashboard501"
+import LoginForm from "@/components/LoginForm"
 import { prisma } from "@/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { Role } from "@prisma/client"
@@ -14,8 +16,11 @@ export const metadata = {
 export default async function OrderPage({ params: { orderId } }: { params: { orderId: string } }) {
     const session = await getServerSession(authOptions)
 
+    if (!session)
+        return <LoginForm />
+        
     if (session?.user.role !== Role.ADMIN)
-        redirect('/dashboard/login')
+        return <Dashboard501 />
 
     const validator = z.number()
     const res = validator.safeParse(parseInt(orderId))

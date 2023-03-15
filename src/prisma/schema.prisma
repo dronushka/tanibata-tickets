@@ -34,25 +34,34 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 enum Role {
   CUSTOMER
   ADMIN
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique
-  name      String?
-  nickname  String?
-  age       Int?
-  phone     String?
-  social    String?
-  createdAt DateTime   @default(now())
-  accounts  Account[]
-  sessions  Session[]
-  role      Role       @default(CUSTOMER)
-  order     Order[]
-  passwords Password[]
+  id            Int        @id @default(autoincrement())
+  email         String     @unique
+  emailVerified DateTime?
+  name          String?
+  nickname      String?
+  age           Int?
+  phone         String?
+  social        String?
+  createdAt     DateTime   @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  role          Role       @default(CUSTOMER)
+  order         Order[]
+  passwords     Password[]
 }
 
 model Password {
