@@ -93,7 +93,7 @@ async function main() {
 
     const venueShow = await prisma.venue.create({
         data: {
-            name: "Нян-Фест. Косплей-шоу.",
+            name: "Нян-Фест, Косплей-шоу",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
@@ -105,13 +105,13 @@ async function main() {
 
     const venueConcert = await prisma.venue.create({
         data: {
-            name: "Нянфест. Концерт.",
+            name: "Нян-фест, Концерт",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),
             active: true,
-            ticketCount: 50,
-            availableTickets: 50,
+            ticketCount: 600,
+            availableTickets: 600,
             noSeats: true
         }
     })
