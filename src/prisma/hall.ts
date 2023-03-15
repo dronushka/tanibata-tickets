@@ -93,7 +93,7 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
             number: 4,
             tickets: [
                 { number: 1 },
-                { number: 2 },
+                { number: 2, priceRange: priceRange[0] },
                 { number: 3, priceRange: priceRange[1] },
                 { number: 4, priceRange: priceRange[1] },
                 { number: 5, priceRange: priceRange[1] },
@@ -115,8 +115,8 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
                 { number: 21, priceRange: priceRange[1] },
                 { number: 22, priceRange: priceRange[1] },
                 { number: 23, priceRange: priceRange[1] },
-                { number: 24 },
-                { number: 25 },
+                { number: 24, priceRange: priceRange[0] },
+                { number: 25, priceRange: priceRange[0] },
             ]
         },
         {
@@ -153,9 +153,9 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
         {
             number: 6,
             tickets: [
-                { number: 1 },
-                { number: 2 },
-                { number: 3 },
+                { number: 1, priceRange: priceRange[0] },
+                { number: 2, priceRange: priceRange[0] },
+                { number: 3, priceRange: priceRange[0] },
                 { number: 4, priceRange: priceRange[1] },
                 { number: 5, priceRange: priceRange[1] },
                 { number: 6, priceRange: priceRange[1] },
@@ -177,9 +177,9 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
                 { number: 22, priceRange: priceRange[1] },
                 { number: 23, priceRange: priceRange[1] },
                 { number: 24, priceRange: priceRange[1] },
-                { number: 25 },
-                { number: 26 },
-                { number: 27 }
+                { number: 25, priceRange: priceRange[0] },
+                { number: 26, priceRange: priceRange[0] },
+                { number: 27, priceRange: priceRange[0] }
             ]
         },
         {
@@ -217,9 +217,9 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
         {
             number: 8,
             tickets: [
-                { number: 1 },
-                { number: 2 },
-                { number: 3 },
+                { number: 1, priceRange: priceRange[0] },
+                { number: 2, priceRange: priceRange[0] },
+                { number: 3, priceRange: priceRange[0] },
                 { number: 4, priceRange: priceRange[1] },
                 { number: 5, priceRange: priceRange[1] },
                 { number: 6, priceRange: priceRange[1] },
@@ -241,9 +241,9 @@ export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
                 { number: 22, priceRange: priceRange[1] },
                 { number: 23, priceRange: priceRange[1] },
                 { number: 24, priceRange: priceRange[1] },
-                { number: 25 },
-                { number: 26 },
-                { number: 27 }
+                { number: 25, priceRange: priceRange[0] },
+                { number: 26, priceRange: priceRange[0] },
+                { number: 27, priceRange: priceRange[0] }
             ]
         },
         {

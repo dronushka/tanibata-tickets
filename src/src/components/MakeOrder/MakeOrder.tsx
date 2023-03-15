@@ -69,7 +69,7 @@ export default function MakeOrder(
         }
     }, [status, stage, setStage, nextStage])
 
-    console.log(transition, stage)
+    // console.log(transition, stage)
     return (
         <Stack sx={{ height: "100%" }}>
             <Stepper active={getStepNumber(stage)} breakpoint="sm" allowNextStepsSelect={false}>

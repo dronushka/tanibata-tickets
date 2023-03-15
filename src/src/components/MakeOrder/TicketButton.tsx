@@ -40,7 +40,7 @@ export default function TicketButton(
     let colorCode: MantineColor = "green"
 
     if (selected)
-        colorCode = "#daca55" //"#da7855"
+        colorCode = "#228be6" //"#daca55" //"#da7855"
     else if (ticket.priceRange?.color)
         colorCode = ticket.priceRange.color
 
@@ -55,6 +55,9 @@ export default function TicketButton(
                         backgroundColor: colorCode,
                         "&:disabled": {
                             backgroundColor: "#d4d4d4"
+                        },
+                        "&:hover": {
+                            backgroundColor: "#9775fa"
                         }
                     }}
                     onMouseEnter={open}
