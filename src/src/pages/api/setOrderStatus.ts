@@ -35,18 +35,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
+        if ((validated.status === OrderStatus.USED || validated.status === OrderStatus.RETURNED)
+            && session?.user.role !== Role.ADMIN) {
+            res.status(401).json({ error: "unauthorized" })
+            return
+        }
+
         if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }
 
         if (!order) {
-            res.status(422).json({ error: "order_not_found"})
+            res.status(422).json({ error: "order_not_found" })
             return
         }
 
         if (order.status === OrderStatus.CANCELLED || order.status === OrderStatus.RETURNED) {
-            res.status(422).json({ error: "cancelled_or_returned_cannot_be_changed"})
+            res.status(422).json({ error: "cancelled_or_returned_cannot_be_changed" })
             return
         }
 

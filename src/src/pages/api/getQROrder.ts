@@ -6,7 +6,7 @@ import { z, ZodError } from "zod"
 import { Role } from "@prisma/client"
 
 import bcrypt from 'bcryptjs'
-import { getSecuritySting } from "@/lib/OrderQR"
+import { getSecurityString } from "@/lib/OrderQR"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hash: z.string()
     })
 
-    console.log("body", req.body)
+    // console.log("body", req.body)
     try {
         const validated = validator.parse(req.body)
         const order = await prisma.order.findUnique({ 
@@ -35,11 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
          })
 
         if (!order)
-            throw "order_auth_error"
+            throw new Error("order_not_found")
 
         // const hash = getOrderHash(order, order.user)
         // const authString = String(order.id) + String(order.createdAt.getTime()) + String(order.user.id) + String(order.user.createdAt.getTime())
-        if (bcrypt.compareSync(getSecuritySting(order, order.user), validated.hash)) {
+        if (bcrypt.compareSync(getSecurityString(order, order.user), validated.hash)) {
             res.status(200).json({
                 ...order,
                 createdAt: order.createdAt.toLocaleString('ru-RU'),
@@ -54,17 +54,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
             return
         } else {
-            throw "order_auth_error"
+            throw new Error("order_qr_signature_error")
         }
     } catch (e: any) {
         console.error(e)
-        if (e instanceof ZodError)
+        if (e instanceof SyntaxError)
             res.status(422).json({ error: "validation_fail" })
-        else if (e instanceof SyntaxError)
+        else if (e instanceof ZodError)
             res.status(422).json({ error: "json_parse_error" })
-        else if (e === "order_auth_error")
-            res.status(422).json({ error: "order_auth_error" })
-        else
-            res.status(500).json({ error: e?.message })
+        else 
+            res.status(422).json({ error: e?.message })
     }
 }
