@@ -19,7 +19,7 @@ export async function sendVerificationRequest({ identifier, url }: { identifier:
       subject: "Нян-Фест 2023 | Одноразовая ссылка для входа в систему приобритения билетов",
       html: `<p><b>>> <a href="${url}" target="_blank">Вход в систему покупки билетов</a> <<</b></p>
       <br />
-      <p>По любым вопросам, связанным с покупкой или возвратом билета вы можете связаться с билетёром фестиваля Чеширой:</p>
+      <p>По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:</p>
       <p><a href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</a></p>
       <p><a href="tel:79054536789">+7 (905) 4536789</a></p>
       <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>

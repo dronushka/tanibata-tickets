@@ -1,7 +1,7 @@
 import { Order, User } from "@prisma/client"
 import bcrypt from 'bcryptjs'
 
-export function getSecuritySting(order: Order, user: User) {
+export function getSecurityString(order: Order, user: User) {
     return String(order.id)
     + String(order.createdAt.getTime())
     + String(user.id)
@@ -10,7 +10,7 @@ export function getSecuritySting(order: Order, user: User) {
 }
 
 export function getOrderHash(order: Order, user: User) {
-    return bcrypt.hashSync(getSecuritySting(order, user))
+    return bcrypt.hashSync(getSecurityString(order, user))
 }
 
 export function getQRString (order: Order, user: User) {

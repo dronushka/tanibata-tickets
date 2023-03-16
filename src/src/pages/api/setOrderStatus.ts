@@ -35,18 +35,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
+        if ((validated.status === OrderStatus.USED || validated.status === OrderStatus.RETURNED)
+            && session?.user.role !== Role.ADMIN) {
+            res.status(401).json({ error: "unauthorized" })
+            return
+        }
+
         if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) {
             res.status(401).json({ error: "unauthorized" })
             return
         }
 
         if (!order) {
-            res.status(422).json({ error: "order_not_found"})
+            res.status(422).json({ error: "order_not_found" })
             return
         }
 
         if (order.status === OrderStatus.CANCELLED || order.status === OrderStatus.RETURNED) {
-            res.status(422).json({ error: "cancelled_or_returned_cannot_be_changed"})
+            res.status(422).json({ error: "cancelled_or_returned_cannot_be_changed" })
             return
         }
 
@@ -87,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         в течение 3 рабочих дней от даты отмены заказа.
                     </p>
                     <p>Будем рады видеть Вас на наших других мероприятиях! :)</p>
-                    <p>По любым вопросам, связанным с покупкой или возвратом билета вы можете связаться с билетёром фестиваля Чеширой:</p>
+                    <p>По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:</p>
                     <p><a href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</a></p>
                     <p><a href="tel:79054536789">+7 (905) 4536789</a></p>
                     <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>

@@ -81,6 +81,26 @@ async function main() {
 
     await prisma.user.create({
         data: {
+            email: "alpha-rnd@yandex.ru",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN
+        }
+    })
+
+    await prisma.user.create({
+        data: {
+            email: "tanibatafest@yandex.ru",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN
+        }
+    })
+
+    await prisma.user.create({
+        data: {
             email: "g-worlds@ya.ru",
             name: "Константиновский Константин Константинович",
             nickname: "tester",
@@ -93,7 +113,7 @@ async function main() {
 
     const venueShow = await prisma.venue.create({
         data: {
-            name: "Нян-Фест, Косплей-шоу",
+            name: "«Нян-фест», Косплей-шоу",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание косплей-шоу ...",
             start: new Date("2023-03-25 13:00"),
@@ -105,7 +125,7 @@ async function main() {
 
     const venueConcert = await prisma.venue.create({
         data: {
-            name: "Нян-фест, Концерт",
+            name: "«Нян-фест», Концерт",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание концерта ...",
             start: new Date("2023-03-25 18:00"),

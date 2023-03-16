@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { z } from "zod"
-import { Avatar, Box, Button, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
+import { Avatar, Box, Button, Center, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { IconInfoCircle, IconUpload } from "@tabler/icons-react"
 import { ClientOrder } from "./useOrder"
 import Link from "next/link"
@@ -87,7 +87,7 @@ export default function PaymentForm({ venue, order, onSubmit }:
                 </List>
                 {/* <Group> */}
                 <Checkbox
-                    label="Активировать Добро!"
+                    label="Активировать «Добро»!"
                     checked={goodness}
                     onChange={(event) => setGoodness(event.currentTarget.checked)}
                 />
@@ -104,45 +104,45 @@ export default function PaymentForm({ venue, order, onSubmit }:
                     </Tooltip> */}
                 {/* </Group> */}
                 <Box>
-                    <Text>Билеты &quot;Добро&quot; - это способ дополнительно поддержать фестиваль! </Text>
-                    <Text>Стоимость такого билета составляет 2500 вне зависимости от места. </Text>
-                    <Text>В дополнение к этому вы получаете уникальные сувениры от оргкома фестиваля!</Text>
+                    <Text>Билеты «Добро» — это способ дополнительно поддержать фестиваль!</Text>
+                    <Text>Стоимость билета составляет 2500 рублей вне зависимости от места.</Text>
+                    <Text>Ты получишь билеты сразу и на косплей-шоу, и на концерт, а ещё уникальные сувениры от оргкома фестиваля!</Text>
                 </Box>
                 <Textarea
-                    label="Вы можете оставить комментарий к заказу"
+                    label="К заказу также можно оставить комментарий:"
                     maxLength={1000}
                     value={comment}
                     onChange={e => setComment(e.target.value)}
                 />
 
-                <Text>Для завершения, оплатите заказ на сумму {goodness ? (Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount).toFixed(2) : sum.toFixed(2)} р. и приложите чек ниже.</Text>
-                <Text>Реквизиты для перевода оплаты за билеты</Text>
-
-                <Text weight={700}>1234 5678 9012 3456, Сбербанк.</Text>
-                <Text>Перевод на имя: Дмитрий З..</Text>
-
+                <Text>Для завершения осталось оплатить заказ на сумму {goodness ? (Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * order.ticketCount).toFixed(2) : sum.toFixed(2)} р. и приложить чек ниже.</Text>
+                <Text>Реквизиты для перевода оплаты за билеты:</Text>
+                <Center>
+                    <Box>
+                        <Text weight={700}>1234 5678 9012 3456, Сбербанк.</Text>
+                        <Text>Перевод на имя: Дмитрий З..</Text>
+                    </Box>
+                </Center>
                 <Text>
-                    В поле &quot;Назначение платежа&quot; при оплате указывать ничего не требуется,
-                    данные о билете мы автоматически получаем из данной формы.
+                    В поле «Назначение платежа» при оплате ничего указывать не нужно,
+                    данные о билете мы автоматически получаем из формы.
                 </Text>
                 <Text>
                     Оплатить заказ и загрузить чек в систему бронирования билетов необходимо в течение суток
-                    с момента создания заказа, иначе заказ автоматически отменяется,
-                    а выбранные вами места возвращаются в свободную продажу.
+                    с момента создания заказа, иначе заказ автоматически отменится, а выбранные места вернутся
+                    в свободную продажу.
+                </Text>
+                <Text>Мы обработаем данные платежа в течение трех дней с момента оплаты.</Text>
+                <Text>
+                    Статус обработки заказа будет виден в разделе <Link href="/orders">«Мои заказы»</Link> системы бронирования.
                 </Text>
                 <Text>
-                    Данные платежа будут нами обработаны в течение трех дней с момента оплаты.
-                    Статус обработки заказа можно увидеть в разделе <Link href="/orders">Мои заказы</Link> системы бронирования,
-                    при возникновении вопросов по поводу покупки билетов можно связаться с билетером фестиваля
+                    При возникновении вопросов по поводу покупки билетов можно связаться с билетёром фестиваля
                     по адресу почты <Link href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</Link>,
                     по телефону <Link href="tel:79054536789">+7 (905) 4536789</Link>{" "}
-                    или по адресу в <Link href="https://vk.com/cheshira_rnd">VK: Anna Kramarenko</Link>.
+                    или через VK: <Link href="https://vk.com/cheshira_rnd">Anna Kramarenko</Link>.
                 </Text>
-                {/* <Checkbox 
-                    label="Активировать Добро!"
-                    checked={checked} 
-                    onChange={(event) => setChecked(event.currentTarget.checked)} 
-                /> */}
+
                 <Group>
                     <Box>
                         {cheque && <Text>{cheque.name}</Text>}
