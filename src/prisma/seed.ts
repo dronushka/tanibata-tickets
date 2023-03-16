@@ -81,6 +81,26 @@ async function main() {
 
     await prisma.user.create({
         data: {
+            email: "alpha-rnd@yandex.ru",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN
+        }
+    })
+
+    await prisma.user.create({
+        data: {
+            email: "tanibatafest@yandex.ru",
+            name: "admin",
+            nickname: "admin",
+            age: 99,
+            role: Role.ADMIN
+        }
+    })
+
+    await prisma.user.create({
+        data: {
             email: "g-worlds@ya.ru",
             name: "Константиновский Константин Константинович",
             nickname: "tester",
