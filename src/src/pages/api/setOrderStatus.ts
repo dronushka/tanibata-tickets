@@ -81,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
 
             emailTransporter.sendMail({
-                from: `"Нян-фест 2023" <${process.env.MAIL_USER}>`,
+                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
                 to: user?.email,
                 subject: "Нян-Фест 2023 | Возврат билетов | Номер заказа: " + order?.id, // Subject line
                 html: `

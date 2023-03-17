@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (order !== null) {
             const pdf = Buffer.from(await generateTicket(order))
             await emailTransporter.sendMail({
-                from: `"Нян-фест 2023" <${process.env.MAIL_USER}>`,
+                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
                 to: order.user.email,
                 subject: "Нян-Фест 2023 | Билеты на фестиваль", // Subject line
                 html: `
