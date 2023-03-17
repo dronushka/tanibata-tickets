@@ -1,1 +1,6 @@
 .env
+mysql
+letsencrypt
+file_storage
+.vscode
+backup
