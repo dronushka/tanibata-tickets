@@ -119,8 +119,8 @@ export default function PaymentForm({ venue, order, onSubmit }:
                 <Text>Реквизиты для перевода оплаты за билеты:</Text>
                 <Center>
                     <Box>
-                        <Text weight={700}>1234 5678 9012 3456, Сбербанк.</Text>
-                        <Text>Перевод на имя: Дмитрий З..</Text>
+                        <Text weight={700}>4274 3200 4304 7698, Сбербанк.</Text>
+                        <Text>Перевод на имя: Анастасия Викторовна В.</Text>
                     </Box>
                 </Center>
                 <Text>
