@@ -15,8 +15,8 @@ export const emailTransporter = nodemailer.createTransport({
 export async function sendVerificationRequest({ identifier, url }: { identifier: string, url: string}) {
     const result = await emailTransporter.sendMail({
       to: identifier,
-      from: `"Tanibata" <${process.env.MAIL_USER}>`,
-      subject: "Нян-Фест 2023 | Одноразовая ссылка для входа в систему приобритения билетов",
+      from: `"Нян-фест 2023" <${process.env.MAIL_USER}>`,
+      subject: "Нян-фест 2023 | Одноразовая ссылка для входа в систему приобритения билетов",
       html: `<p><b>>> <a href="${url}" target="_blank">Вход в систему покупки билетов</a> <<</b></p>
       <br />
       <p>По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:</p>
