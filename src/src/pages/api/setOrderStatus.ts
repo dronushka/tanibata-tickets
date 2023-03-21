@@ -4,7 +4,7 @@ import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
 import { OrderStatus, Role } from '@prisma/client'
-import { emailTransporter } from '@/mail'
+import { sendRefund } from '@/lib/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -80,28 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 where: { id: order.userId }
             })
 
-            emailTransporter.sendMail({
-                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
-                to: user?.email,
-                subject: "Нян-Фест 2023 | Возврат билетов | Номер заказа: " + order?.id, // Subject line
-                html: `
-                    <p>Уважаемый зритель!</p>
-                    <p>Сожалеем, что досадные обстоятельства помешали Вашему посещению Нян-Феста 2023.</p>
-                    <p>
-                        Теперь хорошие новости: отмена Вашего заказа билетов успешно произведена. 
-                        Стоимость билетов будет возвращена Вам на банковскую карту, с которой производилась оплата, 
-                        в течение 3 рабочих дней от даты отмены заказа.
-                    </p>
-                    <p>Будем рады видеть Вас на наших других мероприятиях! :)</p>
-                    <p>По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:</p>
-                    <p><a href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</a></p>
-                    <p><a href="tel:79054536789">+7 (905) 4536789</a></p>
-                    <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>
-                    <p><a href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</a><p>
-                `
-            })
+            user && await sendRefund(user.email, order.id)
         }
-
 
         res.status(200).end()
     } catch (e: any) {
