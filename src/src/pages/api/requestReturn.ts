@@ -52,9 +52,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         admins && admins.forEach(user => {
             emailTransporter.sendMail({
-                from: `"Tanibata" <${process.env.MAIL_USER}>`,
+                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
                 to: user.email,
-                subject: "Танибата. Зарос на возврат билетов. Номер заказа: " + order?.id, // Subject line
+                subject: "Нян-фест 2023. Зарос на возврат билетов. Номер заказа: " + order?.id, // Subject line
                 html: `<p>Зарос на возврат билетов. Номер заказа: </p><p><b><a href="${process.env.NEXTAUTH_URL}/dashboard/orders/${order?.id}">${order?.id}</a></b></p>`
               })
         })
