@@ -4,3 +4,4 @@ letsencrypt
 file_storage
 .vscode
 backup
+.react-email
