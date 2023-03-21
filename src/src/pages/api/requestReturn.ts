@@ -4,7 +4,7 @@ import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'
 import { OrderStatus, Role } from '@prisma/client'
-import { emailTransporter } from '@/mail'
+import { sendRefundRequested } from '@/lib/mail'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST")
@@ -30,14 +30,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        if (order?.userId !== session?.user.id) {
-            res.status(401).json({ error: "unauthorized" })
-            return
-        }
+        if (!order)
+            throw new Error("order_not_found")
+
+        if (order.userId !== session?.user.id)
+            throw new Error("unauthorized")
 
         await prisma.order.update({
             where: {
-                id: order?.id,
+                id: order.id,
             },
             data: {
                 status: OrderStatus.RETURN_REQUESTED
@@ -50,14 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         })
 
-        admins && admins.forEach(user => {
-            emailTransporter.sendMail({
-                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
-                to: user.email,
-                subject: "Нян-фест 2023. Зарос на возврат билетов. Номер заказа: " + order?.id, // Subject line
-                html: `<p>Зарос на возврат билетов. Номер заказа: </p><p><b><a href="${process.env.NEXTAUTH_URL}/dashboard/orders/${order?.id}">${order?.id}</a></b></p>`
-              })
-        })
+        await Promise.allSettled(admins.map(admin => sendRefundRequested(admin.email, order.id)))
 
         res.status(200).end()
     } catch (e: any) {
