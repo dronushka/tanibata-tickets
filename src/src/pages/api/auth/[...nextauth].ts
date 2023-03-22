@@ -1,11 +1,8 @@
 import NextAuth, { NextAuthOptions, SessionUser } from 'next-auth'
 import EmailProvider from "next-auth/providers/email"
-import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/db"
-import bcrypt from 'bcryptjs'
-import { Role, User } from '@prisma/client'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import { sendVerificationRequest } from '@/mail'
+import { sendVerificationRequest } from '@/lib/mail'
 
 export const authOptions: NextAuthOptions = {
     session: {
