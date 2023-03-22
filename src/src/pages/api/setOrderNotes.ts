@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import { z } from 'zod'
 import { getServerSession } from "next-auth/next"
 import { authOptions } from './auth/[...nextauth]'

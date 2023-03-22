@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import { z } from "zod"
 import { OrderStatus, Prisma } from "@prisma/client"
 

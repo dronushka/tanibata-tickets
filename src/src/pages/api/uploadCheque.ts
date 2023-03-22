@@ -1,4 +1,4 @@
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import formidable, { Fields, File, Files } from "formidable"
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth"

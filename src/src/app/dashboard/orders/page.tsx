@@ -1,7 +1,7 @@
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import { z } from "zod"
 import DashboardOrders from "@/components/dashboard/DashboardOrders"
 import { OrderStatus, Prisma, Role } from "@prisma/client"

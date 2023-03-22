@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import { z } from "zod"
 import contentDisposition from "content-disposition"
 import generateTicket from "@/lib/generateTicket"
