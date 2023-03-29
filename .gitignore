@@ -4,5 +4,6 @@ letsencrypt
 file_storage
 .vscode
 backup
+backups
 prod.log
 .gitignore
