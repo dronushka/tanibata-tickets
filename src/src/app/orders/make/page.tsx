@@ -13,58 +13,60 @@ export const metadata = {
 
 
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
-    const session = await getServerSession(authOptions)
+    notFound()
+    return <></>
+    // const session = await getServerSession(authOptions)
 
-    let user: User | null = null
+    // let user: User | null = null
 
-    if (session?.user?.id)
-        user = await prisma.user.findUnique({
-            where: {
-                id: session.user.id
-            }
-        })
+    // if (session?.user?.id)
+    //     user = await prisma.user.findUnique({
+    //         where: {
+    //             id: session.user.id
+    //         }
+    //     })
 
-    const venueIdValidator = z.string().regex(/^\d+$/)
-    const venueIdValidated = venueIdValidator.safeParse(searchParams?.venue)
+    // const venueIdValidator = z.string().regex(/^\d+$/)
+    // const venueIdValidated = venueIdValidator.safeParse(searchParams?.venue)
 
-    if (venueIdValidated.success === false)
-        notFound()
+    // if (venueIdValidated.success === false)
+    //     notFound()
 
-    const venue = await prisma.venue.findUnique({
-        where: {
-            id: Number(venueIdValidated.data)
-        },
-        include: {
-            priceRange: true,
-            tickets: {
-                include: {
-                    priceRange: true
-                },
-                orderBy: [
-                    { sortRowNumber: "asc" },
-                    { sortNumber: "desc" }
-                ]
-            }
-        }
-    })
+    // const venue = await prisma.venue.findUnique({
+    //     where: {
+    //         id: Number(venueIdValidated.data)
+    //     },
+    //     include: {
+    //         priceRange: true,
+    //         tickets: {
+    //             include: {
+    //                 priceRange: true
+    //             },
+    //             orderBy: [
+    //                 { sortRowNumber: "asc" },
+    //                 { sortNumber: "desc" }
+    //             ]
+    //         }
+    //     }
+    // })
 
-    if (venue === null)
-        notFound()
+    // if (venue === null)
+    //     notFound()
 
-    const ticketRowMap: Record<string, (Ticket & { priceRange: PriceRange | null})[]> = {}
+    // const ticketRowMap: Record<string, (Ticket & { priceRange: PriceRange | null})[]> = {}
 
-    if (venue.tickets)
-        for (let ticket of venue.tickets) {
-            const rowNumber = ticket.rowNumber ?? "default"
+    // if (venue.tickets)
+    //     for (let ticket of venue.tickets) {
+    //         const rowNumber = ticket.rowNumber ?? "default"
 
-            if (!ticketRowMap[rowNumber])
-                ticketRowMap[rowNumber] = []
+    //         if (!ticketRowMap[rowNumber])
+    //             ticketRowMap[rowNumber] = []
 
-            ticketRowMap[rowNumber].push(ticket)
-        }
+    //         ticketRowMap[rowNumber].push(ticket)
+    //     }
 
-    return <MakeOrder
-        venue={{...venue, start: venue.start.toLocaleString('ru-RU')}}
-        rows={ticketRowMap}
-    />
+    // return <MakeOrder
+    //     venue={{...venue, start: venue.start.toLocaleString('ru-RU')}}
+    //     rows={ticketRowMap}
+    // />
 }
