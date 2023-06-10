@@ -7,6 +7,10 @@ import FullAreaMessage from "../../components/FullAreaMessage"
 export default function Help() {
     return <FullAreaMessage>
         <Text fz="lg" mb="md">Дорогой зритель «Нян-феста»!</Text>
+        <Text>Реквизиты для перевода оплаты за билеты:</Text>
+        <Text weight={700}>4274 3200 4304 7698, Сбербанк.</Text>
+        <Text mb="md">Перевод на имя: Анастасия Викторовна В.</Text>
+
         <Text>
             По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:
         </Text>
@@ -43,7 +47,6 @@ export default function Help() {
         <Text fw="bold" mt="md" mb="md">Билеты «Добро»</Text>
         <Text>Билеты «Добро» — это способ дополнительно поддержать фестиваль!</Text>
         <Text>Стоимость билета составляет 2500 рублей вне зависимости от места.</Text>
-        <Text>Ты получишь билеты сразу и на косплей-шоу, и на концерт, а ещё уникальные сувениры от оргкома фестиваля!</Text>
 
     </FullAreaMessage>
 
