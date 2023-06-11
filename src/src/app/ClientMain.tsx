@@ -7,13 +7,12 @@ import Link from "next/link"
 export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> & { start: string })[] }) {
     return <FullAreaMessage>
         {/* <Stack> */}
-        <Text fz="lg" fw="bold" mb="md" align="center">Дорогой зритель, система закрыта!</Text>
+        {/* <Text fz="lg" fw="bold" mb="md" align="center">Дорогой зритель, система закрыта!</Text>
         <Text mb="md">Спасибо что воспользовались системой продажи билетов фестиваля Нян-фест 2023!</Text>
-        {/* <Text mb="md">Система закрыта</Text> */}
         <Text mb="md">Билеты на концерт (начало в 21:00) можно приобрести на входе в ОДНТ</Text>
         <Text mb="md">Подробности о фестивале в группе vk: <Link href="https://vk.com/tanibata">Танибата, Нян-фест и Алоха — фестивали в Ростове</Link></Text>
-
-        {/* <Text>Ты решил стать нашим гостем на Мультикультурном фестивале «Нян-фест» 2023?</Text>
+ */}
+        <Text>Ты решил стать нашим гостем на Мультикультурном фестивале «Нян-фест» 2023?</Text>
         <Text>Тогда косплей-шоу, концерт, ярмарка, мастер-классы, фотозона и многое другое ждут тебя!</Text>
         <Text mb="md">На этой странице ты можешь выбрать место в зале, забронировать и купить билеты.</Text>
 
@@ -37,9 +36,9 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
         <Text mb="md">А если на месте не сидится, поддержать вокалистов можно на сцене — конечно, если они пригласят к себе зрителей.</Text>
         <Text mb="md">Можно подпевать! Можно танцевать!</Text>
         <Text mb="md">Приходите, будет весело!</Text>
-        <Text fw="bold" mb="md">Билет на Концерт - 300 рублей</Text> */}
+        <Text fw="bold" mb="md">Билет на Концерт - 300 рублей</Text>
 
-        {/* <Group sx={{ justifyContent: "center" }} mb="sm">
+        <Group sx={{ justifyContent: "center" }} mb="sm">
             {venues.map(venue => <Stack key={venue.id} sx={{ minWidth: 200 }}>
                 <Text fw="bold">{venue.name}</Text>
          
@@ -54,6 +53,6 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
         <Text><Link href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</Link></Text>
         <Text><Link href="tel:79054536789">+7 (905) 4536789</Link></Text>
         <Text><Link href="https://t.me/anna_cheshira">t.me/anna_cheshira</Link></Text>
-        <Text><Link href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</Link></Text> */}
+        <Text><Link href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</Link></Text>
     </FullAreaMessage >
 }

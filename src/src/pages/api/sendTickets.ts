@@ -6,7 +6,7 @@ import { z } from "zod"
 import generateTicket from "@/lib/generateTicket"
 import { Buffer } from "buffer"
 import { Role } from "@prisma/client"
-import { sendTickets } from "@/lib/mail"
+import { emailTransporter, sendTickets } from "@/lib/mail"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET")
@@ -48,11 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (order !== null) {
             const pdf = Buffer.from(await generateTicket(order))
-<<<<<<< HEAD
-            
-            await sendTickets(order.user.email, order.id, pdf)
-            
-=======
             let html = ''
             if (order.venue?.noSeats)
                 html = `
@@ -132,7 +127,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     contentType: "application/pdf"
                 }],
             })
->>>>>>> release-0.1
             await prisma.sentTicket.create({
                 data: {
                     orderId: order.id

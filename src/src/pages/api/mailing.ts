@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import { prisma } from "@/db"
-import { emailTransporter } from "@/mail"
+import { prisma } from "@/lib/db"
+import { emailTransporter } from "@/lib/mail"
 import { Role } from "@prisma/client"
 import { PaymentData } from "@/components/MakeOrder/useOrder"
 

@@ -113,10 +113,22 @@ async function main() {
 
     const venueShow = await prisma.venue.create({
         data: {
-            name: "«Нян-фест», Косплей-шоу",
+            name: "«Танибата», Косплей-шоу, День 1",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание косплей-шоу ...",
-            start: new Date("2023-03-25 13:00"),
+            start: new Date("2023-07-15 13:00"),
+            active: true,
+            ticketCount: 676,
+            availableTickets: 676
+        }
+    })
+
+    const venueShow2 = await prisma.venue.create({
+        data: {
+            name: "«Танибата», Косплей-шоу, День 2",
+            address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
+            description: "Описание косплей-шоу ...",
+            start: new Date("2023-07-16 13:00"),
             active: true,
             ticketCount: 676,
             availableTickets: 676
@@ -128,7 +140,7 @@ async function main() {
             name: "«Нян-фест», Концерт",
             address: "г. Ростов-на-Дону, пл. К. Маркса, 5/1",
             description: "Описание концерта ...",
-            start: new Date("2023-03-25 18:00"),
+            start: new Date("2023-07-15 18:00"),
             active: true,
             ticketCount: 600,
             availableTickets: 600,
@@ -168,6 +180,10 @@ async function main() {
 
     await prisma.ticket.createMany({
         data: getShowTickets(venueShow, getHall([showPriceZone1, showPriceZone2]))
+    })
+
+    await prisma.ticket.createMany({
+        data: getShowTickets(venueShow2, getHall([showPriceZone1, showPriceZone2]))
     })
 
     // await prisma.ticket.createMany({

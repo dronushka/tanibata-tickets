@@ -10,44 +10,44 @@ export const metadata = {
 }
 
 export default async function OrdersPage() {
-    notFound()
-    return <></>
+    // notFound()
+    // return <></>
 
-    // const session = await getServerSession(authOptions)
-    // if (!session?.user.id)
-    //     return <LoginForm />
+    const session = await getServerSession(authOptions)
+    if (!session?.user.id)
+        return <LoginForm />
 
-    // // console.log('orders session', session)
+    // console.log('orders session', session)
 
-    // const orders = await prisma.order.findMany({
-    //     where: {
-    //         userId: session.user.id
-    //     },
-    //     include: {
-    //         venue: {
-    //             include: {
-    //                 priceRange: true
-    //             }
-    //         },
-    //         cheque: true,
-    //         tickets: {
-    //             include: {
-    //                 priceRange: true,
-    //                 venue: true,
-    //             },
-    //             orderBy: [
-    //                 { sortRowNumber: "asc" },
-    //                 { sortNumber: "asc" }
-    //             ]
-    //         }
-    //     },
-    // })
+    const orders = await prisma.order.findMany({
+        where: {
+            userId: session.user.id
+        },
+        include: {
+            venue: {
+                include: {
+                    priceRange: true
+                }
+            },
+            cheque: true,
+            tickets: {
+                include: {
+                    priceRange: true,
+                    venue: true,
+                },
+                orderBy: [
+                    { sortRowNumber: "asc" },
+                    { sortNumber: "asc" }
+                ]
+            }
+        },
+    })
 
-    // // console.log(orders)
-    // return <OrdersForm orders={orders.map(order => ({
-    //     ...order,
-    //     venue: order.venue && { ...order.venue, start: order.venue.start.toLocaleString('ru-RU') },
-    //     createdAt: order.createdAt.toLocaleString('ru-RU'),
-    //     tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
-    // }))}/>
+    // console.log(orders)
+    return <OrdersForm orders={orders.map(order => ({
+        ...order,
+        venue: order.venue && { ...order.venue, start: order.venue.start.toLocaleString('ru-RU') },
+        createdAt: order.createdAt.toLocaleString('ru-RU'),
+        tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
+    }))}/>
 }
