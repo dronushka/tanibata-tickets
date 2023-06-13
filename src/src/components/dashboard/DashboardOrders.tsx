@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import OrdersStatusFilter from "./OrdersStatusFilter"
 import { File as DBFile, Order, OrderStatus, SentTicket, Ticket, User, Venue } from "@prisma/client"
 import { PaymentData } from "../MakeOrder/useOrder"
-import OrderStatusText from "../orders/client/OrderStatusText"
+import OrderStatusText from "../../app/orders/components/OrderStatusText"
 
 // import { events} from "next/router"
 

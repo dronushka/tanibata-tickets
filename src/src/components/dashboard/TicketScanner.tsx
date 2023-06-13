@@ -9,7 +9,7 @@ import Link from "next/link"
 import { useState } from "react"
 import FullAreaLoading from "../FullAreaLoading"
 import FullAreaMessage from "../FullAreaMessage"
-import OrderStatusText from "../orders/client/OrderStatusText"
+import OrderStatusText from "../../app/orders/components/OrderStatusText"
 
 type RestOrder = Omit<Order, "createdAt"> & {
     createdAt: string,

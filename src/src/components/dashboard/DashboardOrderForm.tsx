@@ -7,7 +7,7 @@ import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Se
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import OrderStatusText from "../orders/client/OrderStatusText"
+import OrderStatusText from "../../app/orders/components/OrderStatusText"
 import { PaymentData } from "../MakeOrder/useOrder"
 
 const useStyles = createStyles((theme) => ({
