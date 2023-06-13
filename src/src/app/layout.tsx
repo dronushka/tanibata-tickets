@@ -1,17 +1,19 @@
-import ClientLayout from './ClientLayout'
-import RootStyleRegistry from './emotion'
+import ClientLayout from "./ClientLayout"
+import ClientProviders from "./ClientProviders"
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en-US">
-      <head />
-      <body>
-        <RootStyleRegistry>
-          <ClientLayout>
-            {children}
-          </ClientLayout>
-        </RootStyleRegistry>
-      </body>
-    </html>
-  )
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    return (
+        <html lang="en-US">
+            <head />
+            <body>
+                <ClientProviders>
+                    <ClientLayout>{children}</ClientLayout>
+                </ClientProviders>
+            </body>
+        </html>
+    )
 }

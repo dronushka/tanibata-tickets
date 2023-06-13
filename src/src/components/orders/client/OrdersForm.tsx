@@ -8,6 +8,7 @@ import { useState } from "react"
 import OrderStatusText from "./OrderStatusText"
 import { useRouter } from "next/navigation"
 import OrderStatusTooltip from "./OrderStatusTooltip"
+import MyRpcClientComponent from "@/components/MyRpcClientComponent"
 
 type HydratedOrder = Omit<Order, "createdAt"> & (
     {
@@ -24,6 +25,7 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
 )
 
 export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
+    
     const router = useRouter()
 
     const [loading, setLoading] = useState<number | null>(null)
@@ -97,6 +99,7 @@ export default function OrdersForm({ orders }: { orders: HydratedOrder[] }) {
     return (
         <>
             <Stack>
+                <MyRpcClientComponent/>
                 {orders.map(order => (
                     <Paper
                         key={order.id}
