@@ -9,6 +9,7 @@ import OrderStatusText from "./OrderStatusText"
 import { useRouter } from "next/navigation"
 import OrderStatusTooltip from "./OrderStatusTooltip"
 import OrderItem from "./OrderItem"
+import { ServerMutation, ServerMutations } from "@/types/types"
 
 type HydratedOrder = Omit<Order, "createdAt"> & (
     {
@@ -24,7 +25,12 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
     }
 )
 
-export default function OrdersForm({ orders, uploadCheque }: { orders: HydratedOrder[], uploadCheque: (data: FormData) => Promise<{error: string} | undefined> }) {
+type Mutations = {
+    cancelOrder: ServerMutation,
+    uploadCheque: ServerMutation
+}
+
+export default function OrdersForm({ orders, mutations }: { orders: HydratedOrder[], mutations: Mutations }) {
     const router = useRouter()
 
     const [loading, setLoading] = useState<number | null>(null)
@@ -36,45 +42,10 @@ export default function OrdersForm({ orders, uploadCheque }: { orders: HydratedO
         error?: string
     } | null>(null)
 
-    // const sendCheque = async (orderId: number, file: File | null) => {
-    //     if (!file)
-    //         return
-
-    //     setLoading(orderId)
-
-    //     const res = await uploadCheque(orderId, file)
-    //     if (res.success) {
-    //         router.refresh()
-    //     } else {
-    //         setOrderError({
-    //             orderId,
-    //             error: res.error
-    //         })
-    //     }
-
-    //     setLoading(null)
-    // }
-
     const requestReturn = async (orderId: number) => {
         setLoading(orderId)
 
         const res = await apiRequestReturn(orderId)
-        if (res.success) {
-            router.refresh()
-        } else {
-            setOrderError({
-                orderId,
-                error: res.error
-            })
-        }
-
-        setLoading(null)
-    }
-
-    const setOrderStatus = async (orderId: number) => {
-        setLoading(orderId)
-
-        const res = await apiSetOrderStatus(orderId, OrderStatus.CANCELLED)
         if (res.success) {
             router.refresh()
         } else {
@@ -99,7 +70,7 @@ export default function OrdersForm({ orders, uploadCheque }: { orders: HydratedO
         <>
             <Stack>
                 {orders.map(order => (
-                    <OrderItem key={order.id} order={order} uploadCheque={uploadCheque}/>
+                    <OrderItem key={order.id} order={order} mutations={mutations}/>
                 ))}
 
             </Stack>

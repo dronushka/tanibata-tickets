@@ -1,5 +1,8 @@
 "use client"
 
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { ServerMutation, ServerMutations } from "@/types/types"
 import {
     Box,
     Button,
@@ -27,7 +30,7 @@ import {
     Ticket,
     Venue,
 } from "@prisma/client"
-import { useState, useTransition } from "react"
+
 // import { uploadCheque } from "../actions/uploadCheque"
 
 type HydratedOrder = Omit<Order, "createdAt"> & {
@@ -42,13 +45,20 @@ type HydratedOrder = Omit<Order, "createdAt"> & {
     })[]
 }
 
+type Mutations = {
+    cancelOrder: ServerMutation
+    uploadCheque: ServerMutation
+}
+
 export default function OrderItem({
     order,
-    uploadCheque,
+    mutations,
 }: {
     order: HydratedOrder
-    uploadCheque: (data: FormData) => Promise<{error: string} | undefined>
+    mutations: Mutations
 }) {
+    const router = useRouter()
+
     const [isPending, startTransition] = useTransition()
 
     const [orderError, setOrderError] = useState("")
@@ -168,17 +178,22 @@ export default function OrderItem({
                                         form.append("cheque", value)
 
                                         startTransition(() => {
-                                            uploadCheque(form).then(res => res && res?.error && console.log(res.error))
+                                            mutations
+                                                .uploadCheque(form)
+                                                .then((res) => {
+                                                    if (res && res?.error) {
+                                                        setOrderError(res.error)
+                                                    }
+                                                    router.refresh()
+                                                })
                                         })
                                     }}
-                                    // onChange={(value) => setCheque({orderId: order.id, file: value})}
-                                    //   onChange={(value) => sendCheque(order.id, value)}
                                     accept="image/png,image/jpeg,application/pdf"
                                 >
                                     {(props) => (
                                         <Button
                                             {...props}
-                                            // loading={order.id === loading}
+                                            loading={isPending}
                                             disabled={isPending}
                                             color={
                                                 orderError ? "red" : "primary"
@@ -214,6 +229,19 @@ export default function OrderItem({
                         loading={isPending}
                         disabled={isPending}
                         // onClick={() => setOrderStatus(order.id)}
+                        onClick={() => {
+                            const form = new FormData()
+                            form.append("orderId", String(order.id))
+
+                            startTransition(() => {
+                                mutations.cancelOrder(form).then((res) => {
+                                    if (res && res?.error) {
+                                        setOrderError(res.error)
+                                    }
+                                    router.refresh()
+                                })
+                            })
+                        }}
                     >
                         Отменить
                     </Button>
