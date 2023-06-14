@@ -2,7 +2,6 @@ import LoginForm from "@/components/LoginForm"
 import { prisma } from "@/lib/db"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
-import { notFound, redirect } from "next/navigation"
 import OrdersForm from "./components/OrdersForm"
 import uploadCheque from "./actions/uploadCheque" //TODO workaround. should be imported in client component rather than passed as prop.
 import cancelOrder from "./actions/cancelOrder"
@@ -13,13 +12,9 @@ export const metadata = {
 }
 
 export default async function OrdersPage() {
-    // notFound()
-    // return <></>
-
     const session = await getServerSession(authOptions)
+    
     if (!session?.user.id) return <LoginForm />
-
-    // console.log('orders session', session)
 
     const orders = await prisma.order.findMany({
         where: {
@@ -42,7 +37,6 @@ export default async function OrdersPage() {
         },
     })
 
-    // console.log(orders)
     return (
         <OrdersForm
             orders={orders.map((order) => ({

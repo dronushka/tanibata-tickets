@@ -32,8 +32,6 @@ import {
     Venue,
 } from "@prisma/client"
 
-// import { uploadCheque } from "../actions/uploadCheque"
-
 type HydratedOrder = Omit<Order, "createdAt"> & {
     createdAt: string
     venue:
@@ -90,11 +88,6 @@ export default function OrderItem({
                     {order.isGoodness && (
                         <Text
                             fw="bold"
-                            // sx={{
-                            //     backgroundClip: "text",
-                            //     backgroundImage: "linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red)",
-                            //     color: "transparent"
-                            // }}
                         >
                             Добро активировано!
                         </Text>
@@ -106,7 +99,6 @@ export default function OrderItem({
                                 {order.tickets.map((ticket) => (
                                     <List.Item key={ticket.id}>
                                         <Group>
-                                            {/* <Text>{ticket.venue?.name}</Text> */}
                                             <Text>
                                                 Ряд: {ticket.rowNumber} Место:{" "}
                                                 {ticket.number}
@@ -241,7 +233,6 @@ export default function OrderItem({
                             leftIcon={<IconX />}
                             loading={isPending}
                             disabled={isPending}
-                            // onClick={() => setOrderStatus(order.id)}
                             onClick={() => {
                                 const form = new FormData()
                                 form.append("orderId", String(order.id))
