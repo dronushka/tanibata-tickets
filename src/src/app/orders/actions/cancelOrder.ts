@@ -3,11 +3,10 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import renderErrors from "@/lib/renderErrors"
-import { ZodError, z } from "zod"
-import { OrderStatus, Role } from "@prisma/client"
+import { z } from "zod"
+import { OrderStatus } from "@prisma/client"
 import { ServerMutation } from "@/types/types"
 import { prisma } from "@/lib/db"
-import { sendRefund } from "@/lib/mail"
 
 export const cancelOrder: ServerMutation = async (data: FormData) => {
     const validator = z.object({

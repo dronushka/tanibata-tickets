@@ -1,32 +1,30 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from "@/lib/db"
-import { z, ZodError } from 'zod'
+"use server"
+
 import { getServerSession } from "next-auth/next"
-import { authOptions } from './auth/[...nextauth]'
-import { OrderStatus, Role } from '@prisma/client'
+import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { ServerMutation } from "@/types/types"
+import { z } from "zod"
+import { prisma } from "@/lib/db"
+import { OrderStatus, Role } from "@prisma/client"
 import { sendRefundRequested } from '@/lib/mail'
+import renderErrors from "@/lib/renderErrors"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST")
-        res.status(405).end()
-
-    const session = await getServerSession(req, res, authOptions)
-
-    if (!session)
-        res.status(401).end()
-        
+const requestReturn: ServerMutation = async (data: FormData) => {
     const validator = z.object({
-        id: z.number()
+        orderId: z.number(),
     })
 
     try {
+        const session = await getServerSession(authOptions)
+        if (!session) return { error: "unathorized" }
+        
         const validated = validator.parse({
-            id: Number(req.body.orderId)
+            orderId: Number(data.get("orderId"))
         })
 
         const order = await prisma.order.findUnique({
             where: {
-                id: validated.id
+                id: validated.orderId
             }
         })
 
@@ -53,16 +51,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await Promise.allSettled(admins.map(admin => sendRefundRequested(admin.email, order.id)))
 
-        res.status(200).end()
     } catch (e: any) {
-        console.error(e)
-        let message: any = ""
-        if (e instanceof ZodError)
-            message = e.flatten().formErrors.join(", ")
-        else if (e instanceof Error)
-            message = e.message
-        res.status(422).json({
-            error: message
-        })
-    } 
+        return renderErrors(e)
+    }
 }
+
+export default requestReturn

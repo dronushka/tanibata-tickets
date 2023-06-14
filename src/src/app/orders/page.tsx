@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation"
 import OrdersForm from "./components/OrdersForm"
 import uploadCheque from "./actions/uploadCheque" //TODO workaround. should be imported in client component rather than passed as prop.
 import cancelOrder from "./actions/cancelOrder"
+import requestReturn from "./actions/requestReturn"
 
 export const metadata = {
     title: [process.env.FEST_TITLE, "Мои заказы"].join(" | "),
@@ -61,6 +62,7 @@ export default async function OrdersPage() {
             }))}
             mutations={{
                 cancelOrder,
+                requestReturn,
                 uploadCheque
             }}
         />

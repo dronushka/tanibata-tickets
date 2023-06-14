@@ -26,13 +26,13 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
 )
 
 type Mutations = {
+    requestReturn: ServerMutation,
     cancelOrder: ServerMutation,
     uploadCheque: ServerMutation
 }
 
 export default function OrdersForm({ orders, mutations }: { orders: HydratedOrder[], mutations: Mutations }) {
     const router = useRouter()
-
     const [loading, setLoading] = useState<number | null>(null)
 
     const [returnConfirmationOrderId, setReturnConfirmationOrderId] = useState<number | null>(null)
@@ -74,21 +74,7 @@ export default function OrdersForm({ orders, mutations }: { orders: HydratedOrde
                 ))}
 
             </Stack>
-            <Modal opened={!!returnConfirmationOrderId} onClose={() => setReturnConfirmationOrderId(null)} title="Подвердите возврат" centered>
-                <Text mb="md">Вы точно уверены, что хотите отказаться от билета?</Text>
-                <Group sx={{ justifyContent: "flex-end" }}>
-                    <Button variant="default" onClick={() => setReturnConfirmationOrderId(null)}>Нет</Button>
-                    <Button onClick={() => {
-                        if (returnConfirmationOrderId) {
-                            requestReturn(returnConfirmationOrderId)
-                            setReturnConfirmationOrderId(null)
-                        }
-                    }}
-                    >
-                        Да
-                    </Button>
-                </Group>
-            </Modal>
+
         </>
     )
 }
