@@ -74,7 +74,7 @@ export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSub
                         label="Телефон"
                         name="phone"
                         withAsterisk
-                        mask="+7 (999) 999-99-99"
+                        mask="+7 (000) 000-00-00"
                         maxLength={18}
                         value={paymentData.phone}
                         onChange={value => setField("phone", value)}

@@ -2422,6 +2422,11 @@ ignore@^5.2.0:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.4.tgz#a291c0c6178ff1b960befe47fcdec301674a6324"
   integrity sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==
 
+imask@^6.6.3:
+  version "6.6.3"
+  resolved "https://registry.yarnpkg.com/imask/-/imask-6.6.3.tgz#f9619cea770b97b5ef616acb036d27cf4a1b33d8"
+  integrity sha512-a9MTDhm+ET4G2IRcdUGuVTXHS05WsRNPGM5CeNJnXiXuoi4zv7g0/UDFLlRF4lBBeb8EWds4C4JVwhI0nuAIug==
+
 import-fresh@^3.0.0, import-fresh@^3.2.1:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/import-fresh/-/import-fresh-3.3.0.tgz#37162c25fcb9ebaa2e6e53d5b4d88ce17d9e0c2b"
@@ -3433,10 +3438,13 @@ react-email@1.7.15:
     shelljs "0.8.5"
     tree-node-cli "1.6.0"
 
-react-hook-mask@^1.1.11:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/react-hook-mask/-/react-hook-mask-1.1.11.tgz#48d08be3c8e9e72b3d54f3ef7785b7f1ec39e560"
-  integrity sha512-GBCOUh57Q1K08Xl3CkjCsvIQU+PNisZc+jq5QtdFqQ/p2/HcqmO8x5Jw3ODnC5AcGexwx3rWzslSmAKqHjapGA==
+react-imask@^6.6.3:
+  version "6.6.3"
+  resolved "https://registry.yarnpkg.com/react-imask/-/react-imask-6.6.3.tgz#febb3fb62e098d5cb51537e591bb2b6f7a7676ff"
+  integrity sha512-ZjqKXqBtc1LlFQWEj/SNuk4rQWXDdzLnDqCfNMnqdHHMqSvD1J+JuQZTuWgCCr5cLJxaXshDHW5AmhClk367Gw==
+  dependencies:
+    imask "^6.6.3"
+    prop-types "^15.8.1"
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
