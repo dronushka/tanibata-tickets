@@ -8,8 +8,10 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/lib/db"
 import { OrderStatus } from "@prisma/client"
+import renderErrors from "@/lib/renderErrors"
+import { ServerMutation } from "@/types/types"
 
-export async function uploadCheque(data: FormData) {
+export const uploadCheque: ServerMutation = async (data: FormData) => {
     const session = await getServerSession(authOptions)
 
     if (!session) return { error: "unathorized" }
@@ -79,13 +81,8 @@ export async function uploadCheque(data: FormData) {
             },
         })
     } catch (e: any) {
-        console.error(e)
-        let message: any = ""
-        if (e instanceof ZodError) {
-            message = e.flatten().formErrors.join(", ")
-            return { error: message }
-        } else if (e instanceof Error) {
-            return { error: e.message }
-        }
+        return renderErrors(e)
     }
 }
+
+export default uploadCheque
