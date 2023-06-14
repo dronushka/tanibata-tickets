@@ -13,7 +13,12 @@ import {
 } from "@mantine/core"
 import OrderStatusText from "./OrderStatusText"
 import OrderStatusTooltip from "./OrderStatusTooltip"
-import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icons-react"
+import {
+    IconDownload,
+    IconReceiptRefund,
+    IconUpload,
+    IconX,
+} from "@tabler/icons-react"
 import {
     File as DBFile,
     Order,
@@ -37,7 +42,13 @@ type HydratedOrder = Omit<Order, "createdAt"> & {
     })[]
 }
 
-export default function OrderItem({ order, uploadCheque }: { order: HydratedOrder, uploadCheque: () => Promise<void> }) {
+export default function OrderItem({
+    order,
+    uploadCheque,
+}: {
+    order: HydratedOrder
+    uploadCheque: (data: FormData) => Promise<{error: string} | undefined>
+}) {
     const [isPending, startTransition] = useTransition()
 
     const [orderError, setOrderError] = useState("")
@@ -156,9 +167,9 @@ export default function OrderItem({ order, uploadCheque }: { order: HydratedOrde
                                         form.append("orderId", String(order.id))
                                         form.append("cheque", value)
 
-                                        startTransition(() =>
-                                            uploadCheque(form)
-                                        )
+                                        startTransition(() => {
+                                            uploadCheque(form).then(res => res && res?.error && console.log(res.error))
+                                        })
                                     }}
                                     // onChange={(value) => setCheque({orderId: order.id, file: value})}
                                     //   onChange={(value) => sendCheque(order.id, value)}
@@ -224,9 +235,7 @@ export default function OrderItem({ order, uploadCheque }: { order: HydratedOrde
                         Возврат
                     </Button>
                 )}
-                <Input.Error>
-                    {orderError}
-                </Input.Error>
+                <Input.Error>{orderError}</Input.Error>
             </Stack>
         </Paper>
     )

@@ -24,7 +24,7 @@ type HydratedOrder = Omit<Order, "createdAt"> & (
     }
 )
 
-export default function OrdersForm({ orders, uploadCheque }: { orders: HydratedOrder[], uploadCheque: () => Promise<void> }) {
+export default function OrdersForm({ orders, uploadCheque }: { orders: HydratedOrder[], uploadCheque: (data: FormData) => Promise<{error: string} | undefined> }) {
     const router = useRouter()
 
     const [loading, setLoading] = useState<number | null>(null)
