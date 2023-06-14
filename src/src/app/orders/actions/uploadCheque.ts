@@ -11,8 +11,6 @@ import { OrderStatus } from "@prisma/client"
 
 export async function uploadCheque(data: FormData) {
     const session = await getServerSession(authOptions)
-    console.log("session", session)
-    // return { error: "aaa" }
 
     if (!session) return { error: "unathorized" }
 
@@ -31,6 +29,7 @@ export async function uploadCheque(data: FormData) {
 
         const order = await prisma.order.findUnique({
             where: { id: validated.orderId },
+            include: { cheque: true },
         })
 
         if (!order) return { error: "order_not_found" }
@@ -46,16 +45,27 @@ export async function uploadCheque(data: FormData) {
             process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage",
             randomName
         )
-        fs.writeFileSync(
-            filePath,
-            buffer
-        )
+        fs.writeFileSync(filePath, buffer)
+
+        //TODO delete old file from storage and database
+        if (order.cheque?.path) {
+            fs.unlinkSync(
+                path.join(
+                    process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage",
+                    order.cheque.path
+                )
+            )
+        }
+
+        if (order?.cheque) {
+            await prisma.file.delete({
+                where: { id: order.cheque.id },
+            })
+        }
 
         let orderStatus = order.status
         if (orderStatus === OrderStatus.UNPAID)
             orderStatus = OrderStatus.PENDING
-
-        //TODO delete old file from storage and database
 
         await prisma.order.update({
             where: { id: order.id },
@@ -63,10 +73,10 @@ export async function uploadCheque(data: FormData) {
                 status: orderStatus,
                 cheque: {
                     create: {
-                        path: randomName
-                    }
-                }
-            }
+                        path: randomName,
+                    },
+                },
+            },
         })
     } catch (e: any) {
         console.error(e)
