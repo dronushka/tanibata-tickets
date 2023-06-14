@@ -3,11 +3,11 @@
 import { Button, Checkbox, Flex, Group, Paper, Stack, Text, TextInput } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
-import MaskInput from "../MaskInput"
+import MaskInput from "@/components/MaskInput"
 import { signOut } from "next-auth/react"
-import { ClientOrder, PaymentData, paymentDataSchema } from "./useOrder"
+import { ClientOrder, PaymentData, paymentDataSchema } from "../hooks/useOrder"
 import { getPaymentData } from "@/lib/api-calls"
-import FullAreaMessage from "../FullAreaMessage"
+import FullAreaMessage from "@/components/FullAreaMessage"
 import Link from "next/link"
 
 type PaymentFormErrors = {

@@ -2,7 +2,7 @@
 
 import { Button, Divider, Group, Paper, Stack, Text } from "@mantine/core"
 import { useContext } from "react"
-import { ClientOrder } from "../useOrder"
+import { ClientOrder } from "../../hooks/useOrder"
 import { ClientTicket, TicketContext } from "./TicketsPicker"
 
 export default function Summary({ onSubmit }:

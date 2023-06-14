@@ -1,20 +1,16 @@
-import { TicketRow } from "@/components/MakeOrder/useOrder"
 import { notFound } from "next/navigation"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/lib/db"
 import { OrderStatus, PriceRange, Ticket, User } from "@prisma/client"
 import { z } from "zod"
-import MakeOrder from "@/components/MakeOrder/MakeOrder"
+import MakeOrder from "./components/MakeOrder"
 
 export const metadata = {
     title: [process.env.FEST_TITLE, 'Заказ билетов'].join(" | "),
 }
 
-
 export default async function MakeOrderPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
-    // notFound()
-    // return <></>
     const session = await getServerSession(authOptions)
 
     let user: User | null = null

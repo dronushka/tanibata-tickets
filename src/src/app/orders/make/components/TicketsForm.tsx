@@ -4,7 +4,7 @@ import { Venue } from "@prisma/client"
 import { IconMinus, IconPlus } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
-import { ClientOrder, TicketRow } from "./useOrder"
+import { ClientOrder, TicketRow } from "../hooks/useOrder"
 
 export default function TicketsForm(
     { venue, prevStage, nextStage }:

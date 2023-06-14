@@ -3,7 +3,7 @@ import { Box, Button, Flex, Group, Loader, LoadingOverlay, Paper, Stack, Text, T
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { IconInfoCircle } from "@tabler/icons-react"
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ClientOrder, TicketRow } from "../useOrder"
+import { ClientOrder, TicketRow } from "../../hooks/useOrder"
 import Hall from "./Hall"
 import Stage from "./Stage"
 import Summary from "./Summary"

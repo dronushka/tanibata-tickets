@@ -2,7 +2,7 @@
 
 import { Box, Flex, Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { Order, PriceRange, Ticket, Venue } from "@prisma/client"
-import Stage from "../MakeOrder/TicketsPicker/Stage"
+import Stage from "../../app/orders/make/components/TicketsPicker/Stage"
 import { TicketRow } from "../MakeOrder/useOrder"
 import DashboardTicketButton from "./DashboardTicketButton"
 

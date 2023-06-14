@@ -5,7 +5,7 @@ import { Flex, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/co
 import { TicketContext } from "./TicketsPicker"
 import TicketButton from "../TicketButton"
 import { useRouter } from "next/navigation"
-import { TicketRow } from "../useOrder"
+import { TicketRow } from "../../hooks/useOrder"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
     return oldPros.selected === newProps.selected && oldPros.reserved === newProps.reserved

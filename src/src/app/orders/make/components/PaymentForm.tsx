@@ -2,7 +2,7 @@ import { useState } from "react"
 import { z } from "zod"
 import { Avatar, Box, Button, Center, Checkbox, FileButton, Flex, Group, Input, List, Paper, Popover, Stack, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { IconInfoCircle, IconUpload } from "@tabler/icons-react"
-import { ClientOrder } from "./useOrder"
+import { ClientOrder } from "../hooks/useOrder"
 import Link from "next/link"
 import { PriceRange, Venue } from "@prisma/client"
 
