@@ -2,45 +2,40 @@
 
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import renderErrors from "@/lib/renderErrors"
+import renderActionResponse from "@/lib/renderActionResponse"
+import renderActionErrors from "@/lib/renderActionErrors"
 import { z } from "zod"
 import { OrderStatus } from "@prisma/client"
 import { ServerMutation } from "@/types/types"
 import { prisma } from "@/lib/db"
 
-export const cancelOrder: ServerMutation = async (data: FormData) => {
-    const validator = z.object({
-        orderId: z.number(),
-    })
+export const cancelOrder: ServerMutation = async (orderId: number) => {
+    const orderIdValidator = z.number()
 
     try {
         const session = await getServerSession(authOptions)
         if (!session) return { error: "unathorized" }
 
-        const validated = validator.parse({
-            orderId: Number(data.get("orderId")),
-        })
+        const validatedOrderId = orderIdValidator.parse(orderId)
 
         const order = await prisma.order.findUnique({
             where: {
-                id: validated.orderId,
+                id: validatedOrderId,
             },
             include: {
                 venue: true,
             },
         })
 
-        if (!order) return { error: "order_not_found" }
+        if (!order) throw new Error( "order_not_found")
 
-        if (order?.userId !== session?.user.id) return { error: "unauthorized" }
+        if (order?.userId !== session?.user.id) throw new Error( "unauthorized")
 
         if (
             order.status === OrderStatus.CANCELLED ||
             order.status === OrderStatus.RETURNED
         )
-            return {
-                error: "cancelled_or_returned_cannot_be_changed",
-            }
+            throw new Error( "cancelled_or_returned_cannot_be_changed")
 
         await prisma.order.update({
             where: {
@@ -61,9 +56,9 @@ export const cancelOrder: ServerMutation = async (data: FormData) => {
                     ),
                 },
             })
-
+        return renderActionResponse()
     } catch (e: any) {
-        return renderErrors(e)
+        return renderActionErrors(e)
     }
 }
 

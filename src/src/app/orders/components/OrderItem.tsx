@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { ServerMutation, ServerMutations } from "@/types/types"
+import { ServerMutation } from "@/types/types"
 import {
     Box,
     Button,
@@ -86,11 +86,7 @@ export default function OrderItem({
                     <Text>{order.createdAt}</Text>
                     <Text fw="bold">{order.venue?.name}</Text>
                     {order.isGoodness && (
-                        <Text
-                            fw="bold"
-                        >
-                            Добро активировано!
-                        </Text>
+                        <Text fw="bold">Добро активировано!</Text>
                     )}
                     {order.venue?.noSeats === false && (
                         <>
@@ -182,12 +178,18 @@ export default function OrderItem({
                                                 mutations
                                                     .uploadCheque(form)
                                                     .then((res) => {
-                                                        if (res && res?.error) {
+                                                        if (
+                                                            res?.success ===
+                                                            false
+                                                        ) {
                                                             setOrderError(
-                                                                res.error
+                                                                res.errors?.server?.join(
+                                                                    ", "
+                                                                ) ?? ""
                                                             )
+
+                                                            router.refresh()
                                                         }
-                                                        router.refresh()
                                                     })
                                             })
                                         }}
@@ -234,16 +236,19 @@ export default function OrderItem({
                             loading={isPending}
                             disabled={isPending}
                             onClick={() => {
-                                const form = new FormData()
-                                form.append("orderId", String(order.id))
-
                                 startTransition(() => {
-                                    mutations.cancelOrder(form).then((res) => {
-                                        if (res && res?.error) {
-                                            setOrderError(res.error)
-                                        }
-                                        router.refresh()
-                                    })
+                                    mutations
+                                        .cancelOrder(order.id)
+                                        .then((res) => {
+                                            if (res?.success === false)
+                                                setOrderError(
+                                                    res.errors?.server?.join(
+                                                        ", "
+                                                    ) ?? ""
+                                                )
+
+                                            router.refresh()
+                                        })
                                 })
                             }}
                         >
@@ -291,17 +296,23 @@ export default function OrderItem({
                         <Button
                             loading={isPending}
                             onClick={() => {
-                                const form = new FormData()
-                                form.append("orderId", String(order.id))
+                                // const form = new FormData()
+                                // form.append("orderId", String(order.id))
 
                                 startTransition(() => {
-                                    mutations.requestReturn(form).then((res) => {
-                                        if (res && res?.error) {
-                                            setOrderError(res.error)
-                                        }
-                                        setShowConfirmation(false)
-                                        router.refresh()
-                                    })
+                                    mutations
+                                        .requestReturn(order.id)
+                                        .then((res) => {
+                                            if (res?.success === false)
+                                                setOrderError(
+                                                    res.errors?.server?.join(
+                                                        ", "
+                                                    ) ?? ""
+                                                )
+
+                                            setShowConfirmation(false)
+                                            router.refresh()
+                                        })
                                 })
                             }}
                         >

@@ -1,2 +1,11 @@
-export type ServerMutation = (data: FormData) => Promise<{error: string} | undefined>
-export type ServerMutations = { [name: string]: ServerMutation }
+export type ServerError = {
+    server?: string[],
+    fields?: {
+        [name: string]: string[] | undefined
+    } 
+}
+export type ServerMutation = (data: any) => Promise<{
+    success: boolean,
+    data?: any,
+    errors?: ServerError
+}>

@@ -8,13 +8,14 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
 import { prisma } from "@/lib/db"
 import { OrderStatus } from "@prisma/client"
-import renderErrors from "@/lib/renderErrors"
+import renderActionResponse from "@/lib/renderActionResponse"
+import renderActionErrors from "@/lib/renderActionErrors"
 import { ServerMutation } from "@/types/types"
 
 export const uploadCheque: ServerMutation = async (data: FormData) => {
     const session = await getServerSession(authOptions)
 
-    if (!session) return { error: "unathorized" }
+    if (!session) throw new Error("unauthorized")
 
     const validator = z.object({
         orderId: z.number().gt(0, "invalid_order_id"),
@@ -34,9 +35,9 @@ export const uploadCheque: ServerMutation = async (data: FormData) => {
             include: { cheque: true },
         })
 
-        if (!order) return { error: "order_not_found" }
+        if (!order) throw new Error("order_not_found")
 
-        if (order.userId !== session?.user.id) return { error: "unauthorized" }
+        if (order.userId !== session?.user.id) throw new Error("unauthorized")
 
         const bytes = await validated.cheque.arrayBuffer()
         const buffer = Buffer.from(bytes)
@@ -80,8 +81,10 @@ export const uploadCheque: ServerMutation = async (data: FormData) => {
                 },
             },
         })
+
+        return renderActionResponse()
     } catch (e: any) {
-        return renderErrors(e)
+        return renderActionErrors(e)
     }
 }
 
