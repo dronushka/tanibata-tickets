@@ -1,24 +1,11 @@
-import {
-    createNoSeatsOrder,
-    createOrder,
-    setPaymentInfo,
-    uploadCheque,
-} from "@/lib/api-calls"
 import { PaymentDataForm, ServerAction } from "@/types/types"
-import { Order, PriceRange, Ticket } from "@prisma/client"
+import { PriceRange, Ticket } from "@prisma/client"
 import { useEffect, useState } from "react"
 import { z } from "zod"
 import { useTransition } from "react"
 import { useSession } from "next-auth/react"
 
-export type OrderStage =
-    | "authenticate"
-    | "form"
-    | "tickets"
-    | "makeReservation"
-    | "payment"
-    | "complete"
-    | "error"
+export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
 
 export type TicketRow = {
     number: string
@@ -29,18 +16,13 @@ export const paymentDataSchema = z.object({
     name: z
         .string()
         .min(1, "Введите имя")
-        .refine(
-            (value) => value.trim().split(" ").length >= 2,
-            "Введите полностью фамилию, имя и отчество"
-        ),
+        .refine((value) => value.trim().split(" ").length >= 2, "Введите полностью фамилию, имя и отчество"),
     phone: z.string().min(10, "Введите телефон").max(10),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),
     social: z.string().superRefine((val, ctx) => {
-        const re = new RegExp(
-            /^https:\/\/vk\.com\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]+$/
-        )
+        const re = new RegExp(/^https:\/\/vk\.com\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]+$/)
 
         if (val.length > 0 && !re.test(val)) {
             ctx.addIssue({
@@ -90,8 +72,7 @@ export const useOrder = (
     const [error, setError] = useState("")
 
     useEffect(() => {
-        if (status === "unauthenticated" && stage !== "authenticate")
-            setStage("authenticate")
+        if (status === "unauthenticated" && stage !== "authenticate") setStage("authenticate")
 
         if (status === "authenticated" && stage === "authenticate") {
             nextStage()
@@ -100,8 +81,10 @@ export const useOrder = (
 
     useEffect(() => {
         if (transition) {
-            setStage(transition)
-            transitionTo(null)
+            startTransition(() => {
+                setStage(transition)
+                transitionTo(null)
+            })
         }
     }, [transition])
     // const f = (n: string) => (f: string) =>
@@ -125,11 +108,9 @@ export const useOrder = (
                         const result = !newOrder.noSeats
                             ? await mutations.createOrder({
                                   ...newOrder,
-                                  tickets: [...newOrder.tickets.values()].map(
-                                      (ticket) => ticket.id
-                                  ),
+                                  tickets: [...newOrder.tickets.values()].map((ticket) => ticket.id),
                               })
-                            : await mutations.createOrder({...newOrder, tickets: undefined})
+                            : await mutations.createOrder({ ...newOrder, tickets: undefined })
 
                         if (result.success) {
                             setOrder((prev) => ({
@@ -150,8 +131,7 @@ export const useOrder = (
                         form.append("orderId", String(newOrder.orderId))
                         form.append("goodness", String(newOrder.isGoodness))
                         form.append("comment", newOrder.comment)
-                        newOrder?.cheque &&
-                            form.append("cheque", newOrder.cheque)
+                        newOrder?.cheque && form.append("cheque", newOrder.cheque)
                         const result = await mutations.payOrder(form)
                         if (result.success) transitionTo("complete")
                         else {
@@ -167,9 +147,7 @@ export const useOrder = (
         }
     }
 
-    const nextStage = (
-        orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)
-    ) => {
+    const nextStage = (orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)) => {
         let newOrder: ClientOrder | undefined = undefined
         if (typeof orderSetter === "function") newOrder = orderSetter(order)
         else if (typeof orderSetter === "object") newOrder = orderSetter
@@ -190,6 +168,7 @@ export const useOrder = (
         setOrder,
         stage,
         transition,
+        isPending,
         setStage: transitionTo,
         nextStage,
         prevStage,
