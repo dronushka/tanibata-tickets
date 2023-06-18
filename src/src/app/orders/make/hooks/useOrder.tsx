@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { z } from "zod"
 import { useTransition } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
 
@@ -59,7 +60,7 @@ export const useOrder = (
     }
 ) => {
     const { data: session, status } = useSession()
-
+    const router = useRouter()
     const [isPending, startTransition] = useTransition()
 
     const [transition, transitionTo] = useState<OrderStage | null>(null)
@@ -96,9 +97,11 @@ export const useOrder = (
         switch (stage) {
             case "authenticate":
                 transitionTo("form")
+                startTransition(() => router.refresh())
                 break
             case "form":
                 transitionTo("tickets")
+                startTransition(() => router.refresh())
                 break
             case "tickets":
                 if (newOrder) {
