@@ -7,33 +7,40 @@ import { useEffect, useState, useTransition } from "react"
 import { ClientOrder, TicketRow } from "../hooks/useOrder"
 
 export default function TicketsForm(
-    { venue, prevStage, nextStage }:
+    { venue, reservedTicketCount, prevStage, nextStage }:
         {
             venue: (Omit<Venue, "start"> & { start: string }),
+            reservedTicketCount: number,
             prevStage: () => void,
             nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
         }
 ) {
+    const [ isPending, startTransition ] = useTransition()
+    const router = useRouter()
 
-    const [reservedTicketCount, setReservedTicketsCount] = useState<number>(0)
-    const [loading, setLoading] = useState(true)
+    // const [reservedTicketCount, setReservedTicketsCount] = useState<number>(0)
+    // const [loading, setLoading] = useState(true)
     const [networkError, setNetworkError] = useState("")
 
     useEffect(() => {
-        const fetch = async () => {
-            setLoading(true)
-
-            const res = await getReservedTickets(venue.id)
-
-            if (res.success)
-                setReservedTicketsCount(res.data.reservedTicketCount)
-            else
-                setNetworkError(res.error ?? "")
-
-            setLoading(false)
-        }
-        fetch()
+        startTransition(() => router.refresh())
     }, [venue.id])
+
+    // useEffect(() => {
+    //     const fetch = async () => {
+    //         setLoading(true)
+
+    //         const res = await getReservedTickets(venue.id)
+
+    //         if (res.success)
+    //             setReservedTicketsCount(res.data.reservedTicketCount)
+    //         else
+    //             setNetworkError(res.error ?? "")
+
+    //         setLoading(false)
+    //     }
+    //     fetch()
+    // }, [venue.id])
 
     const [ticketCount, setTicketCount] = useState(1)
 
@@ -54,7 +61,7 @@ export default function TicketsForm(
             alignItems: "center"
         }}>
             <div style={{ position: 'relative' }}>
-                <LoadingOverlay visible={loading} overlayBlur={2} />
+                <LoadingOverlay visible={isPending} overlayBlur={2} />
                 {reservedTicketCount >= venue.ticketCount && <Text>К сожалению все билеты распроданы...</Text>}
                 {(reservedTicketCount < venue.ticketCount) && <Stack>
                     <Paper shadow="md" p="md">

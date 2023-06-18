@@ -132,7 +132,7 @@ export default function MakeOrder(
                 {!transition && stage === "tickets" && venue.noSeats === true && (
                     <TicketsForm
                         venue={venue}
-                        // reservedTicketCount={reservedTicketCount}
+                        reservedTicketCount={typeof reservedTickets === "number" ? reservedTickets : 0}
                         // order={order}
                         prevStage={prevStage}
                         nextStage={nextStage}
