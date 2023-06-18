@@ -1,56 +1,102 @@
-import { createNoSeatsOrder, createOrder, setPaymentInfo, uploadCheque } from "@/lib/api-calls"
+import {
+    createNoSeatsOrder,
+    createOrder,
+    setPaymentInfo,
+    uploadCheque,
+} from "@/lib/api-calls"
+import { PaymentDataForm, ServerAction } from "@/types/types"
 import { Order, PriceRange, Ticket } from "@prisma/client"
 import { useEffect, useState } from "react"
 import { z } from "zod"
+import { useTransition } from "react"
+import { useSession } from "next-auth/react"
 
-export type OrderStage = "authenticate" | "form" | "tickets" | "makeReservation" | "payment" | "complete" | "error"
+export type OrderStage =
+    | "authenticate"
+    | "form"
+    | "tickets"
+    | "makeReservation"
+    | "payment"
+    | "complete"
+    | "error"
 
 export type TicketRow = {
-    number: string,
+    number: string
     tickets: (Ticket & { priceRange: PriceRange | null })[]
 }
 
 export const paymentDataSchema = z.object({
-    name: z.string().min(1, "Введите имя").refine(value => value.trim().split(' ').length >= 2, "Введите полностью фамилию, имя и отчество"),
+    name: z
+        .string()
+        .min(1, "Введите имя")
+        .refine(
+            (value) => value.trim().split(" ").length >= 2,
+            "Введите полностью фамилию, имя и отчество"
+        ),
     phone: z.string().min(10, "Введите телефон").max(10),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),
     social: z.string().superRefine((val, ctx) => {
-        const re = new RegExp(/^https:\/\/vk\.com\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]+$/)
+        const re = new RegExp(
+            /^https:\/\/vk\.com\/[A-Za-z0-9\-\._~:\/\?#\[\]@!$&'\(\)\*\+,;\=]+$/
+        )
 
         if (val.length > 0 && !re.test(val)) {
             ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Адрес не распознан",
-              fatal: true
+                code: z.ZodIssueCode.custom,
+                message: "Адрес не распознан",
+                fatal: true,
             })
-  
+
             return z.NEVER
-          }
-    })
+        }
+    }),
 })
 
 export type PaymentData = z.infer<typeof paymentDataSchema>
 
 export type ClientOrder = {
-    orderId?: number,
-    venueId: number,
-    noSeats: boolean,
-    isGoodness: boolean,
-    comment: string,
-    paymentData: PaymentData,
-    ticketCount: number,
-    tickets: Map<number, Ticket & { priceRange: PriceRange | null }>,
+    orderId?: number
+    venueId: number
+    noSeats: boolean
+    isGoodness: boolean
+    comment: string
+    paymentData: PaymentData
+    ticketCount: number
+    tickets: Map<number, Ticket & { priceRange: PriceRange | null }>
     cheque?: File
 }
 
 // export type OrderSetter = ClientOrder | ((newOrder: ClientOrder) => ClientOrder) | undefined
-export const useOrder = (initialOrder: ClientOrder) => {
+export const useOrder = (
+    initialOrder: Omit<ClientOrder, "tickets">,
+    mutations: {
+        createOrder: ServerAction
+        payOrder: ServerAction
+    }
+) => {
+    const { data: session, status } = useSession()
+
+    const [isPending, startTransition] = useTransition()
+
     const [transition, transitionTo] = useState<OrderStage | null>(null)
-    const [order, setOrder] = useState<ClientOrder>({ ...initialOrder })
+    const [order, setOrder] = useState<ClientOrder>({
+        ...initialOrder,
+        tickets: new Map(),
+        cheque: undefined,
+    })
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
+
+    useEffect(() => {
+        if (status === "unauthenticated" && stage !== "authenticate")
+            setStage("authenticate")
+
+        if (status === "authenticated" && stage === "authenticate") {
+            nextStage()
+        }
+    }, [status, stage])
 
     useEffect(() => {
         if (transition) {
@@ -58,13 +104,11 @@ export const useOrder = (initialOrder: ClientOrder) => {
             transitionTo(null)
         }
     }, [transition])
-    // const f = (n: string) => (f: string) => 
+    // const f = (n: string) => (f: string) =>
     const doNextStage = async (newOrder?: ClientOrder) => {
-        if (!order)
-            return
+        if (!order) return
 
-        if (newOrder)
-            setOrder(newOrder)
+        if (newOrder) setOrder(newOrder)
 
         switch (stage) {
             case "authenticate":
@@ -76,33 +120,59 @@ export const useOrder = (initialOrder: ClientOrder) => {
             case "tickets":
                 if (newOrder) {
                     transitionTo("makeReservation")
-                    const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await createOrder(newOrder)
-                    if (result.success) {
-                        setOrder(prev => ({ ...prev, orderId: result.data.orderId }))
-                        transitionTo("payment")
-                    } else {
-                        transitionTo("error")
-                        setError(result.error)
-                    }
-                    break
+                    startTransition(async () => {
+                        // const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await mutations.createOrder(newOrder)
+                        const result = !newOrder.noSeats
+                            ? await mutations.createOrder({
+                                  ...newOrder,
+                                  tickets: [...newOrder.tickets.values()].map(
+                                      (ticket) => ticket.id
+                                  ),
+                              })
+                            : await mutations.createOrder({...newOrder, tickets: undefined})
+
+                        if (result.success) {
+                            setOrder((prev) => ({
+                                ...prev,
+                                orderId: result.data,
+                            }))
+                            transitionTo("payment")
+                        } else {
+                            transitionTo("error")
+                            setError(result.errors?.server?.join(", ") ?? "")
+                        }
+                    })
                 }
             case "payment":
-                newOrder?.orderId 
-                && newOrder?.cheque
-                && await setPaymentInfo(newOrder.orderId, newOrder.isGoodness, newOrder.comment, newOrder.cheque)
-                transitionTo("complete")
+                if (newOrder?.orderId && newOrder?.cheque) {
+                    startTransition(async () => {
+                        const form: PaymentDataForm = new FormData()
+                        form.append("orderId", String(newOrder.orderId))
+                        form.append("goodness", String(newOrder.isGoodness))
+                        form.append("comment", newOrder.comment)
+                        newOrder?.cheque &&
+                            form.append("cheque", newOrder.cheque)
+                        const result = await mutations.payOrder(form)
+                        if (result.success) transitionTo("complete")
+                        else {
+                            // transitionTo("error")
+                            setError(result.errors?.server?.join(", ") ?? "")
+                        }
+                    })
+                    // && await setPaymentInfo(newOrder.orderId, newOrder.isGoodness, newOrder.comment, newOrder.cheque)
+                }
                 break
             default:
                 transitionTo("authenticate")
         }
     }
 
-    const nextStage = (orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)) => {
+    const nextStage = (
+        orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)
+    ) => {
         let newOrder: ClientOrder | undefined = undefined
-        if (typeof orderSetter === "function")
-            newOrder = orderSetter(order)
-        else if (typeof orderSetter === "object")
-            newOrder = orderSetter
+        if (typeof orderSetter === "function") newOrder = orderSetter(order)
+        else if (typeof orderSetter === "object") newOrder = orderSetter
 
         doNextStage(newOrder)
     }
@@ -115,5 +185,14 @@ export const useOrder = (initialOrder: ClientOrder) => {
         }
     }
 
-    return { order, setOrder, stage, transition, setStage: transitionTo, nextStage, prevStage, error }
+    return {
+        order,
+        setOrder,
+        stage,
+        transition,
+        setStage: transitionTo,
+        nextStage,
+        prevStage,
+        error,
+    }
 }

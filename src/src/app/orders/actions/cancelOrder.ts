@@ -6,15 +6,15 @@ import renderActionResponse from "@/lib/renderActionResponse"
 import renderActionErrors from "@/lib/renderActionErrors"
 import { z } from "zod"
 import { OrderStatus } from "@prisma/client"
-import { ServerMutation } from "@/types/types"
+import { ServerAction } from "@/types/types"
 import { prisma } from "@/lib/db"
 
-export const cancelOrder: ServerMutation = async (orderId: number) => {
+export const cancelOrder: ServerAction = async (orderId: number) => {
     const orderIdValidator = z.number()
 
     try {
         const session = await getServerSession(authOptions)
-        if (!session) return { error: "unathorized" }
+        if (!session) throw new Error("unathorized")
 
         const validatedOrderId = orderIdValidator.parse(orderId)
 

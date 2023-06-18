@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import Link from "next/link"
 import { Button, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
@@ -15,59 +14,60 @@ import TicketsPicker from "./TicketsPicker/TicketsPicker"
 import TicketsForm from "./TicketsForm"
 import { ClientOrder, OrderStage, PaymentData, TicketRow, useOrder } from "../hooks/useOrder"
 import FullAreaLoading from "@/components/FullAreaLoading"
-import { getPaymentData } from "@/lib/api-calls"
+import { ServerAction } from "@/types/types"
+// import { getPaymentData } from "@/lib/api-calls"
 
 export const getStepNumber = (step?: OrderStage) => {
     const stages = ["authenticate", "form", "tickets", "payment", "complete"]
     return stages.findIndex(s => s === step)
 }
 
+type Mutations = {
+    createOrder: ServerAction,
+    payOrder: ServerAction
+}
+
 export default function MakeOrder(
-    { venue, rows }:
+    { initialOrder, venue, rows, reservedTickets, mutations }:
         {
+            initialOrder: Omit<ClientOrder, "tickets">,
             venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }),
-            rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
+            rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>,
+            reservedTickets: number[] | number,
+            mutations: Mutations
         }
 ) {
-    const initialOrder: ClientOrder = {
-        venueId: venue.id,
-        noSeats: venue.noSeats,
-        isGoodness: false,
-        comment: "",
-        paymentData: {
-            name: "",
-            email: "",
-            age: "",
-            phone: "",
-            nickname: "",
-            social: ""
-        },
-        ticketCount: 0,
-        tickets: new Map(),
-        cheque: undefined
-    }
+    // const initialOrder: ClientOrder = {
+    //     venueId: venue.id,
+    //     noSeats: venue.noSeats,
+    //     isGoodness: false,
+    //     comment: "",
+    //     paymentData,
+    //     ticketCount: 0,
+    //     tickets: new Map(),
+    //     cheque: undefined
+    // }
 
-    const { order, setOrder, stage, transition, setStage, nextStage, prevStage, error } = useOrder(initialOrder)
+    const { order, setOrder, stage, transition, setStage, nextStage, prevStage, error } = useOrder(initialOrder, mutations)
 
-    const { data: session, status } = useSession()
+    // useEffect(() => {
+    //     if (!setStage || !nextStage)
+    //         return
 
-    useEffect(() => {
-        if (!setStage || !nextStage)
-            return
+    //     if (status === "unauthenticated" && stage !== "authenticate")
+    //         setStage("authenticate")
 
-        if (status === "unauthenticated" && stage !== "authenticate")
-            setStage("authenticate")
-
-        if (status === "authenticated" && stage === "authenticate") {
-            getPaymentData().then(res => {
-                if (res.success) {
-                    nextStage(prev => ({ ...prev, paymentData: res.data }))
-                }
-                else
-                    nextStage()
-            })
-        }
-    }, [status, stage, setStage, nextStage])
+    //     if (status === "authenticated" && stage === "authenticate") {
+    //         nextStage()
+    //         // getPaymentData().then(res => {
+    //         //     if (res.success) {
+    //         //         nextStage(prev => ({ ...prev, paymentData: res.data }))
+    //         //     }
+    //         //     else
+    //         //         nextStage()
+    //         // })
+    //     }
+    // }, [status, stage, setStage, nextStage])
 
     // console.log(transition, stage)
     return (
@@ -124,6 +124,7 @@ export default function MakeOrder(
                     <TicketsPicker
                         venue={venue}
                         rows={rows}
+                        reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
                         prevStage={prevStage}
                         nextStage={nextStage}
                     />

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { ServerMutation } from "@/types/types"
+import { ServerAction } from "@/types/types"
 import {
     Box,
     Button,
@@ -45,9 +45,9 @@ type HydratedOrder = Omit<Order, "createdAt"> & {
 }
 
 type Mutations = {
-    requestReturn: ServerMutation
-    cancelOrder: ServerMutation
-    uploadCheque: ServerMutation
+    requestReturn: ServerAction
+    cancelOrder: ServerAction
+    uploadCheque: ServerAction
 }
 
 export default function OrderItem({

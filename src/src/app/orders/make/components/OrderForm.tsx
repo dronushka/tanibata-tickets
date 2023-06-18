@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import MaskInput from "@/components/MaskInput"
 import { signOut } from "next-auth/react"
 import { ClientOrder, PaymentData, paymentDataSchema } from "../hooks/useOrder"
-import { getPaymentData } from "@/lib/api-calls"
+// import { getPaymentData } from "@/lib/api-calls"
 import FullAreaMessage from "@/components/FullAreaMessage"
 import Link from "next/link"
 

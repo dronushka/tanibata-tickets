@@ -1,4 +1,6 @@
 import { getReservedTickets } from "@/lib/api-calls"
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Box, Button, Flex, Group, Loader, LoadingOverlay, Paper, Stack, Text, Tooltip } from "@mantine/core"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import { IconInfoCircle } from "@tabler/icons-react"
@@ -23,32 +25,20 @@ export const TicketContext = createContext<
     }
 )
 
-export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
+export default function TicketsPicker({ venue, rows, reservedTickets, prevStage, nextStage }:
     {
         venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }),
         rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>,
+        reservedTickets: number[],
         prevStage: () => void,
         nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
     }
 ) {
-    const [reservedTickets, setReservedTickets] = useState<number[]>([])
-    const [loading, setLoading] = useState(true)
-    const [networkError, setNetworkError] = useState("")
+    const [ isPending, startTransition ] = useTransition()
+    const router = useRouter()
 
     useEffect(() => {
-        const fetch = async () => {
-            setLoading(true)
-
-            const res = await getReservedTickets(venue.id)
-
-            if (res.success)
-                setReservedTickets(res.data)
-            else
-                setNetworkError(res.error ?? "")
-
-            setLoading(false)
-        }
-        fetch()
+        startTransition(() => router.refresh())
     }, [venue.id])
 
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map)
@@ -73,7 +63,7 @@ export default function TicketsPicker({ venue, rows, prevStage, nextStage }:
                     <Box>
                         <Stage />
                         <div style={{ position: 'relative' }}>
-                            <LoadingOverlay visible={loading} overlayBlur={2} />
+                            <LoadingOverlay visible={isPending} overlayBlur={2} />
                             <Hall
                                 rows={Object.entries(rows).map(([rowNumber, tickets]) => ({ number: rowNumber, tickets }))}
                                 reserved={reservedTickets}

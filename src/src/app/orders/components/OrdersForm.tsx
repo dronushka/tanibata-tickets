@@ -7,7 +7,7 @@ import {
     Ticket,
     Venue,
 } from "@prisma/client"
-import { ServerMutation } from "@/types/types"
+import { ServerAction } from "@/types/types"
 import { Loader, Stack, Text } from "@mantine/core"
 import FullAreaMessage from "@/components/FullAreaMessage"
 import OrderItem from "./OrderItem"
@@ -25,9 +25,9 @@ type HydratedOrder = Omit<Order, "createdAt"> & {
 }
 
 type Mutations = {
-    requestReturn: ServerMutation
-    cancelOrder: ServerMutation
-    uploadCheque: ServerMutation
+    requestReturn: ServerAction
+    cancelOrder: ServerAction
+    uploadCheque: ServerAction
 }
 
 export default function OrdersForm({

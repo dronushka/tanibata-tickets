@@ -2,7 +2,7 @@
 
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/pages/api/auth/[...nextauth]"
-import { ServerMutation } from "@/types/types"
+import { ServerAction } from "@/types/types"
 import { z } from "zod"
 import { prisma } from "@/lib/db"
 import { OrderStatus, Role } from "@prisma/client"
@@ -10,7 +10,7 @@ import { sendRefundRequested } from '@/lib/mail'
 import renderErrors from "@/lib/renderActionErrors"
 import renderActionResponse from "@/lib/renderActionResponse"
 
-const requestReturn: ServerMutation = async (orderId: number) => {
+const requestReturn: ServerAction = async (orderId: number) => {
     const orderIdValidator = z.number()
 
     try {

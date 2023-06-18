@@ -10,9 +10,9 @@ import { prisma } from "@/lib/db"
 import { OrderStatus } from "@prisma/client"
 import renderActionResponse from "@/lib/renderActionResponse"
 import renderActionErrors from "@/lib/renderActionErrors"
-import { ServerMutation } from "@/types/types"
+import { ServerAction } from "@/types/types"
 
-export const uploadCheque: ServerMutation = async (data: FormData) => {
+export const uploadCheque: ServerAction = async (data: FormData) => {
     const session = await getServerSession(authOptions)
 
     if (!session) throw new Error("unauthorized")
