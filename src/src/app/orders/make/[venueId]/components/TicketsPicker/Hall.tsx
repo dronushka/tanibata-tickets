@@ -12,7 +12,6 @@ const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
 })
 
 export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[], reserved: number[] }) {
-    console.log('reserved', reserved)
     const getRowSx = (rowIndex: number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexDirection: "row", flexWrap: "nowrap", flexGrow: 1, gap: 10 }
         if (rowIndex === 8)
