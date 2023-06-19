@@ -8,7 +8,7 @@ import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icon
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import OrderStatusText from "../../app/orders/components/OrderStatusText"
-import { PaymentData } from "../MakeOrder/useOrder"
+import { PaymentData } from "@/app/orders/make/hooks/useOrder"
 
 const useStyles = createStyles((theme) => ({
     header: {
