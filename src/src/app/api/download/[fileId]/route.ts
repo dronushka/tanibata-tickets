@@ -37,17 +37,15 @@ export async function GET(request: Request, { params }: { params: { fileId: stri
         if (!fs.existsSync(filePath)) return NextResponse.json({ error: "file_not_found" }, { status: 401 })
 
         const buffer = fs.readFileSync(filePath)
-        
+
         return new Response(buffer, {
             status: 200,
-            headers: { 
+            headers: {
                 "Content-Type": "application/octet-stream",
-                "Content-disposition": contentDisposition(file.path)
+                "Content-disposition": contentDisposition(file.path),
             },
-          })
-        // res.setHeader("Content-Type", )
-        // res.setHeader("Content-disposition", contentDisposition(file.path))
-        // res.send(buffer)
+        })
+
     } catch (e: any) {
         console.error(e)
         return NextResponse.json({ error: e?.message }, { status: 500 })
