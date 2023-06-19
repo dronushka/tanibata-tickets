@@ -15,11 +15,11 @@ export default function AuthError() {
                 <IconAlertTriangle size={40} />
             </ThemeIcon>
             <Text fz="lg">Ошибка авторизации</Text>
-            {searchParams.get('error') === "Verification" && <>
+            {searchParams?.get('error') === "Verification" && <>
                 <Text>Ссылка недействительна!</Text>
                 <Text>Вероятно с ее помощью уже был осуществлен вход</Text>
             </>}
-            {searchParams.get('error') !== "Verification" && <Text>{searchParams.get('error')}</Text>}
+            {searchParams?.get('error') !== "Verification" && <Text>{searchParams?.get('error')}</Text>}
             <Link href="/login" passHref legacyBehavior>
                 <Button component="a">Запросить новую ссылку</Button>
             </Link>
