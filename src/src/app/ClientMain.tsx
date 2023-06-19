@@ -42,7 +42,7 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
             {venues.map(venue => <Stack key={venue.id} sx={{ minWidth: 200 }}>
                 <Text fw="bold">{venue.name}</Text>
          
-                <Link href={"/orders/make?venue=" + venue.id} passHref legacyBehavior>
+                <Link href={"/orders/make/" + venue.id} passHref legacyBehavior>
                     <Button component="a">Купить билеты</Button>
                 </Link>
             </Stack>)}

@@ -9,17 +9,7 @@ import MakeOrder from "./components/MakeOrder"
 import createOrder from "./actions/createOrder"
 import payOrder from "./actions/payOrder"
 
-export const metadata = {
-    title: [process.env.FEST_TITLE, "Заказ билетов"].join(" | "),
-}
-
-export const revalidate = 0
-
-export default async function MakeOrderPage({
-    searchParams,
-}: {
-    searchParams?: { [key: string]: string | string[] | undefined }
-}) {
+export default async function MakeOrderPage({ params }: { params: { venueId: number } }) {
     const session = await getServerSession(authOptions)
 
     let user: User | null = null
@@ -32,7 +22,7 @@ export default async function MakeOrderPage({
         })
 
     const venueIdValidator = z.string().regex(/^\d+$/)
-    const venueIdValidated = venueIdValidator.safeParse(searchParams?.venue)
+    const venueIdValidated = venueIdValidator.safeParse(params.venueId)
 
     if (venueIdValidated.success === false) notFound()
 

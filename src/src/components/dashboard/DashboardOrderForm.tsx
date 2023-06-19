@@ -6,9 +6,9 @@ import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets, set
 import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
+import Link from "next/link"a
 import OrderStatusText from "../../app/orders/components/OrderStatusText"
-import { PaymentData } from "@/app/orders/make/hooks/useOrder"
+import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
 
 const useStyles = createStyles((theme) => ({
     header: {
