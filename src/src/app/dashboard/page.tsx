@@ -1,7 +1,7 @@
 import DashboardHall from "@/components/dashboard/DashboardHall"
 import DashboardLoader from "@/components/dashboard/DashboardLoader"
 import DashboardHallNoSeats from "@/components/dashboard/DashboardHallNoSeats"
-import { TicketRow } from "@/components/MakeOrder/useOrder"
+// import { TicketRow } from "@/components/MakeOrder/useOrder"
 import { prisma } from "@/lib/db"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { Order, OrderStatus, PriceRange, Role, Ticket } from "@prisma/client"
@@ -115,6 +115,4 @@ export default async function DashboardPage() {
             })}
         </>
     )
-    return
-    return <p>Schema goes here</p>
 }

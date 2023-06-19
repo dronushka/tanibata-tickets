@@ -2,8 +2,7 @@
 
 import { Box, Flex, Group, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { Order, PriceRange, Ticket, Venue } from "@prisma/client"
-import Stage from "../../app/orders/make/components/TicketsPicker/Stage"
-import { TicketRow } from "../MakeOrder/useOrder"
+import Stage from "@/app/orders/make/[venueId]/components/TicketsPicker/Stage"
 import DashboardTicketButton from "./DashboardTicketButton"
 
 export default function DashboardHall({ venue, rows, reservedTickets }:
@@ -18,14 +17,14 @@ export default function DashboardHall({ venue, rows, reservedTickets }:
 ) {
     const dimension = 17
 
-    const getRowSx = (rowIndex: Number) => (theme: MantineTheme) => {
+    const getRowSx = (rowIndex: number) => (theme: MantineTheme) => {
         const defaultSx: Sx = { flexDirection: "row", flexWrap: "nowrap", flexGrow: 1, gap: 10 }
         if (rowIndex === 8)
             return { ...defaultSx, marginBottom: dimension }
         return defaultSx
     }
 
-    const getTicketSx = (rowIndex: Number, ticketIndex: Number) => {
+    const getTicketSx = (rowIndex: number, ticketIndex: number) => {
         const defaultSx: Sx = { height: dimension, width: dimension, padding: 0 }
         if (rowIndex > 8 && (ticketIndex == 6 || ticketIndex == 20))
             return { ...defaultSx, marginRight: dimension }
