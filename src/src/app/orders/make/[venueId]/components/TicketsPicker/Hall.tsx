@@ -1,10 +1,9 @@
 'use client'
 
-import { memo, useContext, useEffect, useState, useTransition } from "react"
-import { Flex, LoadingOverlay, MantineTheme, Stack, Sx, Text } from "@mantine/core"
+import { memo, useContext } from "react"
+import { Flex, MantineTheme, Stack, Sx, Text } from "@mantine/core"
 import { TicketContext } from "./TicketsPicker"
 import TicketButton from "../TicketButton"
-import { useRouter } from "next/navigation"
 import { TicketRow } from "../../hooks/useOrder"
 
 const MemoizedTicketButton = memo(TicketButton, (oldPros, newProps) => {
@@ -30,7 +29,6 @@ export default function Hall({ rows = [], reserved = [] }: { rows?: TicketRow[],
 
     const dimension = 17
 
-    // console.log({reserved})
     return (
 
         <Stack spacing={2} sx={{
