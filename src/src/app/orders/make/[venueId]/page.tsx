@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { notFound } from "next/navigation"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/lib/db"
 import { OrderStatus, PriceRange, Ticket, User } from "@prisma/client"

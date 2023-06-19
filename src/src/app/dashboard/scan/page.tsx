@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next"
 import TicketScanner from "@/components/dashboard/TicketScanner"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import LoginForm from "@/components/LoginForm"
 import Dashboard501 from "@/components/Dashboard501"
 import { Role } from "@prisma/client"

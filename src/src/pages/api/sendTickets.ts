@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/db"
 import { z } from "zod"
 import generateTicket from "@/lib/generateTicket"

@@ -10,7 +10,7 @@ import fs from "fs"
 import path from "path"
 import { getServerSession } from "next-auth/next"
 import { OrderStatus } from "@prisma/client"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
 type PaymentDataField = "orderId" | "goodness"
 

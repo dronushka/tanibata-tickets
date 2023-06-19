@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from "@/lib/db"
 import { z, ZodError } from 'zod'
 import { getServerSession } from "next-auth/next"
-import { authOptions } from './auth/[...nextauth]'
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { OrderStatus, Role } from '@prisma/client'
 import { sendRefund } from '@/lib/mail'
 

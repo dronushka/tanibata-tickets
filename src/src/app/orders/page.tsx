@@ -1,6 +1,6 @@
 import LoginForm from "@/components/LoginForm"
 import { prisma } from "@/lib/db"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth/next"
 import OrdersForm from "./components/OrdersForm"
 import uploadCheque from "./actions/uploadCheque" //TODO workaround. should be imported in client component rather than passed as prop.
