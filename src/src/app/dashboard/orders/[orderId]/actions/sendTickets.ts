@@ -1,30 +1,28 @@
-import { NextApiRequest, NextApiResponse } from "next"
-import { getServerSession } from "next-auth/next"
+"use server"
+
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { prisma } from "@/lib/db"
+import { getServerSession } from "next-auth/next"
+import renderActionErrors from "@/lib/renderActionErrors"
+import renderActionResponse from "@/lib/renderActionResponse"
+import { ServerAction } from "@/types/types"
 import { z } from "zod"
-import generateTicket from "@/lib/generateTicket"
-import { Buffer } from "buffer"
+import { prisma } from "@/lib/db"
 import { Role } from "@prisma/client"
-import { emailTransporter, sendTickets } from "@/lib/mail"
+import generateTicket from "@/lib/generateTicket"
+import { emailTransporter } from "@/lib/mail"
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "GET")
-        res.status(405).end()
-
-    const session = await getServerSession(req, res, authOptions)
-
-    if (!session)
-        res.status(401).end()
-
-    const validator = z.number()
+const sendTickets: ServerAction = async (orderId: number) => {
+    const orderIdValidator = z.number()
 
     try {
-        const validatedId = validator.parse(Number(req.query.orderId))
+        const session = await getServerSession(authOptions)
+        if (!session) throw new Error("unathorized")
+
+        const validatedOrderId = orderIdValidator.parse(orderId)
 
         const order = await prisma.order.findUnique({
             where: {
-                id: validatedId
+                id: validatedOrderId,
             },
             include: {
                 venue: true,
@@ -32,25 +30,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     include: {
                         venue: true,
                     },
-                    orderBy: [
-                        { sortRowNumber: "asc" },
-                        { sortNumber: "asc" }
-                    ]
+                    orderBy: [{ sortRowNumber: "asc" }, { sortNumber: "asc" }],
                 },
-                user: true
-            }
+                user: true,
+            },
         })
 
-        if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) {
-            res.status(401).json({ error: "unauthorized" })
-            return
-        }
+        if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id)
+            throw new Error("unauthorized")
+        
 
-        if (order !== null) {
-            const pdf = Buffer.from(await generateTicket(order))
-            let html = ''
-            if (order.venue?.noSeats)
-                html = `
+        if (!order) throw new Error("order_not_found")
+
+        const pdf = Buffer.from(await generateTicket(order))
+        let html = ""
+
+        if (order.venue?.noSeats)
+            html = `
                 <p>Спасибо за покупку! <b>Ваш билет прикреплён к данному письму!</b></p>
                 <p><b>Как пройти на фестиваль?</b></p>
                 <p>Место проведения: ОДНТ, пл. Карла Маркса, 5/1, 25 марта 2023 г.</p>
@@ -80,8 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>
                 <p><a href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</a><p>
                 `
-            else
-                html = `
+        else
+            html = `
                 <p>Спасибо за покупку! <b>Ваш билет прикреплён к данному письму!</b></p>
                 <p><b>Как пройти на фестиваль?</b></p>
                 <p>Место проведения: ОДНТ, пл. Карла Маркса, 5/1, 25 марта 2023 г.</p>
@@ -116,29 +112,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 <p><a href="https://t.me/anna_cheshira">t.me/anna_cheshira</a></p>
                 <p><a href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</a><p>
                 `
-            await emailTransporter.sendMail({
-                from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
-                to: order.user.email,
-                subject: "Нян-Фест 2023 | Билеты на фестиваль", // Subject line
-                html,
-                attachments: [{   // define custom content type for the attachment
+
+        await emailTransporter.sendMail({
+            from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
+            to: order.user.email,
+            subject: "Нян-Фест 2023 | Билеты на фестиваль", // Subject line
+            html,
+            attachments: [
+                {
+                    // define custom content type for the attachment
                     filename: "tanibata-tickets-" + order?.id + ".pdf",
                     content: pdf,
-                    contentType: "application/pdf"
-                }],
-            })
-            await prisma.sentTicket.create({
-                data: {
-                    orderId: order.id
-                }
-            })
-            res.status(200).end()
-        } else {
-            res.status(422).json({ error: "order_not_found" })
+                    contentType: "application/pdf",
+                },
+            ],
+        })
 
-        }
+        await prisma.sentTicket.create({
+            data: {
+                orderId: order.id,
+            },
+        })
+
+        return renderActionResponse()
     } catch (e: any) {
-        console.error(e)
-        res.status(500).json({ error: e?.message })
+        return renderActionErrors(e)
     }
 }
+
+export default sendTickets
