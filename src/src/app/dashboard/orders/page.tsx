@@ -45,6 +45,9 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             {
                 OR: [
                     {
+                        id: Number.isInteger(+filter) ? Number(filter) : 0
+                    },
+                    {
                         paymentData: {
                             path: "$.name",
                             string_contains: filter
@@ -89,7 +92,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     const orderCount = await prisma.order.count({
         where: {AND: ordersAndWhere}
     })
-
+ 
     return <DashboardOrders
         orders={
             orders.map(
