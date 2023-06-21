@@ -4,6 +4,7 @@ import Authorize from "@/emails/Authorize"
 import RefundRequest from "@/emails/RefundRequest"
 import Refund from '@/emails/Refund'
 import Tickets from '@/emails/Tickets'
+import { ReactNode } from 'react'
 
 export const emailTransporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
@@ -63,13 +64,13 @@ export async function sendRefund(mailTo: string, orderId: number) {
     }
 }
 
-export async function sendTickets(mailTo: string, orderId: number, ticketPDF: Buffer) {
+export async function sendTickets(mailTo: string, orderId: number, ticketPDF: Buffer, description?: ReactNode) {
     const result = await emailTransporter.sendMail({
         from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
         to: mailTo,
         subject: "Нян-Фест 2023 | Билеты на фестиваль", 
-        html: render(<Tickets />),
-        text: render(<Tickets />, { plainText: true }),
+        html: render(<Tickets description={description}/>),
+        text: render(<Tickets description={description}/>, { plainText: true }),
         attachments: [{   
             filename: "tanibata-tickets-" + orderId + ".pdf",
             content: ticketPDF,

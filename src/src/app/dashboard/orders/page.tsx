@@ -1,4 +1,4 @@
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
@@ -95,7 +95,7 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
             orders.map(
                 order => ({
                     ...order,
-                    qrString: getQRString(order, order.user),
+                    // qrString: getQRString(order, order.user),
                     user: { ...order.user, createdAt: order.user.createdAt.toLocaleString('ru-RU')},
                     venue: order.venue && {...order.venue, start: order.venue?.start.toLocaleString('ru-RU')},
                     createdAt: order.createdAt.toLocaleString('ru-RU'),

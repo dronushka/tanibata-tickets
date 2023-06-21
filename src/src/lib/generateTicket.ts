@@ -2,7 +2,7 @@ import { Template, BLANK_PDF, generate, TextSchema } from '@pdfme/generator'
 import { Order, Ticket, User, Venue } from '@prisma/client'
 import { getQRString } from './OrderQR'
 import fs from 'fs'
-import { PaymentData } from '@/components/MakeOrder/useOrder'
+import { PaymentData } from '@/app/orders/make/[venueId]/hooks/useOrder'
 
 export default async function generateTicket(order: Order & { venue: Venue | null, user: User, tickets: (Ticket & { venue: Venue | null })[] }) {
     const tickets: Record<string, TextSchema> = {}
@@ -32,8 +32,8 @@ export default async function generateTicket(order: Order & { venue: Venue | nul
 
     const buffer = fs.readFileSync(
         order.venue?.noSeats
-            ? "/var/www/file_storage/ticket_template_2.pdf"
-            : "/var/www/file_storage/ticket_template_1.pdf"
+            ? (process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage") + "/ticket_template_2.pdf"
+            : (process.env.LOCAL_FILE_STORAGE ?? "/var/www/file_storage") + "/ticket_template_1.pdf"
     )
 
     const template: Template = {

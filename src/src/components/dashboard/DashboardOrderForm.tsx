@@ -1,79 +1,47 @@
 "use client"
 
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
-import { useState } from "react"
-import { setOrderStatus as apiSetOrderStatus, sendTickets as apiSendTickets, setOrderNotes } from "@/lib/api-calls"
+import { useState, useTransition } from "react"
 import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import OrderStatusText from "../orders/client/OrderStatusText"
-import { PaymentData } from "../MakeOrder/useOrder"
+import OrderStatusText from "../../app/orders/components/OrderStatusText"
+import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
+import { ServerAction } from "@/types/types"
 
 const useStyles = createStyles((theme) => ({
     header: {
-        flexBasis: 120
+        flexBasis: 120,
     },
 }))
 
-export default function DashboardOrderForm({ order }: {
-    order: (Omit<Order, "createdAt"> & {
-        venue: Omit<Venue, "start"> & { start: string } | null,
-        cheque: DBFile | null,
-        createdAt: string,
-        tickets: (Ticket & { priceRange: PriceRange | null })[],
+export default function DashboardOrderForm({
+    order,
+    mutations,
+}: {
+    order: Omit<Order, "createdAt"> & {
+        venue: (Omit<Venue, "start"> & { start: string }) | null
+        cheque: DBFile | null
+        createdAt: string
+        tickets: (Ticket & { priceRange: PriceRange | null })[]
         sentTickets: boolean
-    })
+    }
+    mutations: {
+        setOrderStatus: ServerAction,
+        setOrderNotes: ServerAction,
+        sendTickets: ServerAction
+    }
 }) {
-    // console.log(order)
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
+
     const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status)
     const [editOrderStatus, setEditOrderStatus] = useState(false)
     const [editSendTicketError, setEditSendTicketError] = useState("")
     const [setStatusError, setSetStatusError] = useState("")
-    const [notesError, setNotesError] = useState("")
-
     const [notes, setNotes] = useState(order.notes)
-
-    const [loading, setLoading] = useState(false)
-
-    const router = useRouter()
-
-    const sendOrderStatus = async () => {
-        setLoading(true)
-        const res = await apiSetOrderStatus(order.id, orderStatus)
-        if (res.success) {
-            setEditOrderStatus(false)
-            setSetStatusError("")
-        } else if (res.error) {
-            setSetStatusError(res.error)
-        }
-
-        setLoading(false)
-    }
-
-    const sendTickets = async () => {
-        setLoading(true)
-        const res = await apiSendTickets(order.id)
-        if (res.success) {
-            router.refresh()
-        } else if (res.error) {
-            setEditSendTicketError(res.error)
-        }
-
-        setLoading(false)
-    }
-
-    const sendOrderNotes = async () => {
-        setLoading(true)
-        const res = await setOrderNotes(order.id, notes)
-        if (res.success) {
-            setNotesError("")
-        } else if (res.error) {
-            setNotesError(res.error)
-        }
-
-        setLoading(false)
-    }
+    const [notesError, setNotesError] = useState("")
 
     const { classes } = useStyles()
 
@@ -96,52 +64,77 @@ export default function DashboardOrderForm({ order }: {
                         {order.isGoodness && <Text fw="bold">(Билеты добро)</Text>}
                     </Group>
 
-                    {!editOrderStatus && <Group>
-                        <OrderStatusText status={orderStatus} />
-                        {
-                            orderStatus !== OrderStatus.CANCELLED
-                            && orderStatus !== OrderStatus.RETURNED
-                            && <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>Изменить</Button>
-                        }
-                    </Group>}
-                    {editOrderStatus && <Group>
-                        <Select
-                            disabled={loading}
-                            data={[
-                                {
-                                    label: "Не оплачен",
-                                    value: OrderStatus.UNPAID
-                                },
-                                {
-                                    label: "В обработке",
-                                    value: OrderStatus.PENDING
-                                },
-                                {
-                                    label: "Запрос на возврат",
-                                    value: OrderStatus.RETURN_REQUESTED
-                                },
-                                {
-                                    label: "Возвращено",
-                                    value: OrderStatus.RETURNED
-                                },
-                                {
-                                    label: "Завершен",
-                                    value: OrderStatus.COMPLETE
-                                },
-                                {
-                                    label: "Отменен",
-                                    value: OrderStatus.CANCELLED
-                                },
-                                {
-                                    label: "Использован",
-                                    value: OrderStatus.USED
-                                },
-                            ]}
-                            value={orderStatus}
-                            onChange={value => value && setOrderStatus(value as OrderStatus)}
-                        />
-                        <Button loading={loading} leftIcon={<IconCheck />} onClick={sendOrderStatus}>Сохранить</Button>
-                    </Group>}
+                    {!editOrderStatus && (
+                        <Group>
+                            <OrderStatusText status={orderStatus} />
+                            {orderStatus !== OrderStatus.CANCELLED && orderStatus !== OrderStatus.RETURNED && (
+                                <Button leftIcon={<IconEdit />} onClick={() => setEditOrderStatus(true)}>
+                                    Изменить
+                                </Button>
+                            )}
+                        </Group>
+                    )}
+                    {editOrderStatus && (
+                        <Group>
+                            <Select
+                                disabled={isPending}
+                                data={[
+                                    {
+                                        label: "Не оплачен",
+                                        value: OrderStatus.UNPAID,
+                                    },
+                                    {
+                                        label: "В обработке",
+                                        value: OrderStatus.PENDING,
+                                    },
+                                    {
+                                        label: "Запрос на возврат",
+                                        value: OrderStatus.RETURN_REQUESTED,
+                                    },
+                                    {
+                                        label: "Возвращено",
+                                        value: OrderStatus.RETURNED,
+                                    },
+                                    {
+                                        label: "Завершен",
+                                        value: OrderStatus.COMPLETE,
+                                    },
+                                    {
+                                        label: "Отменен",
+                                        value: OrderStatus.CANCELLED,
+                                    },
+                                    {
+                                        label: "Использован",
+                                        value: OrderStatus.USED,
+                                    },
+                                ]}
+                                value={orderStatus}
+                                onChange={(value) => value && setOrderStatus(value as OrderStatus)}
+                                //TODO make error handler
+                            />
+                            <Button
+                                loading={isPending}
+                                leftIcon={<IconCheck />}
+                                onClick={() =>
+                                    startTransition(async () => {
+                                        const res = await mutations.setOrderStatus({
+                                            id: order.id,
+                                            status: orderStatus,
+                                        })
+                                        if (res.success) {
+                                            setOrderStatus(res.data)
+                                            setEditOrderStatus(false)
+                                            setSetStatusError("")
+                                        } else {
+                                            setEditSendTicketError(res.errors?.server?.join(", ") ?? "")
+                                        }
+                                    })
+                                }
+                            >
+                                Сохранить
+                            </Button>
+                        </Group>
+                    )}
                     <Input.Error>{setStatusError}</Input.Error>
                     {/* <OrderStatusSelect value={orderStatus} onChange={setOrderStatus}/> */}
                     <Group>
@@ -158,38 +151,74 @@ export default function DashboardOrderForm({ order }: {
                     </Group>
                     <Group>
                         <Text className={classes.header}>Ссылка на VK:</Text>
-                        {(order.paymentData as PaymentData).social && <Link target="_blank" href={(order.paymentData as PaymentData).social}>{(order.paymentData as PaymentData).social}</Link>}
+                        {(order.paymentData as PaymentData).social && (
+                            <Link target="_blank" href={(order.paymentData as PaymentData).social}>
+                                {(order.paymentData as PaymentData).social}
+                            </Link>
+                        )}
                         {!(order.paymentData as PaymentData).social && <Text>Нет</Text>}
                     </Group>
-                    {order.venue?.noSeats === false && <Group sx={{ alignItems: "flex-start" }}>
-                        <Text className={classes.header}>Места:</Text>
-                        <List type="ordered">
-                            {order.tickets.map(ticket => (
-                                <List.Item key={ticket.id}>
-                                    <Group>
-                                        <Text>Ряд: {ticket.rowNumber} Место: {ticket.number}</Text>
-                                        <Text>{order.isGoodness ? `${ticket.priceRange?.price.toFixed(2)} (${Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0).toFixed(2)})` : ticket.priceRange?.price.toFixed(2)} р.</Text>
-                                    </Group>
-                                </List.Item>
-                            ))}
-                        </List>
-                    </Group>}
+                    {order.venue?.noSeats === false && (
+                        <Group sx={{ alignItems: "flex-start" }}>
+                            <Text className={classes.header}>Места:</Text>
+                            <List type="ordered">
+                                {order.tickets.map((ticket) => (
+                                    <List.Item key={ticket.id}>
+                                        <Group>
+                                            <Text>
+                                                Ряд: {ticket.rowNumber} Место: {ticket.number}
+                                            </Text>
+                                            <Text>
+                                                {order.isGoodness
+                                                    ? `${ticket.priceRange?.price.toFixed(2)} (${Number(
+                                                          process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0
+                                                      ).toFixed(2)})`
+                                                    : ticket.priceRange?.price.toFixed(2)}{" "}
+                                                р.
+                                            </Text>
+                                        </Group>
+                                    </List.Item>
+                                ))}
+                            </List>
+                        </Group>
+                    )}
                     {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>}
-                    {!!order.comment.length && <Group>
-                        <Text>Комментарий пользователя:</Text>
-                        <Text>{order.comment}</Text>
-                    </Group>}
+                    {!!order.comment.length && (
+                        <Group>
+                            <Text>Комментарий пользователя:</Text>
+                            <Text>{order.comment}</Text>
+                        </Group>
+                    )}
                     <Stack>
                         <Textarea
                             // sx={{ flexGrow: 1 }}
                             label="Заметки"
                             value={notes}
-                            onChange={e => {
+                            onChange={(e) => {
                                 setNotesError("")
                                 setNotes(e.target.value)
                             }}
                         />
-                        <Button sx={{ maxWidth: 200 }} variant="default" loading={loading} onClick={sendOrderNotes}>Сохранить</Button>
+                        <Button
+                            sx={{ maxWidth: 200 }}
+                            variant="default"
+                            loading={isPending}
+                            onClick={() =>
+                                startTransition(async () => {
+                                    const res = await mutations.setOrderNotes({
+                                        id: order.id,
+                                        notes,
+                                    })
+                                    if (res.success) {
+                                        setNotesError("")
+                                    } else {
+                                        setNotesError(res.errors?.server?.join(", ") ?? "")
+                                    }
+                                })
+                            }
+                        >
+                            Сохранить
+                        </Button>
                         <Input.Error>{notesError}</Input.Error>
                     </Stack>
                     <Group>
@@ -202,11 +231,7 @@ export default function DashboardOrderForm({ order }: {
                         >
                             Скачать чек
                         </Button>
-                        <Button
-                            leftIcon={<IconDownload />}
-                            component="a"
-                            href={"/api/getTicketsPDF?orderId=" + order.id}
-                        >
+                        <Button leftIcon={<IconDownload />} component="a" href={"/api/getTicket/" + order.id}>
                             Скачать билеты
                         </Button>
                     </Group>
@@ -218,8 +243,18 @@ export default function DashboardOrderForm({ order }: {
                     {!!order.sentTickets.length && <Text color="green">Билеты отправлены</Text>} */}
                         <Button
                             leftIcon={<IconMailForward />}
-                            loading={loading}
-                            onClick={sendTickets}
+                            loading={isPending}
+                            //   onClick={sendTickets}
+                            onClick={() =>
+                                startTransition(async () => {
+                                    const res = await mutations.sendTickets(order.id)
+                                    if (res.success) {
+                                        router.refresh()
+                                    } else {
+                                        setEditSendTicketError(res.errors?.server?.join(", ") ?? "")
+                                    }
+                                })
+                            }
                         >
                             Отправить билеты
                         </Button>
@@ -227,9 +262,11 @@ export default function DashboardOrderForm({ order }: {
                     </Group>
                 </Stack>
             </Paper>
-            {order.cheque && <Container sx={{marginTop: 10}}>
-                <iframe src={"/api/view/" + order.cheque?.id} width="100%" height={800}/>
-            </Container>}
+            {order.cheque && (
+                <Container sx={{ marginTop: 10 }}>
+                    <iframe src={"/api/view/" + order.cheque?.id} width="100%" height={800} />
+                </Container>
+            )}
         </>
     )
 }
