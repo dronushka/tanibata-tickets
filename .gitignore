@@ -8,4 +8,5 @@ backups
 prod.log
 .gitignore
 docker-compose.yml
-react-email-starter
+react-email-starter/*
+!react-email-starter/package.json
