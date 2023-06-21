@@ -3,7 +3,6 @@
 import { signIn, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { Button, Flex, Loader, Paper, Stack, Text, TextInput } from "@mantine/core"
-import { sendPasswordEmail } from "@/lib/api-calls"
 import { useRouter } from "next/navigation"
 import FullAreaLoading from "./FullAreaLoading"
 

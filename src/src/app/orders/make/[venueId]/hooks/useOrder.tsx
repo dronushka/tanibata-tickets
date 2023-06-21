@@ -72,6 +72,22 @@ export const useOrder = (
     const [stage, setStage] = useState<OrderStage>("authenticate")
     const [error, setError] = useState("")
 
+    const nextStage = (orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)) => {
+        let newOrder: ClientOrder | undefined = undefined
+        if (typeof orderSetter === "function") newOrder = orderSetter(order)
+        else if (typeof orderSetter === "object") newOrder = orderSetter
+
+        doNextStage(newOrder)
+    }
+
+    const prevStage = () => {
+        switch (stage) {
+            case "tickets":
+                transitionTo("form")
+                break
+        }
+    }
+
     useEffect(() => {
         if (status === "unauthenticated" && stage !== "authenticate") setStage("authenticate")
 
@@ -150,21 +166,7 @@ export const useOrder = (
         }
     }
 
-    const nextStage = (orderSetter?: ClientOrder | ((newOrder: ClientOrder) => ClientOrder)) => {
-        let newOrder: ClientOrder | undefined = undefined
-        if (typeof orderSetter === "function") newOrder = orderSetter(order)
-        else if (typeof orderSetter === "object") newOrder = orderSetter
 
-        doNextStage(newOrder)
-    }
-
-    const prevStage = () => {
-        switch (stage) {
-            case "tickets":
-                transitionTo("form")
-                break
-        }
-    }
 
     return {
         order,

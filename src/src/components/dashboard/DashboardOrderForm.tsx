@@ -2,7 +2,6 @@
 
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 import { useState, useTransition } from "react"
-import { sendTickets as apiSendTickets } from "@/lib/api-calls"
 import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
 import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
@@ -41,48 +40,8 @@ export default function DashboardOrderForm({
     const [editOrderStatus, setEditOrderStatus] = useState(false)
     const [editSendTicketError, setEditSendTicketError] = useState("")
     const [setStatusError, setSetStatusError] = useState("")
-    const [notesError, setNotesError] = useState("")
-
     const [notes, setNotes] = useState(order.notes)
-
-    // const [loading, setLoading] = useState(false)
-
-    // const sendOrderStatus = async () => {
-    //     setLoading(true)
-    //     const res = await apiSetOrderStatus(order.id, orderStatus)
-    //     if (res.success) {
-    //         setEditOrderStatus(false)
-    //         setSetStatusError("")
-    //     } else if (res.error) {
-    //         setSetStatusError(res.error)
-    //     }
-
-    //     setLoading(false)
-    // }
-
-    const sendTickets = async () => {
-        // setLoading(true)
-        const res = await apiSendTickets(order.id)
-        if (res.success) {
-            router.refresh()
-        } else if (res.error) {
-            setEditSendTicketError(res.error)
-        }
-
-        // setLoading(false)
-    }
-
-    // const sendOrderNotes = async () => {
-    //     // setLoading(true)
-    //     const res = await setOrderNotes(order.id, notes)
-    //     if (res.success) {
-    //         setNotesError("")
-    //     } else if (res.error) {
-    //         setNotesError(res.error)
-    //     }
-
-    //     // setLoading(false)
-    // }
+    const [notesError, setNotesError] = useState("")
 
     const { classes } = useStyles()
 
