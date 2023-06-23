@@ -2,13 +2,29 @@
 
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 import { useState, useTransition } from "react"
-import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
-import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
+import {
+    ActionIcon,
+    Button,
+    Container,
+    createStyles,
+    Divider,
+    Group,
+    Input,
+    List,
+    Paper,
+    Select,
+    Stack,
+    Text,
+    Textarea,
+} from "@mantine/core"
+import { IconCheck, IconDownload, IconEdit, IconMailForward, IconX } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import OrderStatusText from "../../app/orders/components/OrderStatusText"
 import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
 import { ServerAction } from "@/types/types"
+import { IconCross } from "@tabler/icons-react"
+import DashboardOrderFormTicketDeleteButton from "./DashboardOrderFormTicketDeleteButton"
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -28,9 +44,10 @@ export default function DashboardOrderForm({
         sentTickets: boolean
     }
     mutations: {
-        setOrderStatus: ServerAction,
-        setOrderNotes: ServerAction,
+        setOrderStatus: ServerAction
+        setOrderNotes: ServerAction
         sendTickets: ServerAction
+        removeTicket: ServerAction
     }
 }) {
     const router = useRouter()
@@ -164,7 +181,7 @@ export default function DashboardOrderForm({
                             <List type="ordered">
                                 {order.tickets.map((ticket) => (
                                     <List.Item key={ticket.id}>
-                                        <Group>
+                                        <Group align="flex-start">
                                             <Text>
                                                 Ряд: {ticket.rowNumber} Место: {ticket.number}
                                             </Text>
@@ -176,6 +193,11 @@ export default function DashboardOrderForm({
                                                     : ticket.priceRange?.price.toFixed(2)}{" "}
                                                 р.
                                             </Text>
+                                            <DashboardOrderFormTicketDeleteButton
+                                                ticketId={ticket.id}
+                                                removeTicket={mutations.removeTicket}
+                                            />
+                                            {/* <ActionIcon variant="subtle" color="red"><IconX size="1rem"/></ActionIcon > */}
                                         </Group>
                                     </List.Item>
                                 ))}
