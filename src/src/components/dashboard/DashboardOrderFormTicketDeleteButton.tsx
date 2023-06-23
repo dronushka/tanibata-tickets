@@ -20,7 +20,7 @@ export default function DashboardOrderFormTicketDeleteButton({ ticketId, removeT
                 <IconX size="1rem" />
             </ActionIcon>
             {showConfirmation && <Modal opened onClose={() => setShowConfirmation(false)} title="Подтвердите действие" centered>
-                <Text mb="md">Вы точно уверены, что хотите удалить билет из заказа?</Text>
+                <Text mb="md">Вы точно уверены, что хотите убрать место из заказа?</Text>
                 {error && <Input.Error>{error}</Input.Error>}
                 <Group sx={{ justifyContent: "flex-end" }}>
                     <Button disabled={isPending} variant="default" onClick={() => setShowConfirmation(false)}>
