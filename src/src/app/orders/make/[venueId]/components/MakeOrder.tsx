@@ -56,20 +56,26 @@ export default function MakeOrder({
         <Stack sx={{ height: "100%" }}>
             <OrderStepper stage={stage} isPending={isPending} noSeats={venue.noSeats} />
 
-            <Flex sx={{ flexGrow: 1, marginBottom: 50 }}>
+            <Flex sx={{ flexDirection: "column", flexGrow: 1, marginBottom: 50 }}>
                 {isPending && <FullAreaLoading />}
                 {!isPending && (
                     <>
                         {stage === "authenticate" && <LoginForm />}
                         {stage === "form" && <OrderForm data={order.paymentData} onSubmit={nextStage} />}
                         {stage === "tickets" && venue.noSeats === false && (
-                            <TicketsPicker
-                                venue={venue}
-                                rows={rows}
-                                reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
-                                prevStage={prevStage}
-                                nextStage={nextStage}
-                            />
+                            <>
+                                <TicketsPicker
+                                    venue={venue}
+                                    rows={rows}
+                                    reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
+                                    onSubmit={(tickets) => nextStage(order => ({...order, tickets, ticketCount: tickets.size}))}
+                                />
+                                <Flex>
+                                    <Button variant="default" onClick={prevStage}>
+                                        Назад
+                                    </Button>
+                                </Flex>
+                            </>
                         )}
                         {stage === "tickets" && venue.noSeats === true && (
                             <TicketsForm

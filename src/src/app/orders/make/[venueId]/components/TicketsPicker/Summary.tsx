@@ -2,12 +2,11 @@
 
 import { Button, Divider, Group, Paper, Stack, Text } from "@mantine/core"
 import { useContext } from "react"
-import { ClientOrder } from "../../hooks/useOrder"
 import { ClientTicket, TicketContext } from "./TicketsPicker"
 
 export default function Summary({ onSubmit }:
     {
-        onSubmit: (order: (prev: ClientOrder) => ClientOrder) => void
+        onSubmit: (tickets: Map<number, ClientTicket>) => void
     }
 ) {
     const { selectedTickets } = useContext(TicketContext)
@@ -29,7 +28,7 @@ export default function Summary({ onSubmit }:
                 </Group>
                 <Button 
                     disabled={!selectedTickets.size}
-                    onClick={() => onSubmit(order => ({...order, tickets: selectedTickets, ticketCount: selectedTickets.size}))}
+                    onClick={() => onSubmit(selectedTickets)}
                 >
                     Перейти к оплате
                 </Button>
