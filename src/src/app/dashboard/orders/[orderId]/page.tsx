@@ -10,7 +10,7 @@ import { z } from "zod"
 import setOrderStatus from "./actions/setOrderStatus"
 import setOrderNotes from "./actions/setOrderNotes"
 import sendTickets from "./actions/sendTickets"
-import removeTicket from "./removeTicket"
+import removeTicket from "./actions/removeTicket"
 
 export const metadata = {
     title: [process.env.FEST_TITLE, "Админка", "Детали заказа"].join(" | "),
