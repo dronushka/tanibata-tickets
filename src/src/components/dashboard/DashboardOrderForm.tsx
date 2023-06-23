@@ -11,6 +11,7 @@ import {
     Group,
     Input,
     List,
+    Modal,
     Paper,
     Select,
     Stack,
@@ -25,6 +26,7 @@ import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
 import { ServerAction } from "@/types/types"
 import { IconCross } from "@tabler/icons-react"
 import DashboardOrderFormTicketDeleteButton from "./DashboardOrderFormTicketDeleteButton"
+import TicketsPicker from "@/app/orders/make/[venueId]/components/TicketsPicker/TicketsPicker"
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -34,20 +36,25 @@ const useStyles = createStyles((theme) => ({
 
 export default function DashboardOrderForm({
     order,
+    rows,
+    reservedTickets,
     mutations,
 }: {
     order: Omit<Order, "createdAt"> & {
-        venue: (Omit<Venue, "start"> & { start: string }) | null
+        venue: (Omit<Venue, "start"> & { start: string, priceRange: PriceRange[] }) | null
         cheque: DBFile | null
         createdAt: string
         tickets: (Ticket & { priceRange: PriceRange | null })[]
         sentTickets: boolean
     }
+    rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
+    reservedTickets: number[] | number
     mutations: {
         setOrderStatus: ServerAction
         setOrderNotes: ServerAction
         sendTickets: ServerAction
         removeTicket: ServerAction
+        addTickets: ServerAction
     }
 }) {
     const router = useRouter()
@@ -59,6 +66,7 @@ export default function DashboardOrderForm({
     const [setStatusError, setSetStatusError] = useState("")
     const [notes, setNotes] = useState(order.notes)
     const [notesError, setNotesError] = useState("")
+    const [showTicketPicker, setShowTicketPicker] = useState(false)
 
     const { classes } = useStyles()
 
@@ -197,13 +205,34 @@ export default function DashboardOrderForm({
                                                 ticketId={ticket.id}
                                                 removeTicket={mutations.removeTicket}
                                             />
-                                            {/* <ActionIcon variant="subtle" color="red"><IconX size="1rem"/></ActionIcon > */}
                                         </Group>
                                     </List.Item>
                                 ))}
                             </List>
                         </Group>
                     )}
+                    <Button onClick={() => setShowTicketPicker(true)}>Добавить места</Button>
+{/* TODO loading state on ticket edit */}
+                    {showTicketPicker && order.venue && (
+                        <Modal opened onClose={() => setShowTicketPicker(false)} title="Выберите места" centered size="auto">
+                            <TicketsPicker
+                                venue={order.venue}
+                                rows={rows}
+                                reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
+                                // onSubmit={(tickets) => nextStage((order) => ({ ...order, tickets, ticketCount: tickets.size }))}
+                                onSubmit={(tickets) => {
+                                    console.log(tickets)
+                                    startTransition(async () => {
+                                        //[...newOrder.tickets.values()].map((ticket) => ticket.id)
+                                        await mutations.addTickets({orderId: order.id, tickets: [...tickets.values()].map((ticket) => ticket.id)})
+                                        setShowTicketPicker(false)
+                                        router.refresh()
+                                    })
+                                }}
+                            />
+                        </Modal>
+                    )}
+
                     {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>}
                     {!!order.comment.length && (
                         <Group>

@@ -38,7 +38,7 @@ const removeTicket: ServerAction = async (ticketId: number) => {
                     ticketCount: ticket?.order?.ticketCount ? Math.min(ticket.order.ticketCount - 1, 0) : 0
                 }
             })
-
+            //TODO update order price
             await tx.ticket.update({
                 where: { id: ticket.id ?? 0},
                 data: {
