@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { PriceRange, Ticket, Venue } from "@prisma/client"
 import Link from "next/link"
-import { Button, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
+import { Button, Group, Flex, Loader, Stack, Stepper, Text, ThemeIcon } from "@mantine/core"
 import { IconAlertTriangle, IconCheck } from "@tabler/icons-react"
 import FullAreaMessage from "@/components/FullAreaMessage"
 import LoginForm from "@/components/LoginForm"
@@ -36,17 +36,6 @@ export default function MakeOrder({
     reservedTickets: number[] | number
     mutations: Mutations
 }) {
-    // const initialOrder: ClientOrder = {
-    //     venueId: venue.id,
-    //     noSeats: venue.noSeats,
-    //     isGoodness: false,
-    //     comment: "",
-    //     paymentData,
-    //     ticketCount: 0,
-    //     tickets: new Map(),
-    //     cheque: undefined
-    // }
-
     const { order, setOrder, stage, transition, isPending, setStage, nextStage, prevStage, error } = useOrder(
         initialOrder,
         mutations
@@ -68,7 +57,9 @@ export default function MakeOrder({
                                     venue={venue}
                                     rows={rows}
                                     reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
-                                    onSubmit={(tickets) => nextStage(order => ({...order, tickets, ticketCount: tickets.size}))}
+                                    onSubmit={(tickets) =>
+                                        nextStage((order) => ({ ...order, tickets, ticketCount: tickets.size }))
+                                    }
                                 />
                                 <Flex>
                                     <Button variant="default" onClick={prevStage}>
@@ -78,13 +69,25 @@ export default function MakeOrder({
                             </>
                         )}
                         {stage === "tickets" && venue.noSeats === true && (
-                            <TicketsForm
-                                venue={venue}
-                                reservedTicketCount={typeof reservedTickets === "number" ? reservedTickets : 0}
-                                // order={order}
-                                prevStage={prevStage}
-                                nextStage={nextStage}
-                            />
+                            <Flex
+                                sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Stack>
+                                    <TicketsForm
+                                        venue={venue}
+                                        reservedTicketCount={typeof reservedTickets === "number" ? reservedTickets : 0}
+                                        onSubmit={(ticketCount) => nextStage((order) => ({ ...order, ticketCount }))}
+                                    />
+                                    <Button variant="default" onClick={prevStage}>
+                                        Назад
+                                    </Button>
+                                </Stack>
+                            </Flex>
                         )}
                         {stage === "payment" && <PaymentForm venue={venue} order={order} onSubmit={nextStage} />}
                         {(stage === "makeReservation" || stage === "complete" || stage === "error") && (
