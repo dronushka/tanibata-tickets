@@ -55,13 +55,17 @@ const removeTicket: ServerAction = async (ticketId: number) => {
                 },
             })
 
+            const price = ticket.order?.isGoodness
+                ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * tickets.length
+                : tickets.reduce((sum, ticket) => (sum += ticket.priceRange?.price ?? 0), 0)
+
             await tx.order.update({
                 where: {
                     id: ticket.order?.id,
                 },
                 data: {
-                    price: tickets.reduce((sum, ticket) => (sum += ticket.priceRange?.price ?? 0), 0),
-                    ticketCount: tickets.length
+                    price,
+                    ticketCount: tickets.length,
                 },
             })
         })
