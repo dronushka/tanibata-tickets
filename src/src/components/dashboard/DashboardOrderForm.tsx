@@ -211,7 +211,7 @@ export default function DashboardOrderForm({
                             </List>
                         </Group>
                     )}
-                    <Button onClick={() => setShowTicketPicker(true)}>Добавить места</Button>
+                    <Button loading={isPending} onClick={() => setShowTicketPicker(true)}>Добавить места</Button>
 {/* TODO loading state on ticket edit */}
                     {showTicketPicker && order.venue && (
                         <Modal opened onClose={() => setShowTicketPicker(false)} title="Выберите места" centered size="auto">
@@ -221,11 +221,11 @@ export default function DashboardOrderForm({
                                 reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
                                 // onSubmit={(tickets) => nextStage((order) => ({ ...order, tickets, ticketCount: tickets.size }))}
                                 onSubmit={(tickets) => {
-                                    console.log(tickets)
+                                    // console.log(tickets)
+                                    setShowTicketPicker(false)
                                     startTransition(async () => {
                                         //[...newOrder.tickets.values()].map((ticket) => ticket.id)
                                         await mutations.addTickets({orderId: order.id, tickets: [...tickets.values()].map((ticket) => ticket.id)})
-                                        setShowTicketPicker(false)
                                         router.refresh()
                                     })
                                 }}

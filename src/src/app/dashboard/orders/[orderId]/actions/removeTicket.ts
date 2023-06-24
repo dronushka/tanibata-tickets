@@ -19,34 +19,52 @@ const removeTicket: ServerAction = async (ticketId: number) => {
 
         const validatedTicketId = validator.parse(ticketId)
 
-        const ticket = await prisma.ticket.findFirst({ 
+        const ticket = await prisma.ticket.findFirst({
             where: {
-                 id: validatedTicketId
+                id: validatedTicketId,
             },
             include: {
-                order: true
-            }
+                order: true,
+            },
         })
 
         if (!ticket) throw new Error("ticket_not_found")
         if (!ticket.order) throw new Error("ticket_not_assigned_to_order")
 
         await prisma.$transaction(async (tx) => {
-            await tx.order.update({ 
+            await tx.order.update({
                 where: { id: ticket.orderId ?? 0 },
                 data: {
-                    ticketCount: ticket?.order?.ticketCount ? Math.min(ticket.order.ticketCount - 1, 0) : 0
-                }
+                    ticketCount: ticket?.order?.ticketCount ? Math.min(ticket.order.ticketCount - 1, 0) : 0,
+                },
             })
-            //TODO update order price
+
             await tx.ticket.update({
-                where: { id: ticket.id ?? 0},
+                where: { id: ticket.id ?? 0 },
                 data: {
-                    orderId: null
-                }
+                    orderId: null,
+                },
+            })
+
+            const tickets = await tx.ticket.findMany({
+                where: {
+                    orderId: ticket.order?.id,
+                },
+                include: {
+                    priceRange: true,
+                },
+            })
+
+            await tx.order.update({
+                where: {
+                    id: ticket.order?.id,
+                },
+                data: {
+                    price: tickets.reduce((sum, ticket) => (sum += ticket.priceRange?.price ?? 0), 0),
+                    ticketCount: tickets.length
+                },
             })
         })
-        // await prisma.order.update({ where: { id }, data: { notes } })
 
         return renderActionResponse()
     } catch (e: any) {

@@ -53,13 +53,13 @@ const addTickets: ServerAction = async (data: {orderId: number, tickets: number[
         // if (!ticket.order) throw new Error("ticket_not_assigned_to_order")
 
         await prisma.$transaction(async (tx) => {
-            await tx.order.update({ 
-                where: { id: order.id },
-                data: {
-                    ticketCount: order.ticketCount + ticketCount,
-                    price: order.price + price
-                }
-            })
+            // await tx.order.update({ 
+            //     where: { id: order.id },
+            //     data: {
+            //         ticketCount: order.ticketCount + ticketCount,
+            //         price: order.price + price
+            //     }
+            // })
             
             const updatedTickets = await tx.ticket.updateMany({
                 where: {
@@ -75,14 +75,26 @@ const addTickets: ServerAction = async (data: {orderId: number, tickets: number[
             if (updatedTickets.count !== tickets?.length) {
                 throw new Error("tickets_pending")
             }
-            // await tx.ticket.update({
-            //     where: { id: ticket.id ?? 0},
-            //     data: {
-            //         orderId: null
-            //     }
-            // })
+
+            const orderTickets = await tx.ticket.findMany({
+                where: {
+                    orderId: order.id,
+                },
+                include: {
+                    priceRange: true,
+                },
+            })
+
+            await tx.order.update({
+                where: {
+                    id: order.id,
+                },
+                data: {
+                    price: orderTickets.reduce((sum, ticket) => (sum += ticket.priceRange?.price ?? 0), 0),
+                    ticketCount: orderTickets.length
+                },
+            })
         })
-        // await prisma.order.update({ where: { id }, data: { notes } })
 
         return renderActionResponse()
     } catch (e: any) {

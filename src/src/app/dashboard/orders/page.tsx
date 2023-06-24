@@ -13,6 +13,8 @@ export const metadata = {
     title: [process.env.FEST_TITLE, 'Админка', 'Заказы'].join(" | ")
 }
 
+export const revalidate = 0
+
 const perPage = 20
 
 export default async function DashboardOrdersPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
