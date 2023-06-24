@@ -12,6 +12,7 @@ import setOrderNotes from "./actions/setOrderNotes"
 import sendTickets from "./actions/sendTickets"
 import removeTicket from "./actions/removeTicket"
 import addTickets from "./actions/addTickets"
+import setNoSeatTickets from "./actions/setNoSeatTickets"
 
 export const metadata = {
     title: [process.env.FEST_TITLE, "Админка", "Детали заказа"].join(" | "),
@@ -137,7 +138,8 @@ export default async function OrderPage({ params }: { params: { orderId: number 
                 setOrderNotes,
                 sendTickets,
                 removeTicket,
-                addTickets
+                addTickets,
+                setNoSeatTickets
             }}
         />
     )

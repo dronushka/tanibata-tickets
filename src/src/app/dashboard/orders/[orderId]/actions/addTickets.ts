@@ -10,7 +10,6 @@ import { z } from "zod"
 import { prisma } from "@/lib/db"
 
 const addTickets: ServerAction = async (data: {orderId: number, tickets: number[]}) => {
-    console.log(data)
     try {
         const session = await getServerSession(authOptions)
 
@@ -65,7 +64,6 @@ const addTickets: ServerAction = async (data: {orderId: number, tickets: number[
                     priceRange: true,
                 },
             })
-
 
             const price = order.isGoodness
             ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * orderTickets.length
