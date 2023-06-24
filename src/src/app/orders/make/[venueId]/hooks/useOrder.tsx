@@ -148,7 +148,7 @@ export const useOrder = (
                     startTransition(async () => {
                         const form: PaymentDataForm = new FormData()
                         form.append("orderId", String(newOrder.orderId))
-                        form.append("goodness", String(newOrder.isGoodness))
+                        form.append("goodness", newOrder.isGoodness ? "1" : "")
                         form.append("comment", newOrder.comment)
                         newOrder?.cheque && form.append("cheque", newOrder.cheque)
                         const result = await mutations.payOrder(form)
