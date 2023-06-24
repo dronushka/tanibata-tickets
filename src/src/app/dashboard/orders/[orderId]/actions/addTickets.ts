@@ -40,27 +40,8 @@ const addTickets: ServerAction = async (data: {orderId: number, tickets: number[
     
         if (!dbTickets) throw new Error("tickets_not_found")
 
-        const price = dbTickets.reduce(
-            (sum, ticket) => (sum += ticket.priceRange?.price ?? 0),
-            0
-        )
-        const ticketCount = dbTickets.length
-
-
-
-
-        // if (!ticket) throw new Error("ticket_not_found")
-        // if (!ticket.order) throw new Error("ticket_not_assigned_to_order")
-
         await prisma.$transaction(async (tx) => {
-            // await tx.order.update({ 
-            //     where: { id: order.id },
-            //     data: {
-            //         ticketCount: order.ticketCount + ticketCount,
-            //         price: order.price + price
-            //     }
-            // })
-            
+           
             const updatedTickets = await tx.ticket.updateMany({
                 where: {
                     id: {
