@@ -18,7 +18,7 @@ export const paymentDataSchema = z.object({
         .string()
         .min(1, "Введите имя")
         .refine((value) => value.trim().split(" ").length >= 2, "Введите полностью фамилию, имя и отчество"),
-    phone: z.string().min(10, "Введите телефон").max(10),
+    phone: z.string().min(10, "Введите телефон").max(19),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),

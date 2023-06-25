@@ -44,6 +44,8 @@ export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSub
         const validated = paymentDataSchema.safeParse(paymentData)
 
         if (validated.success === false) {
+            console.log(paymentData)
+
             setPaymentFormErrors(validated.error.flatten().fieldErrors)
             return
         }
@@ -75,7 +77,7 @@ export default function OrderForm({ data, onSubmit }: { data: PaymentData, onSub
                         name="phone"
                         withAsterisk
                         mask="+7 (000) 000-00-00"
-                        maxLength={18}
+                        maxLength={19}
                         value={paymentData.phone}
                         onChange={value => setField("phone", value)}
                         error={paymentFormErrors?.phone?.join(', ')}
