@@ -279,7 +279,7 @@ export default function OrderItem({
                 <Modal
                     opened
                     onClose={() => setShowConfirmation(false)}
-                    title="Подвердите возврат"
+                    title="Подтвердите действие"
                     centered
                 >
                     <Text mb="md">

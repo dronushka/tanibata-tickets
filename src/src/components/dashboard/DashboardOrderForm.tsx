@@ -2,13 +2,32 @@
 
 import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 import { useState, useTransition } from "react"
-import { Button, Container, createStyles, Divider, Group, Input, List, Paper, Select, Stack, Text, Textarea } from "@mantine/core"
-import { IconCheck, IconDownload, IconEdit, IconMailForward } from "@tabler/icons-react"
+import {
+    ActionIcon,
+    Button,
+    Container,
+    createStyles,
+    Divider,
+    Group,
+    Input,
+    List,
+    Modal,
+    Paper,
+    Select,
+    Stack,
+    Text,
+    Textarea,
+} from "@mantine/core"
+import { IconCheck, IconDownload, IconEdit, IconMailForward, IconX } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import OrderStatusText from "../../app/orders/components/OrderStatusText"
 import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
 import { ServerAction } from "@/types/types"
+import { IconCross } from "@tabler/icons-react"
+import DashboardOrderFormTicketDeleteButton from "./DashboardOrderFormTicketDeleteButton"
+import TicketsPicker from "@/app/orders/make/[venueId]/components/TicketsPicker/TicketsPicker"
+import TicketsForm from "@/app/orders/make/[venueId]/components/TicketsForm"
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -18,19 +37,26 @@ const useStyles = createStyles((theme) => ({
 
 export default function DashboardOrderForm({
     order,
+    rows,
+    reservedTickets,
     mutations,
 }: {
     order: Omit<Order, "createdAt"> & {
-        venue: (Omit<Venue, "start"> & { start: string }) | null
+        venue: (Omit<Venue, "start"> & { start: string; priceRange: PriceRange[] }) | null
         cheque: DBFile | null
         createdAt: string
         tickets: (Ticket & { priceRange: PriceRange | null })[]
         sentTickets: boolean
     }
+    rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
+    reservedTickets: number[] | number
     mutations: {
-        setOrderStatus: ServerAction,
-        setOrderNotes: ServerAction,
+        setOrderStatus: ServerAction
+        setOrderNotes: ServerAction
         sendTickets: ServerAction
+        removeTicket: ServerAction
+        addTickets: ServerAction
+        setNoSeatTickets: ServerAction
     }
 }) {
     const router = useRouter()
@@ -42,6 +68,8 @@ export default function DashboardOrderForm({
     const [setStatusError, setSetStatusError] = useState("")
     const [notes, setNotes] = useState(order.notes)
     const [notesError, setNotesError] = useState("")
+    const [showTicketPicker, setShowTicketPicker] = useState(false)
+    const [showTicketForm, setShowTicketForm] = useState(false)
 
     const { classes } = useStyles()
 
@@ -159,30 +187,106 @@ export default function DashboardOrderForm({
                         {!(order.paymentData as PaymentData).social && <Text>Нет</Text>}
                     </Group>
                     {order.venue?.noSeats === false && (
-                        <Group sx={{ alignItems: "flex-start" }}>
-                            <Text className={classes.header}>Места:</Text>
-                            <List type="ordered">
-                                {order.tickets.map((ticket) => (
-                                    <List.Item key={ticket.id}>
-                                        <Group>
-                                            <Text>
-                                                Ряд: {ticket.rowNumber} Место: {ticket.number}
-                                            </Text>
-                                            <Text>
-                                                {order.isGoodness
-                                                    ? `${ticket.priceRange?.price.toFixed(2)} (${Number(
-                                                          process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0
-                                                      ).toFixed(2)})`
-                                                    : ticket.priceRange?.price.toFixed(2)}{" "}
-                                                р.
-                                            </Text>
-                                        </Group>
-                                    </List.Item>
-                                ))}
-                            </List>
-                        </Group>
+                        <>
+                            <Group sx={{ alignItems: "flex-start" }}>
+                                <Text className={classes.header}>Места:</Text>
+                                <List type="ordered">
+                                    {order.tickets.map((ticket) => (
+                                        <List.Item key={ticket.id}>
+                                            <Group align="flex-start">
+                                                <Text>
+                                                    Ряд: {ticket.rowNumber} Место: {ticket.number}
+                                                </Text>
+                                                <Text>
+                                                    {order.isGoodness
+                                                        ? `${ticket.priceRange?.price.toFixed(2)} (${Number(
+                                                              process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0
+                                                          ).toFixed(2)})`
+                                                        : ticket.priceRange?.price.toFixed(2)}{" "}
+                                                    р.
+                                                </Text>
+                                                <DashboardOrderFormTicketDeleteButton
+                                                    ticketId={ticket.id}
+                                                    removeTicket={mutations.removeTicket}
+                                                />
+                                            </Group>
+                                        </List.Item>
+                                    ))}
+                                </List>
+                            </Group>
+
+                            <Button
+                                loading={isPending}
+                                onClick={() => {
+                                    setShowTicketForm(false)
+                                    setShowTicketPicker(true)
+                                }}
+                            >
+                                Добавить места
+                            </Button>
+                        </>
                     )}
-                    {order.venue?.noSeats === true && <Text>Количество мест: {order.ticketCount}</Text>}
+
+                    {showTicketPicker && order.venue && (
+                        <Modal opened onClose={() => setShowTicketPicker(false)} title="Выберите места" centered size="auto">
+                            <TicketsPicker
+                                venue={order.venue}
+                                rows={rows}
+                                reservedTickets={Array.isArray(reservedTickets) ? reservedTickets : []}
+                                onSubmit={(tickets) => {
+                                    setShowTicketPicker(false)
+                                    startTransition(async () => {
+                                        await mutations.addTickets({
+                                            orderId: order.id,
+                                            tickets: [...tickets.values()].map((ticket) => ticket.id),
+                                        })
+                                        router.refresh()
+                                    })
+                                }}
+                            />
+                        </Modal>
+                    )}
+
+                    {order.venue?.noSeats === true && (
+                        <>
+                            <Text>Количество мест: {order.ticketCount}</Text>
+                            <Button
+                                loading={isPending}
+                                onClick={() => {
+                                    setShowTicketPicker(false)
+                                    setShowTicketForm(true)
+                                }}
+                            >
+                                Изменить места
+                            </Button>
+                        </>
+                    )}
+
+                    {showTicketForm && order.venue && (
+                        <Modal
+                            opened
+                            onClose={() => setShowTicketForm(false)}
+                            title="Выберите места"
+                            centered
+                            size="auto"
+                        >
+                            <TicketsForm
+                                venue={order.venue}
+                                reservedTicketCount={typeof reservedTickets === "number" ? reservedTickets : 0}
+                                onSubmit={(ticketCount) => {
+                                    setShowTicketForm(false)
+                                    startTransition(async () => {
+                                        await mutations.setNoSeatTickets({
+                                            orderId: order.id,
+                                            ticketCount,
+                                        })
+                                        router.refresh()
+                                    })
+                                }}
+                            />
+                        </Modal>
+                    )}
+
                     {!!order.comment.length && (
                         <Group>
                             <Text>Комментарий пользователя:</Text>
@@ -191,7 +295,6 @@ export default function DashboardOrderForm({
                     )}
                     <Stack>
                         <Textarea
-                            // sx={{ flexGrow: 1 }}
                             label="Заметки"
                             value={notes}
                             onChange={(e) => {
@@ -239,12 +342,9 @@ export default function DashboardOrderForm({
                         <Text color={order.sentTickets ? "green" : "red"}>
                             {order.sentTickets ? "Билеты отправлены" : "Билеты не отправлены"}
                         </Text>
-                        {/* {!order.sentTickets.length && <Text color="red">Билеты не отправлены</Text>}
-                    {!!order.sentTickets.length && <Text color="green">Билеты отправлены</Text>} */}
                         <Button
                             leftIcon={<IconMailForward />}
                             loading={isPending}
-                            //   onClick={sendTickets}
                             onClick={() =>
                                 startTransition(async () => {
                                     const res = await mutations.sendTickets(order.id)

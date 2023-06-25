@@ -7,13 +7,12 @@ import { ClientOrder } from "../hooks/useOrder"
 export default function TicketsForm({
     venue,
     reservedTicketCount,
-    prevStage,
-    nextStage,
+    onSubmit
 }: {
     venue: Omit<Venue, "start"> & { start: string }
     reservedTicketCount: number
-    prevStage: () => void
-    nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
+    onSubmit: (ticketCount: number) => void
+
 }) {
     const [ticketCount, setTicketCount] = useState(1)
 
@@ -25,14 +24,7 @@ export default function TicketsForm({
     }
 
     return (
-        <Flex
-            sx={{
-                width: "100%",
-                height: "100%",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
-        >
+        <>
             {reservedTicketCount >= venue.ticketCount && <Text>К сожалению все билеты распроданы...</Text>}
             {reservedTicketCount < venue.ticketCount && (
                 <Stack>
@@ -48,14 +40,9 @@ export default function TicketsForm({
                             </Group>
                         </Stack>
                     </Paper>
-                    <Group position="center">
-                        <Button variant="default" onClick={prevStage}>
-                            Назад
-                        </Button>
-                        <Button onClick={() => nextStage((order) => ({ ...order, ticketCount }))}>Далее</Button>
-                    </Group>
+                    <Button onClick={() => onSubmit(ticketCount)}>Далее</Button>
                 </Stack>
             )}
-        </Flex>
+        </>
     )
 }

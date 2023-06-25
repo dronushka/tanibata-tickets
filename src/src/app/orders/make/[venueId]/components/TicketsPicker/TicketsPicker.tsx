@@ -22,14 +22,13 @@ export default function TicketsPicker({
     venue,
     rows,
     reservedTickets,
-    prevStage,
-    nextStage,
+    // prevStage,
+    onSubmit,
 }: {
     venue: Omit<Venue, "start"> & { start: string; priceRange: PriceRange[] }
     rows: Record<string, (Ticket & { priceRange: PriceRange | null })[]>
     reservedTickets: number[]
-    prevStage: () => void
-    nextStage: (order: (prev: ClientOrder) => ClientOrder) => void
+    onSubmit: (tickets: Map<number, ClientTicket>) => void
 }) {
     const [selectedTickets, setSelectedTickets] = useState<Map<number, ClientTicket>>(new Map())
 
@@ -101,14 +100,10 @@ export default function TicketsPicker({
                             </Stack>
                         </Paper>
 
-                        <Summary onSubmit={nextStage} />
+                        <Summary onSubmit={onSubmit} />
                     </Flex>
                 </Flex>
-                <Flex>
-                    <Button variant="default" onClick={prevStage}>
-                        Назад
-                    </Button>
-                </Flex>
+
             </Stack>
         </TicketContext.Provider>
     )
