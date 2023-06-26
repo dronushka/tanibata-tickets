@@ -39,6 +39,7 @@ export default async function createVenue () {
             description: "",
             start: new Date("2023-07-15 18:40"),
             active: true,
+            goodnessPrice: 2000,
             ticketCount: 600,
             availableTickets: 600,
             noSeats: true,

@@ -44,6 +44,7 @@ export default async function createVenue () {
             description: "Описание косплей-шоу ...",
             start: new Date("2023-07-16 13:00"),
             active: true,
+            goodnessPrice: 2200,
             ticketCount: 676,
             availableTickets: 676,
             ticketTemplateId: ticketTemplate.id

@@ -97,6 +97,7 @@ model Venue {
   availableTickets Int
   start            DateTime        @default(now())
   noSeats          Boolean         @default(false)
+  goodnessPrice    Float?
   ticketTemplate   TicketTemplate? @relation(fields: [ticketTemplateId], references: [id])
   ticketTemplateId Int?
   priceRange       PriceRange[]
