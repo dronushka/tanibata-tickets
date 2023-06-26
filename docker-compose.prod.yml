@@ -29,7 +29,7 @@ services:
       - tt_prod_net
 
   yarn:
-    image: node:16.13.0
+    image: node:20.2.0
     container_name: tt_prod_yarn
     depends_on:
       - db
