@@ -10,6 +10,8 @@ import createVenueBlueBoat from "./seed/blueBoat/createVenue";
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log(process.cwd())
+
   console.log("Creating users");
   await createUsers();
   console.log("Done");
