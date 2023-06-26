@@ -21,8 +21,8 @@ export const emailTransporter = nodemailer.createTransport({
 export async function sendVerificationRequest({ identifier, url }: { identifier: string, url: string }) {
     const result = await emailTransporter.sendMail({
         to: identifier,
-        from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
-        subject: "Нян-фест 2023 | Одноразовая ссылка для входа в систему приобретения билетов",
+        from: `"Танибата 2023" <${process.env.MAIL_FROM}>`,
+        subject: "Танибата 2023 | Одноразовая ссылка для входа в систему приобретения билетов",
         html: render(<Authorize url={url} />),
         text: render(<Authorize url={url} />, { plainText: true })
     })
@@ -35,9 +35,9 @@ export async function sendVerificationRequest({ identifier, url }: { identifier:
 
 export async function sendRefundRequested(mailTo: string, orderId: number) {
     const result = await emailTransporter.sendMail({
-        from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
+        from: `"Танибата 2023" <${process.env.MAIL_FROM}>`,
         to: mailTo,
-        subject: "Нян-фест 2023. Запрос на возврат билетов. Номер заказа: " + orderId,
+        subject: "Танибата 2023. Запрос на возврат билетов. Номер заказа: " + orderId,
         html: render(<RefundRequest url={`${process.env.NEXTAUTH_URL}/dashboard/orders/${orderId}`} orderId={orderId} />),
         text: render(<RefundRequest url={`${process.env.NEXTAUTH_URL}/dashboard/orders/${orderId}`} orderId={orderId} />,
             { plainText: true })
@@ -51,9 +51,9 @@ export async function sendRefundRequested(mailTo: string, orderId: number) {
 
 export async function sendRefund(mailTo: string, orderId: number) {
     const result = await emailTransporter.sendMail({
-        from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
+        from: `"Танибата 2023" <${process.env.MAIL_FROM}>`,
         to: mailTo,
-        subject: "Нян-Фест 2023 | Возврат билетов | Номер заказа: " + orderId,
+        subject: "Танибата 2023 | Возврат билетов | Номер заказа: " + orderId,
         html: render(<Refund />),
         text: render(<Refund />, { plainText: true })
     })
@@ -66,9 +66,9 @@ export async function sendRefund(mailTo: string, orderId: number) {
 
 export async function sendTickets(mailTo: string, orderId: number, ticketPDF: Buffer, description: string) {
     const result = await emailTransporter.sendMail({
-        from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
+        from: `"Танибата 2023" <${process.env.MAIL_FROM}>`,
         to: mailTo,
-        subject: "Нян-Фест 2023 | Билеты на фестиваль", 
+        subject: "Танибата 2023 | Билеты на фестиваль", 
         html: render(<Tickets description={description}/>),
         text: render(<Tickets description={description}/>, { plainText: true }),
         attachments: [{   
