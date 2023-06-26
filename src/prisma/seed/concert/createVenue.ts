@@ -3,7 +3,6 @@ import fs from "fs"
 
 export default async function createVenue () {
     let mailMessage = '\
-        <p>Спасибо за покупку! <strong>Ваш билет прикреплён к данному письму!</strong></p>\
         <p><strong>Как пройти на концерт?</strong></p>\
         <p>Место проведения: ОДНТ, пл. Карла Маркса, 5/1, 15 июля 2023 г, 21:00.<br>\
         Билет даёт пропуск на концерт фестиваля.</p>\
