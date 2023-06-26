@@ -3,40 +3,15 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ServerAction } from "@/types/types"
-import {
-    Box,
-    Button,
-    FileButton,
-    Group,
-    Input,
-    List,
-    Modal,
-    Paper,
-    Stack,
-    Text,
-} from "@mantine/core"
+import { Box, Button, FileButton, Group, Input, List, Modal, Paper, Stack, Text } from "@mantine/core"
 import OrderStatusText from "./OrderStatusText"
 import OrderStatusTooltip from "./OrderStatusTooltip"
-import {
-    IconDownload,
-    IconReceiptRefund,
-    IconUpload,
-    IconX,
-} from "@tabler/icons-react"
-import {
-    File as DBFile,
-    Order,
-    OrderStatus,
-    PriceRange,
-    Ticket,
-    Venue,
-} from "@prisma/client"
+import { IconDownload, IconReceiptRefund, IconUpload, IconX } from "@tabler/icons-react"
+import { File as DBFile, Order, OrderStatus, PriceRange, Ticket, Venue } from "@prisma/client"
 
 type HydratedOrder = Omit<Order, "createdAt"> & {
     createdAt: string
-    venue:
-        | (Omit<Venue, "start"> & { start: string; priceRange: PriceRange[] })
-        | null
+    venue: (Omit<Venue, "start"> & { start: string; priceRange: PriceRange[] }) | null
     cheque: DBFile | null
     tickets: (Ticket & {
         venue: (Omit<Venue, "start"> & { start: string }) | null
@@ -50,13 +25,7 @@ type Mutations = {
     uploadCheque: ServerAction
 }
 
-export default function OrderItem({
-    order,
-    mutations,
-}: {
-    order: HydratedOrder
-    mutations: Mutations
-}) {
+export default function OrderItem({ order, mutations }: { order: HydratedOrder; mutations: Mutations }) {
     const router = useRouter()
 
     const [isPending, startTransition] = useTransition()
@@ -83,11 +52,9 @@ export default function OrderItem({
                             <OrderStatusTooltip status={order.status} />
                         </Group>
                     </Group>
-                    <Text>{order.createdAt}</Text>
+                    <Text>{order.createdAt + " - " + String(order.price.toFixed(2)) + " р."}</Text>
                     <Text fw="bold">{order.venue?.name}</Text>
-                    {order.isGoodness && (
-                        <Text fw="bold">Добро активировано!</Text>
-                    )}
+                    {order.isGoodness && <Text fw="bold">Добро активировано!</Text>}
                     {order.venue?.noSeats === false && (
                         <>
                             <Text>Места:</Text>
@@ -96,19 +63,12 @@ export default function OrderItem({
                                     <List.Item key={ticket.id}>
                                         <Group>
                                             <Text>
-                                                Ряд: {ticket.rowNumber} Место:{" "}
-                                                {ticket.number}
+                                                Ряд: {ticket.rowNumber} Место: {ticket.number}
                                             </Text>
                                             <Text>
-                                                {order.isGoodness
-                                                    ? Number(
-                                                          process.env
-                                                              .NEXT_PUBLIC_GOODNESS_PRICE ??
-                                                              0
-                                                      ).toFixed(2)
-                                                    : ticket.priceRange?.price.toFixed(
-                                                          2
-                                                      )}{" "}
+                                                {order.isGoodness && order.venue?.goodnessPrice
+                                                    ? order.venue.goodnessPrice.toFixed(2)
+                                                    : ticket.priceRange?.price.toFixed(2)}{" "}
                                                 р.
                                             </Text>
                                         </Group>
@@ -129,19 +89,12 @@ export default function OrderItem({
                         </>
                     )}
                     <Group>
-                        {order.status !== OrderStatus.UNPAID &&
-                            !order.cheque && (
-                                <Text color="red">Чек не найден!</Text>
-                            )}
-                        {order.status !== OrderStatus.UNPAID &&
-                            order.cheque && (
-                                <a href={"/api/download/" + order.cheque.id}>
-                                    Чек приложен
-                                </a>
-                            )}
+                        {order.status !== OrderStatus.UNPAID && !order.cheque && <Text color="red">Чек не найден!</Text>}
+                        {order.status !== OrderStatus.UNPAID && order.cheque && (
+                            <a href={"/api/download/" + order.cheque.id}>Чек приложен</a>
+                        )}
                     </Group>
-                    {(order.status === OrderStatus.UNPAID ||
-                        order.status === OrderStatus.PENDING) && (
+                    {(order.status === OrderStatus.UNPAID || order.status === OrderStatus.PENDING) && (
                         <Group>
                             <Box>
                                 <Text color="gray" size="sm">
@@ -153,14 +106,8 @@ export default function OrderItem({
                             </Box>
                             <Box>
                                 {isPending && (
-                                    <Button
-                                        loading
-                                        variant="outline"
-                                        leftIcon={<IconUpload />}
-                                    >
-                                        {order.cheque
-                                            ? "Приложить другой"
-                                            : "Приложить чек"}
+                                    <Button loading variant="outline" leftIcon={<IconUpload />}>
+                                        {order.cheque ? "Приложить другой" : "Приложить чек"}
                                     </Button>
                                 )}
                                 {!isPending && (
@@ -168,29 +115,17 @@ export default function OrderItem({
                                         onChange={(value) => {
                                             if (!value) return
                                             const form = new FormData()
-                                            form.append(
-                                                "orderId",
-                                                String(order.id)
-                                            )
+                                            form.append("orderId", String(order.id))
                                             form.append("cheque", value)
 
                                             startTransition(() => {
-                                                mutations
-                                                    .uploadCheque(form)
-                                                    .then((res) => {
-                                                        if (
-                                                            res?.success ===
-                                                            false
-                                                        ) {
-                                                            setOrderError(
-                                                                res.errors?.server?.join(
-                                                                    ", "
-                                                                ) ?? ""
-                                                            )
+                                                mutations.uploadCheque(form).then((res) => {
+                                                    if (res?.success === false) {
+                                                        setOrderError(res.errors?.server?.join(", ") ?? "")
 
-                                                            router.refresh()
-                                                        }
-                                                    })
+                                                        router.refresh()
+                                                    }
+                                                })
                                             })
                                         }}
                                         accept="image/png,image/jpeg,application/pdf"
@@ -200,17 +135,11 @@ export default function OrderItem({
                                                 {...props}
                                                 loading={isPending}
                                                 disabled={isPending}
-                                                color={
-                                                    orderError
-                                                        ? "red"
-                                                        : "primary"
-                                                }
+                                                color={orderError ? "red" : "primary"}
                                                 variant="outline"
                                                 leftIcon={<IconUpload />}
                                             >
-                                                {order.cheque
-                                                    ? "Приложить другой"
-                                                    : "Приложить чек"}
+                                                {order.cheque ? "Приложить другой" : "Приложить чек"}
                                             </Button>
                                         )}
                                     </FileButton>
@@ -220,10 +149,7 @@ export default function OrderItem({
                     )}
                     <Button
                         leftIcon={<IconDownload />}
-                        disabled={
-                            order.status !== OrderStatus.COMPLETE &&
-                            order.status !== OrderStatus.USED
-                        }
+                        disabled={order.status !== OrderStatus.COMPLETE && order.status !== OrderStatus.USED}
                         component="a"
                         href={"/api/getTicketsPDF?orderId=" + order.id}
                     >
@@ -237,18 +163,11 @@ export default function OrderItem({
                             disabled={isPending}
                             onClick={() => {
                                 startTransition(() => {
-                                    mutations
-                                        .cancelOrder(order.id)
-                                        .then((res) => {
-                                            if (res?.success === false)
-                                                setOrderError(
-                                                    res.errors?.server?.join(
-                                                        ", "
-                                                    ) ?? ""
-                                                )
+                                    mutations.cancelOrder(order.id).then((res) => {
+                                        if (res?.success === false) setOrderError(res.errors?.server?.join(", ") ?? "")
 
-                                            router.refresh()
-                                        })
+                                        router.refresh()
+                                    })
                                 })
                             }}
                         >
@@ -276,21 +195,10 @@ export default function OrderItem({
                 </Stack>
             </Paper>
             {showConfirmation && (
-                <Modal
-                    opened
-                    onClose={() => setShowConfirmation(false)}
-                    title="Подтвердите действие"
-                    centered
-                >
-                    <Text mb="md">
-                        Вы точно уверены, что хотите отказаться от билета?
-                    </Text>
+                <Modal opened onClose={() => setShowConfirmation(false)} title="Подтвердите действие" centered>
+                    <Text mb="md">Вы точно уверены, что хотите отказаться от билета?</Text>
                     <Group sx={{ justifyContent: "flex-end" }}>
-                        <Button
-                            disabled={isPending}
-                            variant="default"
-                            onClick={() => setShowConfirmation(false)}
-                        >
+                        <Button disabled={isPending} variant="default" onClick={() => setShowConfirmation(false)}>
                             Нет
                         </Button>
                         <Button
@@ -300,19 +208,12 @@ export default function OrderItem({
                                 // form.append("orderId", String(order.id))
 
                                 startTransition(() => {
-                                    mutations
-                                        .requestReturn(order.id)
-                                        .then((res) => {
-                                            if (res?.success === false)
-                                                setOrderError(
-                                                    res.errors?.server?.join(
-                                                        ", "
-                                                    ) ?? ""
-                                                )
+                                    mutations.requestReturn(order.id).then((res) => {
+                                        if (res?.success === false) setOrderError(res.errors?.server?.join(", ") ?? "")
 
-                                            setShowConfirmation(false)
-                                            router.refresh()
-                                        })
+                                        setShowConfirmation(false)
+                                        router.refresh()
+                                    })
                                 })
                             }}
                         >

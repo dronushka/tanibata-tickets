@@ -88,18 +88,30 @@ model Ticket {
 }
 
 model Venue {
-  id               Int          @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   name             String
-  description      String       @default("")
-  active           Boolean      @default(false)
-  address          String       @default("")
+  description      String          @default("")
+  active           Boolean         @default(false)
+  address          String          @default("")
   ticketCount      Int
   availableTickets Int
-  start            DateTime     @default(now())
-  noSeats          Boolean      @default(false)
+  start            DateTime        @default(now())
+  noSeats          Boolean         @default(false)
+  goodnessPrice    Float?
+  ticketTemplate   TicketTemplate? @relation(fields: [ticketTemplateId], references: [id])
+  ticketTemplateId Int?
   priceRange       PriceRange[]
   tickets          Ticket[]
   order            Order[]
+}
+
+model TicketTemplate {
+  id                    Int     @id @default(autoincrement())
+  mailMessage           String? @db.Text
+  premiumTicketMessage  String? @db.Text
+  ticketTemplate        String?
+  premiumTicketTemplate String?
+  venue                 Venue[]
 }
 
 model PriceRange {

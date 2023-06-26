@@ -39,8 +39,8 @@ const setNoSeatTickets: ServerAction = async (data: { orderId: number; ticketCou
             throw new Error("overbooking")
 
 
-        const price = order.isGoodness
-        ? ticketCount * Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0)
+        const price = order.isGoodness && order.venue?.goodnessPrice
+        ? ticketCount * order.venue.goodnessPrice
         : ticketCount * ((order.venue?.priceRange?.length && (order.venue.priceRange[0].price)) ?? 0)
         
         await prisma.$transaction(async (tx) => {

@@ -1,10 +1,5 @@
 import { PriceRange } from "@prisma/client"
-
-type HallTicket = {
-    number: number,
-    priceRange?: PriceRange 
-}
-export type HallTicketRow = { number: number, tickets: HallTicket[] }
+import { HallTicketRow } from "../types"
 
 export default function getHall(priceRange: PriceRange[]): HallTicketRow[] {
     return [

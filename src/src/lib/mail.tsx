@@ -64,7 +64,7 @@ export async function sendRefund(mailTo: string, orderId: number) {
     }
 }
 
-export async function sendTickets(mailTo: string, orderId: number, ticketPDF: Buffer, description?: ReactNode) {
+export async function sendTickets(mailTo: string, orderId: number, ticketPDF: Buffer, description: string) {
     const result = await emailTransporter.sendMail({
         from: `"Нян-фест 2023" <${process.env.MAIL_FROM}>`,
         to: mailTo,

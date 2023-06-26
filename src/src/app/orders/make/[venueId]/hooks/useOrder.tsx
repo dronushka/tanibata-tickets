@@ -18,7 +18,7 @@ export const paymentDataSchema = z.object({
         .string()
         .min(1, "Введите имя")
         .refine((value) => value.trim().split(" ").length >= 2, "Введите полностью фамилию, имя и отчество"),
-    phone: z.string().min(10, "Введите телефон").max(10),
+    phone: z.string().min(10, "Введите телефон").max(19),
     email: z.string().email("Введите корректный e-mail"),
     age: z.string().regex(/^\d+$/, "Введите возраст"),
     nickname: z.string().optional(),
@@ -104,7 +104,7 @@ export const useOrder = (
             })
         }
     }, [transition])
-    // const f = (n: string) => (f: string) =>
+    
     const doNextStage = async (newOrder?: ClientOrder) => {
         if (!order) return
 
@@ -123,7 +123,6 @@ export const useOrder = (
                 if (newOrder) {
                     transitionTo("makeReservation")
                     startTransition(async () => {
-                        // const result = newOrder.noSeats ? await createNoSeatsOrder(newOrder) : await mutations.createOrder(newOrder)
                         const result = !newOrder.noSeats
                             ? await mutations.createOrder({
                                   ...newOrder,
@@ -154,19 +153,15 @@ export const useOrder = (
                         const result = await mutations.payOrder(form)
                         if (result.success) transitionTo("complete")
                         else {
-                            // transitionTo("error")
                             setError(result.errors?.server?.join(", ") ?? "")
                         }
                     })
-                    // && await setPaymentInfo(newOrder.orderId, newOrder.isGoodness, newOrder.comment, newOrder.cheque)
                 }
                 break
             default:
                 transitionTo("authenticate")
         }
     }
-
-
 
     return {
         order,

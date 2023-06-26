@@ -28,7 +28,7 @@ services:
       - tt_test_net
 
   yarn:
-    image: node:16.13.0
+    image: node:20.2.0
     container_name: tt_test_yarn
     depends_on:
       - db
