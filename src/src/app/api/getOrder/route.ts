@@ -2,11 +2,8 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/db"
 import { z, ZodError } from "zod"
-import contentDisposition from "content-disposition"
 import { Role } from "@prisma/client"
 import { NextResponse } from "next/server"
-import generateTicket from "@/lib/generateTicket"
-
 import bcrypt from "bcryptjs"
 import { getSecurityString } from "@/lib/OrderQR"
 

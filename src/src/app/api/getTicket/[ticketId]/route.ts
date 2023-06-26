@@ -5,7 +5,9 @@ import { z } from "zod"
 import contentDisposition from "content-disposition"
 import { Role } from "@prisma/client"
 import { NextResponse } from "next/server"
-import generateTicket from "@/lib/generateTicket"
+import generateTicketPDF from "@/lib/generateTicketPDF"
+import { getQRString } from "@/lib/OrderQR"
+import { PaymentData } from "@/app/orders/make/[venueId]/hooks/useOrder"
 
 export async function GET(request: Request, { params }: { params: { ticketId: string } }) {
     const validator = z.number()
@@ -22,7 +24,11 @@ export async function GET(request: Request, { params }: { params: { ticketId: st
                 id: validatedId
             },
             include: {
-                venue: true,
+                venue: {
+                    include: {
+                        ticketTemplate: true
+                    }
+                },
                 tickets: {
                     include: {
                         venue: true
@@ -34,9 +40,28 @@ export async function GET(request: Request, { params }: { params: { ticketId: st
 
         if (session?.user.role !== Role.ADMIN && order?.userId !== session?.user.id) 
             return NextResponse.json({ error: "unauthorized" }, { status: 401 })
-        
+
         if (order !== null) {
-            const pdf = Buffer.from(await generateTicket(order))
+            let ticketTemplate = "default_ticket_template.pdf"
+
+            if (order.isGoodness && order.venue?.ticketTemplate?.premiumTicketTemplate)
+                ticketTemplate = order.venue.ticketTemplate?.premiumTicketTemplate
+            else if (!order.isGoodness && order.venue?.ticketTemplate?.ticketTemplate)
+                ticketTemplate = order.venue.ticketTemplate?.ticketTemplate
+    
+            let ticketLines = []
+            if (order.venue?.noSeats)
+                ticketLines = [`Количество билетов: ${order.ticketCount}`]
+            else
+                ticketLines = order.tickets.map((ticket, index) => `${index + 1}. Ряд: ${ticket.rowNumber}, место ${ticket.number}`)
+
+            const pdf = Buffer.from(await generateTicketPDF(
+                ticketTemplate,
+                order.id,
+                (order.paymentData as PaymentData).name,
+                ticketLines,
+                getQRString(order, order.user)
+            ))
 
             return new Response(pdf, {
                 status: 200,
