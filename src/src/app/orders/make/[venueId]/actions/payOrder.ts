@@ -34,6 +34,7 @@ const payOrder: ServerAction = async (data: PaymentDataForm) => {
 
         const order = await prisma.order.findUnique({
             where: { id: validated.orderId },
+            include: { venue: true }
         })
 
         if (!order) throw new Error("order_not_found")
@@ -66,8 +67,8 @@ const payOrder: ServerAction = async (data: PaymentDataForm) => {
                 status: orderStatus,
                 isGoodness: validated.goodness,
                 comment: validated.comment,
-                price: validated.goodness
-                    ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) *
+                price: validated.goodness && order.venue?.goodnessPrice
+                    ? order.venue.goodnessPrice *
                       order.ticketCount
                     : order.price,
                 cheque: {

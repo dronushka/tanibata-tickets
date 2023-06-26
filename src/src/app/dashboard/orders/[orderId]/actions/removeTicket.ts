@@ -25,6 +25,7 @@ const removeTicket: ServerAction = async (ticketId: number) => {
             },
             include: {
                 order: true,
+                venue: true
             },
         })
 
@@ -55,8 +56,8 @@ const removeTicket: ServerAction = async (ticketId: number) => {
                 },
             })
 
-            const price = ticket.order?.isGoodness
-                ? Number(process.env.NEXT_PUBLIC_GOODNESS_PRICE ?? 0) * tickets.length
+            const price = ticket.order?.isGoodness && ticket.venue?.goodnessPrice
+                ? ticket.venue.goodnessPrice * tickets.length
                 : tickets.reduce((sum, ticket) => (sum += ticket.priceRange?.price ?? 0), 0)
 
             await tx.order.update({
