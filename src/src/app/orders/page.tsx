@@ -39,6 +39,8 @@ export default async function OrdersPage() {
         },
     })
 
+    // console.log(orders)
+
     return (
         <OrdersForm
             orders={orders.map((order) => ({

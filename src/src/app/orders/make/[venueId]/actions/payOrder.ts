@@ -11,6 +11,7 @@ import path from "path"
 import { getServerSession } from "next-auth/next"
 import { OrderStatus } from "@prisma/client"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { revalidatePath } from "next/cache"
 
 type PaymentDataField = "orderId" | "goodness"
 
@@ -79,6 +80,8 @@ const payOrder: ServerAction = async (data: PaymentDataForm) => {
             },
         })
 
+        revalidatePath("/orders")
+        
         return renderActionResponse()
     } catch (e: any) {
         return renderActionErrors(e)
