@@ -1,32 +1,42 @@
 import { Input, TextInputProps } from "@mantine/core"
 import { useId } from "@mantine/hooks"
-import { MaskedInput, createDefaultMaskGenerator } from 'react-hook-mask'
+import { IMaskInput } from "react-imask"
 
-export default function MaskInput (
-    {mask, disabled, label, name, maxLength, value, withAsterisk, error, onChange}: 
-    Omit<TextInputProps,"value"|"onChange"> & { value: string, onChange: ((value: string) => void) | undefined, mask: string }
-    // {label?: string, name?: string, maxLength: number, value: string, , withAsterisk?: boolean, error?: string, onChange?: (value: string) => void  }
-) {
+export default function MaskInput({
+    mask,
+    disabled,
+    label,
+    name,
+    maxLength,
+    value,
+    withAsterisk,
+    error,
+    onChange,
+}: Omit<TextInputProps, "value" | "onChange"> & {
+    value: string
+    onChange: ((value: string) => void) | undefined
+    mask: string
+}) {
     const id = useId()
-    const maskGenerator = createDefaultMaskGenerator(mask)
-    // if (!value || !onChange)
-    //     return <></>
-        
+
     return (
-        <Input.Wrapper id={id} label={label} withAsterisk={withAsterisk} error={error}>
-            <Input
+        <Input.Wrapper
+            id={id}
+            label={label}
+            required
+            withAsterisk={withAsterisk}
+            error={error}
+        >
+            <Input<any>
+                component={IMaskInput}
                 disabled={disabled}
                 invalid={!!error}
+                mask={mask}
                 id={id}
-                name={name}
-                component={MaskedInput}
-                maskGenerator={maskGenerator}
                 maxLength={maxLength}
                 value={value}
-                onChange={onChange}
+                onAccept={(value: string) => { onChange && onChange(value) }}
             />
         </Input.Wrapper>
     )
-
-
 }

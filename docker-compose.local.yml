@@ -37,7 +37,7 @@ services:
     image: mysql:8
     container_name: tt_db
     labels:
-      - docker-volume-backup.archive-pre=/bin/sh -c '/usr/bin/mysqldump -uroot -pQMPDIw9ZbOqb27mkn928+9e5ArOMC3dA tt > /tmp/file_storage/tt.sql'
+      - docker-volume-backup.archive-pre=/bin/sh -c '/usr/bin/mysqldump -uroot -p${MYSQL_ROOT_PASSWORD} tt > /tmp/file_storage/tt.sql'
     restart: always
     #    ports:
     #      - "3306:3306"
@@ -55,7 +55,7 @@ services:
       - tt_net
 
   yarn:
-    image: node:16.13.0
+    image: node:20.2.0
     container_name: tt_yarn
     depends_on:
       - traefik

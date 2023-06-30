@@ -1,0 +1,29 @@
+version: '3.9'
+
+networks:
+  tt_net:
+  coder_default:
+    external: true
+
+services:
+  db:
+    image: mysql:8
+    container_name: tt_db
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ttdb:/var/lib/mysql
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      #      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=tt
+      - MYSQL_PASSWORD=${MYSQL_TT_PASSWORD}
+      - MYSQL_DATABASE=tt
+    networks:
+      - tt_net
+      - coder_default
+
+volumes:
+  ttdb:

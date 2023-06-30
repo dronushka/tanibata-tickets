@@ -1,30 +1,32 @@
 import LoginForm from "@/components/LoginForm"
-import { prisma } from "@/db"
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { prisma } from "@/lib/db"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth/next"
-import { redirect } from "next/navigation"
-import OrdersForm from "../../components/orders/client/OrdersForm"
+import OrdersForm from "./components/OrdersForm"
+import uploadCheque from "./actions/uploadCheque" //TODO workaround. should be imported in client component rather than passed as prop.
+import cancelOrder from "./actions/cancelOrder"
+import requestReturn from "./actions/requestReturn"
 
 export const metadata = {
-    title: [process.env.FEST_TITLE, 'Мои заказы'].join(" | ")
+    title: [process.env.FEST_TITLE, "Мои заказы"].join(" | "),
 }
+
+export const revalidate = 0
 
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)
-    if (!session?.user.id)
-        return <LoginForm />
-
-    // console.log('orders session', session)
+    
+    if (!session?.user.id) return <LoginForm />
 
     const orders = await prisma.order.findMany({
         where: {
-            userId: session.user.id
+            userId: session.user.id,
         },
         include: {
             venue: {
                 include: {
-                    priceRange: true
-                }
+                    priceRange: true,
+                },
             },
             cheque: true,
             tickets: {
@@ -32,19 +34,33 @@ export default async function OrdersPage() {
                     priceRange: true,
                     venue: true,
                 },
-                orderBy: [
-                    { sortRowNumber: "asc" },
-                    { sortNumber: "asc" }
-                ]
-            }
+                orderBy: [{ sortRowNumber: "asc" }, { sortNumber: "asc" }],
+            },
         },
     })
 
-    // console.log(orders)
-    return <OrdersForm orders={orders.map(order => ({
-        ...order,
-        venue: order.venue && { ...order.venue, start: order.venue.start.toLocaleString('ru-RU') },
-        createdAt: order.createdAt.toLocaleString('ru-RU'),
-        tickets: order.tickets.map(ticket => ({ ...ticket, venue: ticket.venue && { ...ticket.venue, start: ticket.venue.start.toLocaleString('ru-RU')}}))
-    }))}/>
+    return (
+        <OrdersForm
+            orders={orders.map((order) => ({
+                ...order,
+                venue: order.venue && {
+                    ...order.venue,
+                    start: order.venue.start.toLocaleString("ru-RU"),
+                },
+                createdAt: order.createdAt.toLocaleString("ru-RU"),
+                tickets: order.tickets.map((ticket) => ({
+                    ...ticket,
+                    venue: ticket.venue && {
+                        ...ticket.venue,
+                        start: ticket.venue.start.toLocaleString("ru-RU"),
+                    },
+                })),
+            }))}
+            mutations={{
+                cancelOrder,
+                requestReturn,
+                uploadCheque
+            }}
+        />
+    )
 }

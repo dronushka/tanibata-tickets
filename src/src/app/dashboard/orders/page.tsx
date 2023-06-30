@@ -1,7 +1,7 @@
-import { authOptions } from "@/pages/api/auth/[...nextauth]"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import { prisma } from "@/db"
+import { prisma } from "@/lib/db"
 import { z } from "zod"
 import DashboardOrders from "@/components/dashboard/DashboardOrders"
 import { OrderStatus, Prisma, Role } from "@prisma/client"
@@ -12,6 +12,8 @@ import Dashboard501 from "@/components/Dashboard501"
 export const metadata = {
     title: [process.env.FEST_TITLE, 'Админка', 'Заказы'].join(" | ")
 }
+
+export const revalidate = 0
 
 const perPage = 20
 
@@ -44,6 +46,9 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
         ordersAndWhere.push(
             {
                 OR: [
+                    {
+                        id: Number.isInteger(+filter) ? Number(filter) : 0
+                    },
                     {
                         paymentData: {
                             path: "$.name",
@@ -89,13 +94,13 @@ export default async function DashboardOrdersPage({ searchParams }: { searchPara
     const orderCount = await prisma.order.count({
         where: {AND: ordersAndWhere}
     })
-
+ 
     return <DashboardOrders
         orders={
             orders.map(
                 order => ({
                     ...order,
-                    qrString: getQRString(order, order.user),
+                    // qrString: getQRString(order, order.user),
                     user: { ...order.user, createdAt: order.user.createdAt.toLocaleString('ru-RU')},
                     venue: order.venue && {...order.venue, start: order.venue?.start.toLocaleString('ru-RU')},
                     createdAt: order.createdAt.toLocaleString('ru-RU'),
