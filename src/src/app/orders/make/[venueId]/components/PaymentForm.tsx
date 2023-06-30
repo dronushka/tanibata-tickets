@@ -121,7 +121,7 @@ export default function PaymentForm({
                         />
                         <Box>
                             <Text>Билеты «Добро» — это способ дополнительно поддержать фестиваль!</Text>
-                            <Link href="https://vk.com/wall-10188014_30584" target="_blank">Подробнее</Link>
+                            <Link href="https://vk.com/wall-10188014_30602" target="_blank">Подробнее</Link>
                         </Box>
                     </>
                 )}
