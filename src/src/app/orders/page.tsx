@@ -11,6 +11,8 @@ export const metadata = {
     title: [process.env.FEST_TITLE, "Мои заказы"].join(" | "),
 }
 
+export const revalidate = 0
+
 export default async function OrdersPage() {
     const session = await getServerSession(authOptions)
     
