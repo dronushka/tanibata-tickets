@@ -27,7 +27,7 @@ export default async function createVenue () {
 
     const venue = await prisma.venue.create({
         data: {
-            name: "Подарить добро",
+            name: "Добро без посещения фестиваля",
             address: "",
             description: "",
             start: new Date("2023-07-15 18:00"),

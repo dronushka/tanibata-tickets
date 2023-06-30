@@ -41,8 +41,8 @@ export default async function createVenue () {
             description: "Описание концерта ...",
             start: new Date("2023-07-15 18:00"),
             active: true,
-            ticketCount: 595,
-            availableTickets: 595,
+            ticketCount: 200,
+            availableTickets: 200,
             noSeats: true,
             ticketTemplateId: ticketTemplate.id
         }
