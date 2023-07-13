@@ -140,8 +140,8 @@ export default function PaymentForm({
                 <Text>Реквизиты для перевода оплаты за билеты:</Text>
                 <Center>
                     <Box>
-                        <Text weight={700}>2202 2062 5621 0845, Сбербанк.</Text>
-                        <Text>Перевод на имя: Анастасия Викторовна В.</Text>
+                        <Text weight={700}>2202 2067 1170 1206, Сбербанк.</Text>
+                        <Text>Перевод на имя: Дмитрий Вадимович З.</Text>
                     </Box>
                 </Center>
                 <Text italic>

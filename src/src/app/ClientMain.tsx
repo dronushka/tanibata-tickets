@@ -7,7 +7,16 @@ import Link from "next/link"
 export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> & { start: string })[] }) {
     return (
         <FullAreaMessage>
+            <Text fz="lg" fw="bold" mb="md" align="center">Система продажи билетов  фестиваля Танибата 2023 закрыта!</Text>
+            <Text mb="md">Спасибо всем, кто купил билеты.</Text>
+            <Text mb="md">Приобрести оставшиеся билеты, если они будут в наличии, можно будет 14.07 с 13:00 на генеральной репетиции фестиваля или в дни фестиваля (15-16 июля)!</Text>
             <Text mb="md">
+                Информация об остатках билетов будет размещена здесь: 
+                <Link href="https://t.me/+GVvy27KBMlBjOTdi">
+                    https://t.me/+GVvy27KBMlBjOTdi
+                </Link>
+            </Text>
+            {/* <Text mb="md">
                 Ты решил стать нашим гостем на Южно-Российском Мультикультурном фестивале {"«"}Танибата{"»"} 2023?
             </Text>
             <Text mb="md">
@@ -134,14 +143,14 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
                         </Link>
                     </Grid.Col>
                 ))}
-            </Grid>
+                </Grid>*/}
             <Text mt="md">
                 По любым вопросам, связанным с покупкой или возвратом билета, можно обратиться к билетёру фестиваля Чешире:
             </Text>
             <Text>
                 <Link href="mailto:tanibatafest@yandex.ru">tanibatafest@yandex.ru</Link>
             </Text>
-            <Text>
+            {/*<Text>
                 <Link href="tel:79054536789">+7 (905) 4536789</Link>
             </Text>
             <Text>
@@ -149,7 +158,7 @@ export default function ClientMain({ venues }: { venues: (Omit<Venue, "start"> &
             </Text>
             <Text>
                 <Link href="https://vk.com/cheshira_rnd">vk.com/cheshira_rnd</Link>
-            </Text>
+            </Text> */}
         </FullAreaMessage>
     )
 }
