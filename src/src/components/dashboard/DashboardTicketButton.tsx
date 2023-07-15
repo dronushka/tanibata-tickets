@@ -1,6 +1,6 @@
 import { Button, MantineColor, Popover, Stack, Sx, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { Order, PriceRange, Ticket } from "@prisma/client"
+import { Order, OrderStatus, PriceRange, Ticket } from "@prisma/client"
 import { useRouter } from "next/navigation"
 
 
@@ -21,7 +21,7 @@ export default function DashboardTicketButton({ ticket, sx }:
 
     let colorCode: MantineColor = "#4eadbb"
 
-    if (ticket.orderId)
+    if (ticket.order && (ticket.order.status !== OrderStatus.CANCELLED && ticket.order.status !== OrderStatus.RETURNED))
         colorCode = "gray"
     else if (ticket.priceRange?.color)
         colorCode = ticket.priceRange.color
