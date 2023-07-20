@@ -57,7 +57,7 @@ export default function Navigation({ onClick }: { onClick: () => void }) {
                     onClick={onClick}
 
                 />
-            </Link>
+    </Link>*/}
             <Link href="/orders" passHref legacyBehavior>
                 <NavLink
                     component="a"
@@ -75,7 +75,7 @@ export default function Navigation({ onClick }: { onClick: () => void }) {
                     active={pathname === "/help"}
                     onClick={onClick}
                 />
-            </Link> */}
+            </Link> 
         </>
     )
 }
